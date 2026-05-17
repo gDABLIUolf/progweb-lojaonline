@@ -1,7 +1,7 @@
-package com.lojaonline.service;
+package com.vesteBem.service;
 
-import com.lojaonline.model.Usuario;
-import com.lojaonline.repository.UsuarioRepository;
+import com.vesteBem.model.Usuario;
+import com.vesteBem.repository.UsuarioRepository;
 import org.springframework.stereotype.Service;
 
 @Service

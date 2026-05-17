@@ -1,4 +1,4 @@
-package com.lojaonline.model;
+package com.vesteBem.model;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -24,18 +24,15 @@ public class Usuario {
     @Column(nullable = false)
     private String senha;
 
-    // 1. Construtor vazio (Obrigatório para o Spring/Hibernate funcionar)
     public Usuario() {
     }
 
-    // 2. Construtor com argumentos (Opcional, mas facilita na hora de testar)
     public Usuario(String nome, String email, String senha) {
         this.nome = nome;
         this.email = email;
         this.senha = senha;
     }
 
-    // 3. Getters e Setters (Para permitir a leitura e gravação dos dados)
     public long getId() {
         return id;
     }

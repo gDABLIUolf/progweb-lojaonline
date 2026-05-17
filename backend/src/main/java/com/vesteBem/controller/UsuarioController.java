@@ -1,7 +1,7 @@
-package com.lojaonline.controller;
+package com.vesteBem.controller;
 
-import com.lojaonline.model.Usuario;
-import com.lojaonline.service.UsuarioService;
+import com.vesteBem.model.Usuario;
+import com.vesteBem.service.UsuarioService;
 import org.springframework.web.bind.annotation.*;
 
 @RestController

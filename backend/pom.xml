@@ -8,11 +8,11 @@
 		<version>4.0.6</version>
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
-    <groupId>com.lojaonline</groupId>
-    <artifactId>lojaonline-backend</artifactId>
+    <groupId>com.VesteBem</groupId>
+    <artifactId>VesteBem-backend</artifactId>
     <version>0.0.1-SNAPSHOT</version>
-    <name>lojaonline-backend</name>
-    <description>Backend da Loja Online</description>
+    <name>VesteBem-backend</name>
+    <description>Backend da Loja VesteBem</description>
 	<url/>
 	<licenses>
 		<license/>

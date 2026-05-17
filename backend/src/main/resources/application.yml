@@ -13,3 +13,8 @@ spring:
       hibernate:
         dialect: org.hibernate.dialect.PostgreSQLDialect
         format_sql: true
+
+  devtools:
+    restart:
+      additional-paths: src/main/java
+      exclude: static/**,templates/**,**/*.txt

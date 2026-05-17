@@ -1,13 +1,13 @@
-package com.lojaonline;
+package com.vesteBem;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
-public class LojaApplication {
+public class VesteBemApplication {
 
 	public static void main(String[] args) {
-		SpringApplication.run(LojaApplication.class, args);
+		SpringApplication.run(VesteBemApplication.class, args);
 	}
 
 }

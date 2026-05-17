@@ -1,6 +1,6 @@
-package com.lojaonline.repository;
+package com.vesteBem.repository;
 
-import com.lojaonline.model.Usuario;
+import com.vesteBem.model.Usuario;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

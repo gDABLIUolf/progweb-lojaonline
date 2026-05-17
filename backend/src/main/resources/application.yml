@@ -1,8 +1,8 @@
 spring:
   datasource:
-    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5432/lojaonline}
-    username: ${SPRING_DATASOURCE_USERNAME:lojaonline}
-    password: ${SPRING_DATASOURCE_PASSWORD:lojaonline}
+    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5432/vesteBem}
+    username: ${SPRING_DATASOURCE_USERNAME:vesteBem}
+    password: ${SPRING_DATASOURCE_PASSWORD:vesteBem}
     driver-class-name: org.postgresql.Driver
 
   jpa:

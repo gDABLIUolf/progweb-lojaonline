@@ -1,12 +1,12 @@
 services:
   postgres:
-    image: postgres:15
+    image: postgres:16-alpine
     container_name: postgres_db
     restart: always
     environment:
-      POSTGRES_DB: lojaonline
-      POSTGRES_USER: lojaonline
-      POSTGRES_PASSWORD: lojaonline
+      POSTGRES_DB: vesteBem
+      POSTGRES_USER: vesteBem
+      POSTGRES_PASSWORD: vesteBem
     ports:
       - "5432:5432"
     volumes:

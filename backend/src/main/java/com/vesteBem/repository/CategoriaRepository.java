@@ -1,9 +1,11 @@
 package com.vesteBem.repository;
 
-import com.vesteBem.model.Categoria;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
+import com.vesteBem.model.Categoria;
+
 @Repository
 public interface CategoriaRepository extends JpaRepository<Categoria, Long> {
+    boolean existsByNome(String nome);
 }

@@ -22,7 +22,6 @@ public class ProdutoService {
         this.categoriaRepository = categoriaRepository;
     }
 
-    // CRIAR
     public ProdutoResponseDTO cadastrar(ProdutoRequestDTO dto) {
         Categoria categoria = categoriaRepository.findById(dto.categoriaId())
                 .orElseThrow(() -> new IllegalArgumentException("Categoria não encontrada com o ID: " + dto.categoriaId()));
@@ -37,21 +36,18 @@ public class ProdutoService {
         return converterParaResponseDTO(produtoSalvo);
     }
 
-    // LER TUDO
     public List<ProdutoResponseDTO> listarTodos() {
         return produtoRepository.findAll().stream()
                 .map(this::converterParaResponseDTO)
                 .collect(Collectors.toList());
     }
 
-    // LER POR ID
     public ProdutoResponseDTO buscarPorId(Long id) {
         Produto produto = produtoRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Produto não encontrado com o ID: " + id));
         return converterParaResponseDTO(produto);
     }
 
-    // ATUALIZAR
     public ProdutoResponseDTO atualizar(Long id, ProdutoRequestDTO dto) {
         Produto produto = produtoRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Produto não encontrado com o ID: " + id));
@@ -68,20 +64,19 @@ public class ProdutoService {
         return converterParaResponseDTO(produtoAtualizado);
     }
 
-    // APAGAR
     public void deletar(Long id) {
         Produto produto = produtoRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Produto não encontrado com o ID: " + id));
         produtoRepository.delete(produto);
     }
 
-    // Função auxiliar para converter a entidade para o formato limpo de saída
     private ProdutoResponseDTO converterParaResponseDTO(Produto produto) {
         return new ProdutoResponseDTO(
                 produto.getId(),
                 produto.getNome(),
                 produto.getDescricao(),
                 produto.getPreco(),
+                produto.getQuantidadeEstoque(),
                 produto.getCategoria().getNome()
         );
     }

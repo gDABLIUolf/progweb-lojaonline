@@ -1,6 +1,8 @@
 package com.vesteBem.model;
 
 import jakarta.persistence.*;
+import jakarta.persistence.criteria.CriteriaBuilder;
+
 import java.math.BigDecimal;
 
 @Entity
@@ -20,20 +22,25 @@ public class Produto {
     @Column(nullable = false)
     private BigDecimal preco;
 
+    @Column(nullable = false)
+    private Integer quantidadeEstoque;
+
     @ManyToOne(optional = false)
     @JoinColumn(name = "categoria_id", nullable = false)
     private Categoria categoria;
 
+
+
     public Produto() {}
 
-    public Produto(String nome, String descricao, BigDecimal preco, Categoria categoria) {
+    public Produto(String nome, String descricao, BigDecimal preco, Integer quantidadeEstoque, Categoria categoria) {
         this.nome = nome;
         this.descricao = descricao;
         this.preco = preco;
         this.categoria = categoria;
+        this.quantidadeEstoque = quantidadeEstoque;
     }
 
-    // Getters e Setters
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
 
@@ -45,6 +52,9 @@ public class Produto {
 
     public BigDecimal getPreco() { return preco; }
     public void setPreco(BigDecimal preco) { this.preco = preco; }
+
+    public Integer getQuantidadeEstoque() { return quantidadeEstoque; }
+    public void setQuantidadeEstoque(Integer quantidadeEstoque) { this.quantidadeEstoque = quantidadeEstoque; }
 
     public Categoria getCategoria() { return categoria; }
     public void setCategoria(Categoria categoria) { this.categoria = categoria; }

@@ -1,0 +1,45 @@
+version: "3.8"
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: postgres_db
+    restart: always
+    environment:
+      POSTGRES_DB: lojaonline
+      POSTGRES_USER: lojaonline
+      POSTGRES_PASSWORD: lojaonline
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U lojaonline -d lojaonline"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - vestebem_network
+
+  api:
+    build: .
+    container_name: vestebem_api
+    restart: always
+    ports:
+      - "8080:8080"
+    environment:
+      # O host da URL aponta para o nome do serviço do banco ('postgres') na rede interna
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/lojaonline
+      SPRING_DATASOURCE_USERNAME: lojaonline
+      SPRING_DATASOURCE_PASSWORD: lojaonline
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - vestebem_network
+
+volumes:
+  postgres_data:
+
+networks:
+  vestebem_network:

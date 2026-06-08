@@ -2,6 +2,8 @@ package com.vesteBem.model;
 
 import jakarta.persistence.*;
 
+import java.time.LocalDateTime;
+
 @Entity
 @Table(name = "usuarios")
 public class Usuario {
@@ -18,6 +20,16 @@ public class Usuario {
 
     @Column(nullable = false)
     private String senha;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private UsuarioRole role = UsuarioRole.CLIENTE;
+
+    @Column(length = 6)
+    private String codigoRecuperacao;
+
+    @Column
+    private LocalDateTime dataExpiracaoCodigo;
 
     public Usuario() {}
 
@@ -38,4 +50,13 @@ public class Usuario {
 
     public String getSenha() { return senha; }
     public void setSenha(String senha) { this.senha = senha; }
+
+    public UsuarioRole getRole() { return role; }
+    public void setRole(UsuarioRole role) { this.role = role; }
+
+    public String getCodigoRecuperacao() { return codigoRecuperacao; }
+    public void setCodigoRecuperacao(String codigoRecuperacao) { this.codigoRecuperacao = codigoRecuperacao; }
+
+    public LocalDateTime getDataExpiracaoCodigo() { return dataExpiracaoCodigo; }
+    public void setDataExpiracaoCodigo(LocalDateTime dataExpiracaoCodigo) { this.dataExpiracaoCodigo = dataExpiracaoCodigo; }
 }

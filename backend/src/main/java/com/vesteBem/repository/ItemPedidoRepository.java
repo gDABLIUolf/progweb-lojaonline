@@ -1,11 +1,12 @@
 package com.vesteBem.repository;
 
-import com.vesteBem.model.Pedido;
+import com.vesteBem.model.ItemPedido;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
+
 import java.util.List;
 
 @Repository
-public interface PedidoRepository extends JpaRepository<Pedido, Long> {
-    List<Pedido> findByUsuarioId(Long usuarioId);
+public interface ItemPedidoRepository extends JpaRepository<ItemPedido, Long> {
+    List<ItemPedido> findByPedidoId(Long pedidoId);
 }

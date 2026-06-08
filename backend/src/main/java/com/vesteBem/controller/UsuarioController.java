@@ -26,6 +26,7 @@ public class UsuarioController {
         try {
             String resultado = usuarioService.cadastrar(dto);
             return ResponseEntity.status(HttpStatus.CREATED).body(resultado);
+
         } catch (IllegalArgumentException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
         }

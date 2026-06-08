@@ -10,10 +10,12 @@ public class ItemCarrinho {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    // Relacionamento de volta para o Carrinho
     @ManyToOne(optional = false)
     @JoinColumn(name = "carrinho_id", nullable = false)
     private Carrinho carrinho;
 
+    // Relacionamento com o Produto (Checklist: Relacionar Produto)
     @ManyToOne(optional = false)
     @JoinColumn(name = "produto_id", nullable = false)
     private Produto produto;
@@ -29,6 +31,7 @@ public class ItemCarrinho {
         this.quantidade = quantidade;
     }
 
+    // Getters e Setters
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
 

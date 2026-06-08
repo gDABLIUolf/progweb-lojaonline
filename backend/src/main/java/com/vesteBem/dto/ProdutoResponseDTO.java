@@ -8,16 +8,16 @@ public record ProdutoResponseDTO(
         String nome,
         String descricao,
         BigDecimal preco,
-        Integer quantidadeEstoque, // Adicionado aqui
+        Integer quantidadeEstoque,
         String categoriaNome
 ) {
     public ProdutoResponseDTO(Produto produto) {
         this(
                 produto.getId(),
                 produto.getNome(),
-                produto.getDescription(),
+                produto.getDescricao(),
                 produto.getPreco(),
-                produto.getQuantidadeEstoque(), // Mapeado aqui
+                produto.getQuantidadeEstoque(),
                 produto.getCategoria().getNome()
         );
     }

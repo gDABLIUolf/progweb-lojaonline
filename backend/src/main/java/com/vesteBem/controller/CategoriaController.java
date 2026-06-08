@@ -1,61 +1,65 @@
 package com.vesteBem.controller;
 
+import java.util.List;
+
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
 import com.vesteBem.dto.CategoriaRequestDTO;
 import com.vesteBem.model.Categoria;
-import com.vesteBem.repository.CategoriaRepository;
+import com.vesteBem.service.CategoriaService;
+
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/categorias")
-@Tag(name = "Categorias", description = "Endpoints para gerenciamento de categorias de produtos")
+@Tag(name = "Categorias", description = "Endpoints para gerenciamento de categorias")
 public class CategoriaController {
 
-    private final CategoriaRepository repository;
+    private final CategoriaService service;
 
-    public CategoriaController(CategoriaRepository repository) {
-        this.repository = repository;
+    public CategoriaController(CategoriaService service) {
+        this.service = service;
+    }
+
+    @GetMapping
+    @Operation(summary = "Listar todas as categorias")
+    public ResponseEntity<List<Categoria>> listar() {
+        return ResponseEntity.ok(service.listar());
+    }
+
+    @GetMapping("/{id}")
+    @Operation(summary = "Buscar categoria por ID")
+    public ResponseEntity<Categoria> buscarPorId(@PathVariable Long id) {
+        return ResponseEntity.ok(service.buscarPorId(id));
     }
 
     @PostMapping
-    @Operation(summary = "Criar uma nova categoria", description = "Cadastra uma nova categoria no catálogo.")
+    @Operation(summary = "Cadastrar uma nova categoria")
     public ResponseEntity<Categoria> criar(@RequestBody @Valid CategoriaRequestDTO dto) {
-        Categoria novaCategoria = new Categoria(dto.nome());
-
-        Categoria categoriaSalva = repository.save(novaCategoria);
-
-        return ResponseEntity.status(HttpStatus.CREATED).body(categoriaSalva);
+        return ResponseEntity.status(HttpStatus.CREATED).body(service.criar(dto));
     }
 
     @PutMapping("/{id}")
-    @Operation(summary = "Atualizar uma categoria", description = "Altera o nome de uma categoria existente.")
-    public ResponseEntity<Categoria> atualizar(
-            @PathVariable Long id,
-            @RequestBody @Valid CategoriaRequestDTO dto) {
-
-        return repository.findById(id).map(categoria -> {
-            categoria.setNome(dto.nome());
-            Categoria atualizada = repository.save(categoria);
-            return ResponseEntity.ok(atualizada);
-        }).orElse(ResponseEntity.status(HttpStatus.NOT_FOUND).build());
+    @Operation(summary = "Atualizar uma categoria existente")
+    public ResponseEntity<Categoria> atualizar(@PathVariable Long id, @RequestBody @Valid CategoriaRequestDTO dto) {
+        return ResponseEntity.ok(service.atualizar(id, dto));
     }
 
     @DeleteMapping("/{id}")
-    @Operation(summary = "Remover uma categoria", description = "Exclui uma categoria do sistema.")
-    public ResponseEntity<Void> eliminar(@PathVariable Long id) {
-        if (!repository.existsById(id)) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
-        }
-
-        try {
-            repository.deleteById(id);
-            return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
-        }
+    @Operation(summary = "Remover uma categoria")
+    public ResponseEntity<Void> deletar(@PathVariable Long id) {
+        service.deletar(id);
+        return ResponseEntity.noContent().build();
     }
 }

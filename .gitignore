@@ -1,10 +1,38 @@
 # ==========================================
-# Compilação e Artefatos do Spring / Java
+# Frontend (Vue.js / Vite / Node)
 # ==========================================
-*.class
+# Dependências
+node_modules/
+.pnp
+.pnp.js
+
+# Pastas de Build do Frontend
+dist/
+dist-ssr/
+.nuxt/
+.output/
+
+# Logs do Node
+logs/
 *.log
-*.ctxt
-.mtj.tmp/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# ==========================================
+# Backend (Java / Spring Boot / Maven)
+# ==========================================
+# Pastas de Build do Backend
+target/
+bin/
+build/
+out/
+.gradle/
+
+# Artefatos compilados
+*.class
 *.jar
 *.war
 *.nar
@@ -13,68 +41,56 @@
 *.tar.gz
 *.rar
 
-# Pastas de build
-target/
-bin/
-build/
-out/
-.gradle/
-/build/
+# Logs do Java
+hprof-dumps/
 
 # ==========================================
-# IDEs (IntelliJ, Eclipse, VS Code)
+# IDEs e Editores
 # ==========================================
+# VS Code
+.vscode/*
+!.vscode/extensions.json
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
 # IntelliJ IDEA
 .idea/
 *.iws
 *.iml
 *.ipr
-out/
-!/.idea/icon.png
 
-# Eclipse
+# Eclipse / NetBeans
 .metadata/
 .classpath
 .project
 .settings/
 *.launch
-
-# NetBeans
 nbproject/private/
 nbbuild/
-dist/
 nbdist/
 .nb-gradle/
 
-# VS Code
-.vscode/
-
 # ==========================================
-# Logs e Arquivos Temporários
+# Arquivos de Sistema Operacional
 # ==========================================
-log/
-logs/
-*.log
-hprof-dumps/
-
-# ==========================================
-# Configurações de Ambiente e Dados Sensíveis
-# ==========================================
-# Arquivos de propriedades que podem conter senhas locais
-.env
-*.env
-/src/main/resources/application-local.properties
-/src/main/resources/application-local.yml
-
-# ==========================================
-# Sistema Operacional
-# ==========================================
-# macOS
 .DS_Store
 .AppleDouble
 .LSOverride
-
-# Windows
 Thumbs.db
 Ehthumbs.db
 Desktop.ini
+
+# ==========================================
+# Configurações Locais e Dados Sensíveis
+# ==========================================
+# Variáveis de ambiente
+.env
+.env.*
+*.local
+
+# Properties locais do Spring Boot
+/src/main/resources/application-local.properties
+/src/main/resources/application-local.yml

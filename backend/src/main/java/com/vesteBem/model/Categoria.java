@@ -20,6 +20,13 @@ public class Categoria {
     @Column(nullable = false, unique = true)
     private String nome;
 
+    @com.fasterxml.jackson.annotation.JsonIgnore
+    @jakarta.persistence.Column(columnDefinition = "bytea")
+    private byte[] imagem;
+
+    @jakarta.persistence.Column(name = "tipo_imagem")
+    private String tipoImagem;
+
     public Categoria() {}
 
     public Categoria(Long id) {
@@ -36,4 +43,20 @@ public class Categoria {
 
     public String getNome() { return nome; }
     public void setNome(String nome) { this.nome = nome; }
+
+    public byte[] getImagem() {
+        return imagem;
+    }
+
+    public void setImagem(byte[] imagem) {
+        this.imagem = imagem;
+    }
+
+    public String getTipoImagem() {
+        return tipoImagem;
+    }
+
+    public void setTipoImagem(String tipoImagem) {
+        this.tipoImagem = tipoImagem;
+    }
 }

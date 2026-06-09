@@ -1,7 +1,7 @@
 package com.vesteBem.dto;
 
-import com.vesteBem.model.Produto;
 import java.math.BigDecimal;
+import java.util.List;
 
 public record ProdutoResponseDTO(
         Long id,
@@ -9,16 +9,6 @@ public record ProdutoResponseDTO(
         String descricao,
         BigDecimal preco,
         Integer quantidadeEstoque,
-        String categoriaNome
+        List<String> categoriasNomes // Alterado de String para List<String>
 ) {
-    public ProdutoResponseDTO(Produto produto) {
-        this(
-                produto.getId(),
-                produto.getNome(),
-                produto.getDescricao(),
-                produto.getPreco(),
-                produto.getQuantidadeEstoque(),
-                produto.getCategoria().getNome()
-        );
-    }
 }

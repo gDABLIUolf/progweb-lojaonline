@@ -1,9 +1,10 @@
 package com.vesteBem.model;
 
 import jakarta.persistence.*;
-import jakarta.persistence.criteria.CriteriaBuilder;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "produtos")
@@ -25,19 +26,27 @@ public class Produto {
     @Column(nullable = false)
     private Integer quantidadeEstoque;
 
-    @ManyToOne(optional = false)
-    @JoinColumn(name = "categoria_id", nullable = false)
-    private Categoria categoria;
+    @com.fasterxml.jackson.annotation.JsonIgnore
+    @Column(columnDefinition = "bytea")
+    private byte[] imagem;
 
+    @Column(name = "tipo_imagem")
+    private String tipoImagem;
 
+    @ManyToMany
+    @JoinTable(
+            name = "produto_categoria", // Nome da tabela intermediária
+            joinColumns = @JoinColumn(name = "produto_id"), // Chave do produto
+            inverseJoinColumns = @JoinColumn(name = "categoria_id") // Chave da categoria
+    )
+    private List<Categoria> categorias = new ArrayList<>();
 
     public Produto() {}
 
-    public Produto(String nome, String descricao, BigDecimal preco, Integer quantidadeEstoque, Categoria categoria) {
+    public Produto(String nome, String descricao, BigDecimal preco, Integer quantidadeEstoque) {
         this.nome = nome;
         this.descricao = descricao;
         this.preco = preco;
-        this.categoria = categoria;
         this.quantidadeEstoque = quantidadeEstoque;
     }
 
@@ -56,6 +65,12 @@ public class Produto {
     public Integer getQuantidadeEstoque() { return quantidadeEstoque; }
     public void setQuantidadeEstoque(Integer quantidadeEstoque) { this.quantidadeEstoque = quantidadeEstoque; }
 
-    public Categoria getCategoria() { return categoria; }
-    public void setCategoria(Categoria categoria) { this.categoria = categoria; }
+    public List<Categoria> getCategorias() { return categorias; }
+    public void setCategorias(List<Categoria> categorias) { this.categorias = categorias; }
+
+    public byte[] getImagem() { return imagem; }
+    public void setImagem(byte[] imagem) { this.imagem = imagem; }
+
+    public String getTipoImagem() { return tipoImagem; }
+    public void setTipoImagem(String tipoImagem) { this.tipoImagem = tipoImagem; }
 }

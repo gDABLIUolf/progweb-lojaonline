@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 import com.vesteBem.dto.CategoriaRequestDTO;
 import com.vesteBem.model.Categoria;
 import com.vesteBem.repository.CategoriaRepository;
+import org.springframework.web.multipart.MultipartFile;
 
 @Service
 public class CategoriaService {
@@ -26,16 +27,26 @@ public class CategoriaService {
                 .orElseThrow(() -> new IllegalArgumentException("Categoria não encontrada com o ID: " + id));
     }
 
-    public Categoria criar(CategoriaRequestDTO dto) {
-        if (repository.existsByNome(dto.nome())) {
-            throw new IllegalArgumentException("Já existe uma categoria com esse nome!");
+    public Categoria criar(CategoriaRequestDTO dto, MultipartFile file) throws Exception {
+        Categoria categoria = new Categoria();
+        categoria.setNome(dto.nome());
+
+        if (file != null && !file.isEmpty()) {
+            categoria.setImagem(file.getBytes());
+            categoria.setTipoImagem(file.getContentType());
         }
-        return repository.save(new Categoria(dto.nome()));
+
+        return repository.save(categoria);
     }
 
-    public Categoria atualizar(Long id, CategoriaRequestDTO dto) {
+    public Categoria atualizar(Long id, CategoriaRequestDTO dto, MultipartFile file) throws Exception {
         Categoria categoria = buscarPorId(id);
         categoria.setNome(dto.nome());
+
+        if (file != null && !file.isEmpty()) {
+            categoria.setImagem(file.getBytes());
+            categoria.setTipoImagem(file.getContentType());
+        }
         return repository.save(categoria);
     }
 

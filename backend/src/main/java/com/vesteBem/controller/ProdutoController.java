@@ -5,88 +5,108 @@ import com.vesteBem.dto.ProdutoResponseDTO;
 import com.vesteBem.model.Categoria;
 import com.vesteBem.model.Produto;
 import com.vesteBem.repository.ProdutoRepository;
+import com.vesteBem.service.ProdutoService;
+import com.vesteBem.specs.ProdutoSpecs;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 
+import org.springframework.data.jpa.domain.Specification;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/produtos")
 @Tag(name = "Produtos")
 public class ProdutoController {
 
+    private final ProdutoService produtoService;
     private final ProdutoRepository produtoRepository;
 
-    public ProdutoController(ProdutoRepository produtoRepository) {
+    public ProdutoController(ProdutoService produtoService, ProdutoRepository produtoRepository) {
+        this.produtoService = produtoService;
         this.produtoRepository = produtoRepository;
     }
 
-    @PostMapping
-    @Operation(summary = "Cadastrar produto vinculado a uma categoria")
-    public ResponseEntity<Produto> criar(@RequestBody @Valid ProdutoRequestDTO dto) {
-        Categoria categoria = new Categoria(dto.categoriaId());
+    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @Operation(summary = "Cadastrar produto vinculado a múltiplas categorias com imagem")
+    public ResponseEntity<ProdutoResponseDTO> criar(
+            @RequestPart("dados") @Valid ProdutoRequestDTO dto,
+            @RequestPart(value = "imagem", required = false) MultipartFile imagem) throws IOException {
 
-        Produto produto = new Produto(dto.nome(), dto.descricao(), dto.preco(), dto.quantidadeEstoque(), categoria);
-        Produto salvo = produtoRepository.save(produto);
-
+        ProdutoResponseDTO salvo = produtoService.cadastrar(dto, imagem);
         return ResponseEntity.status(HttpStatus.CREATED).body(salvo);
     }
 
     @GetMapping
-    @Operation(summary = "Listar produtos (Vitrine)", description = "Retorna o catálogo de produtos com paginação. Padrão: 10 itens por página.")
+    @Operation(summary = "Listar produtos (Vitrine)")
     public ResponseEntity<List<ProdutoResponseDTO>> listarVitrine() {
-        List<Produto> produtos = produtoRepository.findAll();
-
-        List<ProdutoResponseDTO> vitrine = produtos.stream()
-                .map(ProdutoResponseDTO::new)
-                .toList();
-
-        return ResponseEntity.ok(vitrine);
+        return ResponseEntity.ok(produtoService.listarTodos());
     }
 
     @GetMapping("/{id}")
-    @Operation(summary = "Buscar produto por ID", description = "Retorna os detalhes de um produto específico para a página de detalhes.")
+    @Operation(summary = "Buscar produto por ID")
     public ResponseEntity<ProdutoResponseDTO> buscarPorId(@PathVariable Long id) {
+        return ResponseEntity.ok(produtoService.buscarPorId(id));
+    }
+
+    @GetMapping("/{id}/imagem")
+    @Operation(summary = "Buscar a imagem do produto")
+    public ResponseEntity<byte[]> buscarImagem(@PathVariable Long id) {
         return produtoRepository.findById(id)
-                .map(ProdutoResponseDTO::new)
-                .map(ResponseEntity::ok)
+                .filter(produto -> produto.getImagem() != null)
+                .map(produto -> ResponseEntity.ok()
+                        .header(HttpHeaders.CONTENT_TYPE, produto.getTipoImagem())
+                        .body(produto.getImagem()))
                 .orElse(ResponseEntity.status(HttpStatus.NOT_FOUND).build());
     }
 
-    @PutMapping("/{id}")
-    @Operation(summary = "Atualizar um produto existente", description = "Altera os dados de um produto com base no ID.")
+    @PutMapping(value = "/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @Operation(summary = "Atualizar um produto existente com nova imagem")
     public ResponseEntity<ProdutoResponseDTO> atualizar(
             @PathVariable Long id,
-            @RequestBody @Valid ProdutoRequestDTO dto) {
+            @RequestPart("dados") @Valid ProdutoRequestDTO dto,
+            @RequestPart(value = "imagem", required = false) MultipartFile imagem) throws IOException {
 
-        return produtoRepository.findById(id).map(produto -> {
-            produto.setNome(dto.nome());
-            produto.setDescricao(dto.descricao());
-            produto.setPreco(dto.preco());
-            produto.setQuantidadeEstoque(dto.quantidadeEstoque());
-
-            Categoria categoria = new Categoria(dto.categoriaId());
-            produto.setCategoria(categoria);
-
-            Produto atualizado = produtoRepository.save(produto);
-
-            return ResponseEntity.ok(new ProdutoResponseDTO(atualizado));
-        }).orElse(ResponseEntity.status(HttpStatus.NOT_FOUND).build());
+        ProdutoResponseDTO atualizado = produtoService.atualizar(id, dto, imagem);
+        return ResponseEntity.ok(atualizado);
     }
 
     @DeleteMapping("/{id}")
-    @Operation(summary = "Remover um produto", description = "Exclui permanentemente um produto do catálogo.")
+    @Operation(summary = "Remover um produto")
     public ResponseEntity<Void> eliminar(@PathVariable Long id) {
-        if (!produtoRepository.existsById(id)) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
-        }
-
-        produtoRepository.deleteById(id);
+        produtoService.deletar(id);
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+    }
+
+    @GetMapping("/busca")
+    @Operation(summary = "Busca dinâmica por nome e múltiplas categorias")
+    public ResponseEntity<List<ProdutoResponseDTO>> buscarDinamicamente(
+            @RequestParam(required = false) String nome,
+            @RequestParam(required = false) List<Long> categorias) {
+
+        Specification<Produto> regraDeBusca = ProdutoSpecs.filtrarDinamico(nome, categorias);
+        List<Produto> resultadosEntity = produtoRepository.findAll(regraDeBusca);
+
+        List<ProdutoResponseDTO> resultadosDTO = resultadosEntity.stream()
+                .map(produto -> new ProdutoResponseDTO(
+                        produto.getId(),
+                        produto.getNome(),
+                        produto.getDescricao(),
+                        produto.getPreco(),
+                        produto.getQuantidadeEstoque(),
+                        produto.getCategorias().stream().map(Categoria::getNome).collect(Collectors.toList())
+                ))
+                .collect(Collectors.toList());
+
+        return ResponseEntity.ok(resultadosDTO);
     }
 }

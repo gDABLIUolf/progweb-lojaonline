@@ -2,7 +2,6 @@ package com.vesteBem.controller;
 
 import com.vesteBem.dto.ProdutoRequestDTO;
 import com.vesteBem.dto.ProdutoResponseDTO;
-import com.vesteBem.model.Categoria;
 import com.vesteBem.model.Produto;
 import com.vesteBem.repository.ProdutoRepository;
 import com.vesteBem.service.ProdutoService;
@@ -97,14 +96,7 @@ public class ProdutoController {
         List<Produto> resultadosEntity = produtoRepository.findAll(regraDeBusca);
 
         List<ProdutoResponseDTO> resultadosDTO = resultadosEntity.stream()
-                .map(produto -> new ProdutoResponseDTO(
-                        produto.getId(),
-                        produto.getNome(),
-                        produto.getDescricao(),
-                        produto.getPreco(),
-                        produto.getQuantidadeEstoque(),
-                        produto.getCategorias().stream().map(Categoria::getNome).collect(Collectors.toList())
-                ))
+                .map(ProdutoResponseDTO::new) // Usa o construtor inteligente que resolve tudo
                 .collect(Collectors.toList());
 
         return ResponseEntity.ok(resultadosDTO);

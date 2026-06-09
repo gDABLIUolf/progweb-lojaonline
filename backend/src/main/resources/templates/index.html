@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VesteBem | Moda Básica Premium</title>
+    <meta name="description" content="Moda básica premium. Roupas minimalistas, confortáveis e atemporais para o seu dia a dia.">
+    
+    <!-- Phosphor Icons -->
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    
+    <!-- CSS -->
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+    
+    <style>
+        .user-greeting {
+            font-size: 0.95rem;
+            font-weight: 500;
+            color: var(--text-primary);
+            margin-right: 0.5rem;
+        }
+        
+        .nav-icons {
+            align-items: center;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Navbar -->
+    <nav class="navbar">
+        <div class="container">
+            <a th:href="@{/}" class="logo">VesteBem.</a>
+            
+            <ul class="nav-links">
+                <li><a href="#">Novidades</a></li>
+                <li><a href="#">Feminino</a></li>
+                <li><a href="#">Masculino</a></li>
+                <li><a href="#">Acessórios</a></li>
+            </ul>
+            
+            <div class="nav-icons">
+                <a href="#" title="Pesquisar" id="openSearch"><i class="ph ph-magnifying-glass"></i></a>
+                
+                <!-- Authentication status -->
+                <span th:if="${user != null}" class="user-greeting" th:text="'Olá, ' + ${user.nome}">Olá, Visitante</span>
+                <a th:if="${user != null}" th:href="@{/logout}" title="Sair"><i class="ph ph-sign-out"></i></a>
+                <a th:if="${user == null}" th:href="@{/login}" title="Minha Conta" id="openLoginBtn"><i class="ph ph-user"></i></a>
+                
+                <a href="#" title="Carrinho" id="openCart">
+                    <i class="ph ph-handbag"></i>
+                    <span class="cart-count">2</span>
+                </a>
+                <div class="mobile-toggle">
+                    <i class="ph ph-list"></i>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <header class="hero">
+        <div class="container fade-in">
+            <div class="hero-text">
+                <h1>O Essencial, Elevado.</h1>
+                <p>Descubra a nova coleção de peças atemporais feitas com algodão pima e tecidos sustentáveis. Um toque suave e um caimento impecável.</p>
+                <a href="#" class="btn btn-primary">Comprar Coleção</a>
+            </div>
+            <div class="hero-img-wrap">
+                <img th:src="@{/assets/img/hero_minimal_fashion_1780402716026.png}" alt="VesteBem Minimal Fashion" class="hero-img">
+            </div>
+        </div>
+    </header>
+
+    <!-- Categories -->
+    <section class="categories">
+        <div class="container">
+            <h2 class="fade-in">Explore por Categoria</h2>
+            <div class="cat-grid fade-in">
+                <div class="cat-card">
+                    <div class="cat-img-wrap">
+                        <img th:src="@{/assets/img/product_minimal_shirt_1780402725534.png}" alt="Camisetas Básicas">
+                    </div>
+                    <h3>Básicos</h3>
+                </div>
+                <div class="cat-card">
+                    <div class="cat-img-wrap">
+                        <img th:src="@{/assets/img/product_minimal_sweater_1780402734479.png}" alt="Tricot e Malhas">
+                    </div>
+                    <h3>Malhas</h3>
+                </div>
+                <div class="cat-card">
+                    <div class="cat-img-wrap">
+                        <img th:src="@{/assets/img/product_minimal_pants_1780402745684.png}" alt="Calças e Alfaiataria">
+                    </div>
+                    <h3>Bottoms</h3>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Featured Products (Dynamic Showcase) -->
+    <section class="products">
+        <div class="container">
+            <h2 class="fade-in">Novidades da Semana</h2>
+            
+            <div class="product-grid" th:if="${not #lists.isEmpty(produtos)}">
+                <div th:each="produto, iterStat : ${produtos}" class="product-card fade-in" th:style="'transition-delay: ' + (${iterStat.index} * 0.1) + 's;'">
+                    <div class="product-img-wrap">
+                        <!-- Dynamic Image Mapper based on name keyword -->
+                        <img th:if="${#strings.contains(#strings.toLowerCase(produto.nome), 'sueter') or #strings.contains(#strings.toLowerCase(produto.nome), 'tricot') or #strings.contains(#strings.toLowerCase(produto.nome), 'sweater')}"
+                             th:src="@{/assets/img/product_minimal_sweater_1780402734479.png}" 
+                             th:alt="${produto.nome}" class="product-img">
+                             
+                        <img th:if="${#strings.contains(#strings.toLowerCase(produto.nome), 'calça') or #strings.contains(#strings.toLowerCase(produto.nome), 'calca') or #strings.contains(#strings.toLowerCase(produto.nome), 'pants') or #strings.contains(#strings.toLowerCase(produto.nome), 'chino')}"
+                             th:src="@{/assets/img/product_minimal_pants_1780402745684.png}" 
+                             th:alt="${produto.nome}" class="product-img">
+                             
+                        <img th:if="${not (#strings.contains(#strings.toLowerCase(produto.nome), 'sueter') or #strings.contains(#strings.toLowerCase(produto.nome), 'tricot') or #strings.contains(#strings.toLowerCase(produto.nome), 'sweater') or #strings.contains(#strings.toLowerCase(produto.nome), 'calça') or #strings.contains(#strings.toLowerCase(produto.nome), 'calca') or #strings.contains(#strings.toLowerCase(produto.nome), 'pants') or #strings.contains(#strings.toLowerCase(produto.nome), 'chino'))}"
+                             th:src="@{/assets/img/product_minimal_shirt_1780402725534.png}" 
+                             th:alt="${produto.nome}" class="product-img">
+                        
+                        <button class="add-to-cart-btn">Adicionar à Sacola</button>
+                    </div>
+                    <div class="product-info">
+                        <h3 class="product-title" th:text="${produto.nome}">T-Shirt Algodão Pima Branca</h3>
+                        <p class="product-price" th:text="'R$ ' + ${#numbers.formatDecimal(produto.preco, 1, 'POINT', 2, 'COMMA')}">R$ 149,00</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Fallback if no products -->
+            <div th:if="${#lists.isEmpty(produtos)}" style="text-align: center; color: var(--text-secondary); padding: 4rem 0;" class="fade-in">
+                <p>Nenhum produto cadastrado no catálogo atualmente.</p>
+            </div>
+            
+            <div style="text-align: center; margin-top: 4rem;" class="fade-in">
+                <a href="#" class="btn btn-outline">Ver Toda a Coleção</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-grid fade-in">
+                <div class="footer-about">
+                    <a href="#" class="logo" style="font-size: 1.2rem;">VesteBem.</a>
+                    <p>Acreditamos no poder do minimalismo. Peças atemporais, duráveis e feitas para você viver o essencial.</p>
+                </div>
+                
+                <div class="footer-links">
+                    <h4>Navegação</h4>
+                    <ul>
+                        <li><a href="#">Coleções</a></li>
+                        <li><a href="#">Sustentabilidade</a></li>
+                        <li><a href="#">Sobre Nós</a></li>
+                        <li><a href="#">Lojas Físicas</a></li>
+                    </ul>
+                </div>
+                
+                <div class="footer-links">
+                    <h4>Atendimento</h4>
+                    <ul>
+                        <li><a href="#">Contato</a></li>
+                        <li><a href="#">Trocas e Devoluções</a></li>
+                        <li><a href="#">Guia de Medidas</a></li>
+                        <li><a href="#">FAQ</a></li>
+                    </ul>
+                </div>
+                
+                <div class="newsletter">
+                    <h4>Assine nossa Newsletter</h4>
+                    <p>Receba novidades e acesso antecipado a novas coleções.</p>
+                    <form class="newsletter-form">
+                        <input type="email" placeholder="Seu melhor e-mail" required>
+                        <button type="submit">Assinar</button>
+                    </form>
+                </div>
+            </div>
+            
+            <div class="footer-bottom">
+                &copy; 2026 VesteBem. Todos os direitos reservados.
+            </div>
+        </div>
+    </footer>
+
+    <!-- Search Overlay -->
+    <div class="search-overlay" id="searchOverlay">
+        <button class="close-btn" id="closeSearch"><i class="ph ph-x"></i></button>
+        <div class="search-container">
+            <h2>O que você está procurando?</h2>
+            <form class="search-form-modal">
+                <input type="text" placeholder="Buscar produtos, categorias..." autofocus>
+                <button type="submit"><i class="ph ph-magnifying-glass"></i></button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Cart Sidebar -->
+    <div class="cart-overlay-bg" id="cartOverlayBg"></div>
+    <div class="cart-sidebar" id="cartSidebar">
+        <div class="cart-header">
+            <h2>Sua Sacola</h2>
+            <button class="close-btn" id="closeCart"><i class="ph ph-x"></i></button>
+        </div>
+        <div class="cart-items">
+            <!-- Sample Cart Item -->
+            <div class="cart-item">
+                <img th:src="@{/assets/img/product_minimal_shirt_1780402725534.png}" alt="Camisa">
+                <div class="cart-item-info">
+                    <h4>T-Shirt Algodão Pima</h4>
+                    <p>R$ 149,00</p>
+                    <div class="qty-control">
+                        <button>-</button>
+                        <span>1</span>
+                        <button>+</button>
+                    </div>
+                </div>
+                <button class="remove-item"><i class="ph ph-trash"></i></button>
+            </div>
+            <!-- Sample Cart Item -->
+            <div class="cart-item">
+                <img th:src="@{/assets/img/product_minimal_pants_1780402745684.png}" alt="Calça">
+                <div class="cart-item-info">
+                    <h4>Calça Chino Areia</h4>
+                    <p>R$ 289,00</p>
+                    <div class="qty-control">
+                        <button>-</button>
+                        <span>1</span>
+                        <button>+</button>
+                    </div>
+                </div>
+                <button class="remove-item"><i class="ph ph-trash"></i></button>
+            </div>
+        </div>
+        <div class="cart-footer">
+            <div class="cart-total">
+                <span>Total:</span>
+                <span>R$ 438,00</span>
+            </div>
+            <button class="btn btn-primary" style="width: 100%;">Finalizar Compra</button>
+        </div>
+    </div>
+
+    <!-- JS -->
+    <script th:src="@{/js/main.js}"></script>
+</body>
+</html>

@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VesteBem | Entrar ou Cadastrar</title>
+    <meta name="description" content="Acesse sua conta na VesteBem para gerenciar seus pedidos e carrinho.">
+    
+    <!-- Phosphor Icons -->
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    
+    <!-- CSS -->
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+    
+    <style>
+        .auth-page {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: var(--surface-light);
+            padding: 2rem;
+            position: relative;
+        }
+
+        .back-home {
+            position: absolute;
+            top: 2rem;
+            left: 2rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.95rem;
+            font-weight: 500;
+            color: var(--text-secondary);
+            transition: var(--transition);
+        }
+
+        .back-home:hover {
+            color: var(--text-primary);
+            transform: translateX(-4px);
+        }
+
+        .auth-card {
+            background: #ffffff;
+            width: 100%;
+            max-width: 460px;
+            padding: 3rem;
+            border-radius: var(--radius-lg);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.04);
+            border: 1px solid var(--border-color);
+            transition: var(--transition);
+        }
+
+        .auth-logo {
+            text-align: center;
+            font-size: 2.2rem;
+            font-weight: 700;
+            letter-spacing: 0.05em;
+            margin-bottom: 2rem;
+        }
+
+        .auth-header-text {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .auth-header-text h2 {
+            font-size: 1.5rem;
+            margin-bottom: 0.5rem;
+            text-align: center;
+        }
+
+        .auth-header-text p {
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+        }
+
+        .auth-form-container {
+            display: flex;
+            flex-direction: column;
+            gap: 1.2rem;
+        }
+
+        .input-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .input-group label {
+            font-size: 0.85rem;
+            font-weight: 500;
+            color: var(--text-primary);
+            padding-left: 0.5rem;
+        }
+
+        .auth-form-container input {
+            padding: 1rem 1.5rem;
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-pill);
+            font-family: 'Inter', sans-serif;
+            font-size: 0.95rem;
+            outline: none;
+            transition: var(--transition);
+            width: 100%;
+        }
+
+        .auth-form-container input:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(26, 26, 26, 0.05);
+        }
+
+        .form-footer {
+            text-align: center;
+            margin-top: 1.5rem;
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+        }
+
+        .form-footer a {
+            color: var(--text-primary);
+            font-weight: 500;
+            text-decoration: underline;
+            cursor: pointer;
+        }
+
+        .form-footer a:hover {
+            color: var(--secondary-color);
+        }
+
+        .forgot-link {
+            align-self: flex-end;
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            text-decoration: none;
+            margin-top: -0.5rem;
+            margin-bottom: 0.5rem;
+            padding-right: 0.5rem;
+            cursor: pointer;
+        }
+
+        .forgot-link:hover {
+            color: var(--text-primary);
+            text-decoration: underline;
+        }
+
+        .alert {
+            padding: 1rem;
+            border-radius: var(--radius-sm);
+            font-size: 0.9rem;
+            margin-bottom: 1.5rem;
+            text-align: center;
+            border: 1px solid transparent;
+            animation: fadeIn 0.4s ease;
+        }
+
+        .alert-error {
+            background-color: #fee2e2;
+            color: #991b1b;
+            border-color: #fca5a5;
+        }
+
+        .alert-success {
+            background-color: #ecfdf5;
+            color: #065f46;
+            border-color: #a7f3d0;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="auth-page">
+        <!-- Back to Home -->
+        <a href="/" class="back-home">
+            <i class="ph ph-arrow-left"></i> Voltar para a loja
+        </a>
+
+        <div class="auth-card">
+            <div class="auth-logo">VesteBem.</div>
+
+            <!-- Global messages -->
+            <div th:if="${error}" class="alert alert-error">
+                <span th:text="${error}">Erro genérico</span>
+            </div>
+            <div th:if="${success}" class="alert alert-success">
+                <span th:text="${success}">Sucesso genérico</span>
+            </div>
+
+            <!-- 1. LOGIN FORM -->
+            <div id="loginSection">
+                <div class="auth-header-text">
+                    <h2>Acesse sua conta</h2>
+                    <p>Insira seu e-mail e senha para entrar.</p>
+                </div>
+
+                <form th:action="@{/login}" method="POST" class="auth-form-container">
+                    <input type="hidden" name="action" value="login">
+                    <div class="input-group">
+                        <label for="loginEmail">E-mail</label>
+                        <input type="email" id="loginEmail" name="email" placeholder="seuemail@exemplo.com" required th:value="${email}">
+                    </div>
+
+                    <div class="input-group">
+                        <label for="loginPassword">Senha</label>
+                        <input type="password" id="loginPassword" name="senha" placeholder="Digite sua senha" required>
+                    </div>
+
+                    <a class="forgot-link" onclick="showForm('forgot')">Esqueceu a senha?</a>
+
+                    <button type="submit" class="btn btn-primary" style="width: 100%;">Entrar</button>
+                </form>
+
+                <div class="form-footer">
+                    Não tem uma conta? <a onclick="showForm('register')">Cadastre-se</a>
+                </div>
+            </div>
+
+            <!-- 2. REGISTER FORM -->
+            <div id="registerSection" style="display: none;">
+                <div class="auth-header-text">
+                    <h2>Crie sua conta</h2>
+                    <p>Preencha os campos abaixo para se cadastrar.</p>
+                </div>
+
+                <form th:action="@{/register}" method="POST" class="auth-form-container">
+                    <div class="input-group">
+                        <label for="registerName">Nome Completo</label>
+                        <input type="text" id="registerName" name="nome" placeholder="Seu nome completo" required th:value="${nome}">
+                    </div>
+
+                    <div class="input-group">
+                        <label for="registerEmail">E-mail</label>
+                        <input type="email" id="registerEmail" name="email" placeholder="seuemail@exemplo.com" required th:value="${email}">
+                    </div>
+
+                    <div class="input-group">
+                        <label for="registerPassword">Senha</label>
+                        <input type="password" id="registerPassword" name="senha" placeholder="Crie uma senha forte" required>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary" style="width: 100%;">Criar Conta</button>
+                </form>
+
+                <div class="form-footer">
+                    Já tem uma conta? <a onclick="showForm('login')">Entrar</a>
+                </div>
+            </div>
+
+            <!-- 3. FORGOT PASSWORD FORM -->
+            <div id="forgotSection" style="display: none;">
+                <div class="auth-header-text">
+                    <h2>Recuperar Senha</h2>
+                    <p>Insira seu e-mail para receber um código de 6 dígitos.</p>
+                </div>
+
+                <form th:action="@{/login}" method="POST" class="auth-form-container">
+                    <input type="hidden" name="action" value="forgot">
+                    <div class="input-group">
+                        <label for="forgotEmail">E-mail</label>
+                        <input type="email" id="forgotEmail" name="email" placeholder="seuemail@exemplo.com" required th:value="${email}">
+                    </div>
+
+                    <button type="submit" class="btn btn-primary" style="width: 100%;">Enviar Código</button>
+                </form>
+
+                <div class="form-footer">
+                    Lembrou a senha? <a onclick="showForm('login')">Entrar</a>
+                </div>
+            </div>
+
+            <!-- 4. REDEFINIR SENHA FORM -->
+            <div id="redefinirSection" style="display: none;">
+                <div class="auth-header-text">
+                    <h2>Nova Senha</h2>
+                    <p>Insira o código de 6 dígitos e defina sua nova senha.</p>
+                </div>
+
+                <form th:action="@{/login}" method="POST" class="auth-form-container">
+                    <input type="hidden" name="action" value="redefinir">
+                    
+                    <div class="input-group">
+                        <label for="redefinirEmail">E-mail de Cadastro</label>
+                        <input type="email" id="redefinirEmail" name="email" placeholder="seuemail@exemplo.com" required th:value="${email}">
+                    </div>
+
+                    <div class="input-group">
+                        <label for="redefinirCode">Código de 6 dígitos</label>
+                        <input type="text" id="redefinirCode" name="codigo" placeholder="000000" maxlength="6" required>
+                    </div>
+
+                    <div class="input-group">
+                        <label for="redefinirNewPassword">Nova Senha</label>
+                        <input type="password" id="redefinirNewPassword" name="novaSenha" placeholder="Nova senha" required>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary" style="width: 100%;">Salvar Nova Senha</button>
+                </form>
+
+                <div class="form-footer">
+                    Voltar para o <a onclick="showForm('login')">Login</a>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- Toggle forms JS -->
+    <script>
+        function showForm(formName) {
+            document.getElementById('loginSection').style.display = 'none';
+            document.getElementById('registerSection').style.display = 'none';
+            document.getElementById('forgotSection').style.display = 'none';
+            document.getElementById('redefinirSection').style.display = 'none';
+
+            if (formName === 'login') {
+                document.getElementById('loginSection').style.display = 'block';
+            } else if (formName === 'register') {
+                document.getElementById('registerSection').style.display = 'block';
+            } else if (formName === 'forgot') {
+                document.getElementById('forgotSection').style.display = 'block';
+            } else if (formName === 'redefinir') {
+                document.getElementById('redefinirSection').style.display = 'block';
+            }
+        }
+    </script>
+
+    <!-- Handle active view state from controller -->
+    <script th:inline="javascript">
+        /*<![CDATA[*/
+        document.addEventListener('DOMContentLoaded', () => {
+            const activeTab = /*[[${activeTab}]]*/ 'login';
+            showForm(activeTab);
+        });
+        /*]]>*/
+    </script>
+</body>
+</html>

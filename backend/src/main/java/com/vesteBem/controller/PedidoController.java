@@ -18,7 +18,9 @@ import java.util.List;
 @RequestMapping("/api/pedidos")
 @Tag(name="Pedidos", description = "Endpoints para finalização e consulta de compras")
 public class PedidoController {
+
     private final PedidoService pedidoService;
+
     public PedidoController(PedidoService pedidoService) {
         this.pedidoService = pedidoService;
     }
@@ -51,6 +53,17 @@ public class PedidoController {
             return ResponseEntity.ok(pedidoAtualizado);
         } catch (IllegalArgumentException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+        }
+    }
+
+    @PostMapping("/carrinho/{usuarioId}")
+    @Operation(summary = "Finalizar carrinho", description = "Transforma o carrinho do usuário em um pedido oficial e esvazia o carrinho.")
+    public ResponseEntity<?> finalizarCarrinho(@PathVariable Long usuarioId) {
+        try {
+            Pedido pedidoSalvo = pedidoService.finalizarCarrinho(usuarioId);
+            return ResponseEntity.ok().body(pedidoSalvo);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
 }

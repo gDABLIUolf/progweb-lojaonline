@@ -3,7 +3,7 @@
     <nav class="navbar">
       <div class="container d-flex justify-content-between align-items-center">
         <a href="#" class="logo text-dark text-decoration-none fs-4 fw-bold"
-          >VesteBem.</a
+          >vesteBem.</a
         >
 
         <div class="nav-icons d-flex gap-3 align-items-center">
@@ -65,7 +65,7 @@
           <div class="hero-img-wrap fade-in-up" style="transition-delay: 0.2s">
             <img
               src="../../assets/img/hero_minimal_fashion_1780402716026.png"
-              alt="VesteBem Minimal Fashion"
+              alt="vesteBem Minimal Fashion"
               class="hero-img"
             />
           </div>

@@ -7,6 +7,8 @@ import com.vesteBem.model.Produto;
 import com.vesteBem.model.ProdutoImagem;
 import com.vesteBem.repository.CategoriaRepository;
 import com.vesteBem.repository.ProdutoRepository;
+import com.vesteBem.specs.ProdutoSpecs;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -49,8 +51,9 @@ public class ProdutoService {
         return new ProdutoResponseDTO(produtoSalvo);
     }
 
-    public List<ProdutoResponseDTO> listarTodos() {
-        return produtoRepository.findAll().stream()
+    public List<ProdutoResponseDTO> listarTodos(String nome, List<Long> categoriasIds) {
+        Specification<Produto> spec = ProdutoSpecs.filtrarDinamico(nome, categoriasIds);
+        return produtoRepository.findAll(spec).stream()
                 .map(ProdutoResponseDTO::new)
                 .collect(Collectors.toList());
     }

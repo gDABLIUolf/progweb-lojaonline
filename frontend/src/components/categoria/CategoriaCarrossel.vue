@@ -16,7 +16,10 @@
           :key="categoria.id"
           class="cat-scroll-item"
         >
-          <CategoriaCard :categoria="categoria" />
+          <CategoriaCard
+            :categoria="categoria"
+            @click="$emit('selecionar-categoria', categoria.id)"
+          />
         </div>
       </div>
 
@@ -41,6 +44,8 @@ defineProps({
     required: true,
   },
 });
+
+defineEmits(["selecionar-categoria"]);
 
 // Referência para acessar a div no DOM
 const scrollContainer = ref(null);

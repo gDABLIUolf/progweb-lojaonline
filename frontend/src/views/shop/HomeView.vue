@@ -27,11 +27,18 @@
       @produto-salvo="carregarCategorias"
     />
 
-    <CategoriaCarrossel :categorias="categorias" />
+    <CategoriaCarrossel
+      :categorias="categorias"
+      @selecionar-categoria="filtrarPorCarrosselCategoria"
+    />
 
     <ProdutoList
       :produtos="produtos"
+      :categorias="categorias"
+      :filtro-categorias-inicial="filtroCategoriasAtual"
+      :filtro-nome-inicial="filtroNomeAtual"
       @adicionar-carrinho="adicionarAoCarrinho"
+      @filtrar="aplicarFiltros"
     />
 
     <!-- Botão flutuante para abrir o carrinho -->
@@ -247,13 +254,42 @@ const modalCategoriaAberta = ref(false);
 const modalProdutoAberta = ref(false);
 
 const produtos = ref([]);
+const filtroNomeAtual = ref("");
+const filtroCategoriasAtual = ref([]);
 
 const carregarProdutos = async () => {
   try {
-    const response = await api.get("/produtos");
+    const params = new URLSearchParams();
+    if (filtroNomeAtual.value) {
+      params.append("nome", filtroNomeAtual.value);
+    }
+    if (filtroCategoriasAtual.value && filtroCategoriasAtual.value.length > 0) {
+      filtroCategoriasAtual.value.forEach(id => {
+        params.append("categoriasIds", id);
+      });
+    }
+    const queryStr = params.toString();
+    const url = queryStr ? `/produtos?${queryStr}` : "/produtos";
+    const response = await api.get(url);
     produtos.value = response.data;
   } catch (error) {
     console.error("Erro ao carregar produtos:", error);
+  }
+};
+
+const aplicarFiltros = ({ nome, categoriasIds }) => {
+  filtroNomeAtual.value = nome;
+  filtroCategoriasAtual.value = categoriasIds;
+  carregarProdutos();
+};
+
+const filtrarPorCarrosselCategoria = (categoriaId) => {
+  filtroCategoriasAtual.value = [categoriaId];
+  carregarProdutos();
+
+  const produtosSecao = document.querySelector(".produtos");
+  if (produtosSecao) {
+    produtosSecao.scrollIntoView({ behavior: "smooth" });
   }
 };
 

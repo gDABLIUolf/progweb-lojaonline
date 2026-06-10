@@ -90,8 +90,10 @@ public class ProdutoController {
 
     @GetMapping
     @Operation(summary = "Listar produtos (Vitrine)")
-    public ResponseEntity<List<ProdutoResponseDTO>> listarVitrine() {
-        return ResponseEntity.ok(produtoService.listarTodos());
+    public ResponseEntity<List<ProdutoResponseDTO>> listarVitrine(
+            @RequestParam(required = false) String nome,
+            @RequestParam(required = false) List<Long> categoriasIds) {
+        return ResponseEntity.ok(produtoService.listarTodos(nome, categoriasIds));
     }
 
     @DeleteMapping("/{id}")

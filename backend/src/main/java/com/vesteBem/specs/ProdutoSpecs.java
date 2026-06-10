@@ -25,8 +25,11 @@ public class ProdutoSpecs {
             }
 
             if (categoriasIds != null && !categoriasIds.isEmpty()) {
-                Join<Produto, Categoria> joinCategorias = root.join("categorias");
-                predicados.add(joinCategorias.get("id").in(categoriasIds));
+                for (Long catId : categoriasIds) {
+                    Join<Produto, Categoria> joinCategorias = root.join("categorias");
+                    predicados.add(criteriaBuilder.equal(joinCategorias.get("id"), catId));
+                }
+                query.distinct(true);
             }
 
             return criteriaBuilder.and(predicados.toArray(new Predicate[0]));

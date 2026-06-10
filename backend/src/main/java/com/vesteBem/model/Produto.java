@@ -33,6 +33,9 @@ public class Produto {
     @Column(name = "tipo_imagem")
     private String tipoImagem;
 
+    @OneToMany(mappedBy = "produto", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Avaliacao> avaliacoes;
+
     @ManyToMany
     @JoinTable(
             name = "produto_categoria", // Nome da tabela intermediária
@@ -73,4 +76,7 @@ public class Produto {
 
     public String getTipoImagem() { return tipoImagem; }
     public void setTipoImagem(String tipoImagem) { this.tipoImagem = tipoImagem; }
+
+    public List<Avaliacao> getAvaliacoes() { return avaliacoes; }
+    public void setAvaliacoes(List<Avaliacao> avaliacoes) { this.avaliacoes = avaliacoes; }
 }

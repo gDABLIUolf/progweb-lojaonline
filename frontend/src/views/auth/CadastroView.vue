@@ -2,17 +2,29 @@
   <div class="login-container">
     <div class="login-card fade-in">
       <div class="brand-logo">VesteBem.</div>
-      <p class="auth-subtitle">Insira o seu e-mail e senha para entrar.</p>
+      <p class="auth-subtitle">Crie sua conta para começar.</p>
 
-      <div
-        v-if="erro"
-        class="alert alert-danger py-2 mb-3"
-        style="font-size: 0.9rem; border-radius: var(--radius-sm)"
-      >
+      <div v-if="erro" class="alert alert-danger py-2 mb-3" style="font-size: 0.9rem; border-radius: var(--radius-sm)">
         <i class="ph ph-warning-circle me-1"></i> {{ erro }}
       </div>
+      
+      <div v-if="sucesso" class="alert alert-success py-2 mb-3" style="font-size: 0.9rem; border-radius: var(--radius-sm)">
+        <i class="ph ph-check-circle me-1"></i> Cadastro realizado com sucesso! Redirecionando...
+      </div>
 
-      <form @submit.prevent="fazerLogin">
+      <form @submit.prevent="fazerCadastro">
+        <div class="mb-4 position-relative">
+          <i class="ph ph-user input-icon"></i>
+          <input
+            type="text"
+            class="form-control-premium"
+            v-model="nome"
+            placeholder="Seu nome completo"
+            required
+            autofocus
+          />
+        </div>
+
         <div class="mb-4 position-relative">
           <i class="ph ph-envelope input-icon"></i>
           <input
@@ -21,7 +33,6 @@
             v-model="email"
             placeholder="Seu e-mail"
             required
-            autofocus
           />
         </div>
 
@@ -31,42 +42,22 @@
             type="password"
             class="form-control-premium"
             v-model="senha"
-            placeholder="Senha"
+            placeholder="Senha (mínimo 6 caracteres)"
             required
+            minlength="6"
           />
         </div>
 
-        <div
-          class="d-flex justify-content-between align-items-center mb-4 px-2"
-        >
-          <div class="form-check">
-            <input type="checkbox" class="form-check-input" id="lembrar" />
-            <label
-              class="form-check-label text-muted"
-              for="lembrar"
-              style="font-size: 0.9rem"
-              >Lembrar-me</label
-            >
-          </div>
-          <a
-            href="#"
-            class="text-dark text-decoration-none"
-            style="font-size: 0.9rem; font-weight: 500"
-            >Esqueceu a senha?</a
-          >
-        </div>
-
         <button type="submit" class="btn-premium w-100" :disabled="carregando">
-          {{ carregando ? "A entrar..." : "Entrar na Conta" }}
+          {{ carregando ? "A cadastrar..." : "Criar Conta" }}
         </button>
       </form>
 
       <div class="text-center mt-4">
-        <router-link to="/cadastro" class="text-dark text-decoration-none" style="font-size: 0.9rem; font-weight: 500">
-          Não tem uma conta? Cadastre-se
+        <router-link to="/login" class="text-dark text-decoration-none" style="font-size: 0.9rem; font-weight: 500">
+          Já tem uma conta? Entre aqui
         </router-link>
       </div>
-      
     </div>
   </div>
 </template>
@@ -76,45 +67,41 @@ import { ref, onMounted } from "vue";
 import { useRouter } from "vue-router";
 import api from "../../services/api";
 
-// Variáveis de estado
+const nome = ref("");
 const email = ref("");
 const senha = ref("");
 const erro = ref("");
+const sucesso = ref(false);
 const carregando = ref(false);
 
-const router = useRouter(); // Ferramenta para mudar de tela
+const router = useRouter();
 
-// Nova função de Login Real
-const fazerLogin = async () => {
-  erro.value = ""; // Limpa os erros ao tentar de novo
+const fazerCadastro = async () => {
+  erro.value = "";
   carregando.value = true;
 
   try {
-    // 1. Bate na porta do Spring Boot
-    const resposta = await api.post("/auth/login", {
+    await api.post("/usuarios", {
+      nome: nome.value,
       email: email.value,
       senha: senha.value,
     });
-
-    // 2. Pega o Token do JSON devolvido e guarda no navegador
-    const tokenJWT = resposta.data.token;
-    localStorage.setItem("token_vestebem", tokenJWT);
-
-    // Se a sua API devolve a Role do utilizador no login, guardamos também!
-    // localStorage.setItem('user_role', resposta.data.role);
-
-    // 3. Sucesso! Manda o utilizador para a Home
-    router.push("/");
+    
+    sucesso.value = true;
+    
+    // Redireciona para o login após 2 segundos
+    setTimeout(() => {
+      router.push("/login");
+    }, 2000);
+    
   } catch (error) {
     console.error("Erro na API:", error);
-    // 4. Captura o 401/403 do Java e avisa o utilizador
-    erro.value = "E-mail ou senha inválidos. Tente novamente.";
+    erro.value = error.response?.data || "Erro ao realizar cadastro. Verifique os dados.";
   } finally {
     carregando.value = false;
   }
 };
 
-// Animação de entrada
 onMounted(() => {
   const card = document.querySelector(".fade-in");
   setTimeout(() => {
@@ -140,12 +127,9 @@ onMounted(() => {
   border-radius: var(--radius-lg);
   padding: 3rem;
   box-shadow: 0 25px 50px rgba(0, 0, 0, 0.05);
-
   opacity: 0;
   transform: translateY(20px);
-  transition:
-    opacity 0.8s ease,
-    transform 0.8s ease;
+  transition: opacity 0.8s ease, transform 0.8s ease;
 }
 
 .brand-logo {

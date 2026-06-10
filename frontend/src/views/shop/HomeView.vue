@@ -3,7 +3,7 @@
     <nav class="navbar">
       <div class="container d-flex justify-content-between align-items-center">
         <a href="#" class="logo text-dark text-decoration-none fs-4 fw-bold"
-          >VesteBem.</a
+          >vesteBem.</a
         >
 
         <div class="nav-icons d-flex gap-3 align-items-center">
@@ -65,7 +65,7 @@
           <div class="hero-img-wrap fade-in-up" style="transition-delay: 0.2s">
             <img
               src="../../assets/img/hero_minimal_fashion_1780402716026.png"
-              alt="VesteBem Minimal Fashion"
+              alt="vesteBem Minimal Fashion"
               class="hero-img"
             />
           </div>
@@ -302,15 +302,77 @@
         </div>
       </div>
     </section>
+
+    <section class="produtos py-5 bg-light fade-in-up">
+      <div class="container text-center">
+        <h2 class="mb-5">Nossos Produtos</h2>
+        
+        <p v-if="produtos.length === 0" class="text-muted mb-5">
+          Nenhum produto disponível no momento.
+        </p>
+
+        <div class="row g-4">
+          <div class="col-md-3" v-for="produto in produtos" :key="produto.id">
+            <div class="card h-100 shadow-sm border-0" style="transition: transform 0.2s;">
+              <img 
+                :src="`http://localhost:8080/api/produtos/${produto.id}/imagem`" 
+                class="card-img-top" 
+                :alt="produto.nome"
+                style="height: 250px; object-fit: cover;"
+              >
+              <div class="card-body d-flex flex-column text-start">
+                <h5 class="card-title fw-bold mb-1">{{ produto.nome }}</h5>
+                <p class="card-text text-muted small mb-2 text-truncate">{{ produto.descricao }}</p>
+                
+                <p class="fs-5 fw-bold mb-1" style="color: var(--primary-color)">R$ {{ produto.preco.toFixed(2) }}</p>
+                
+                <div class="mb-3 d-flex align-items-center">
+                  <div class="d-flex align-items-center" style="gap: 3px;">
+                    <span v-for="n in 5" :key="n"
+                      style="position: relative; display: inline-flex; width: 18px; height: 18px; flex-shrink: 0;">
+
+                      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256"
+                        style="width:18px;height:18px;display:block;">
+                        <path d="M128,22.9l27.5,55.7l61.5,8.9l-44.5,43.4l10.5,61.3L128,163.8l-55,28.9l10.5-61.3L39,87.5l61.5-8.9L128,22.9z"
+                          fill="#e0e0e0"/>
+                      </svg>
+
+                      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256"
+                        style="position:absolute;top:0;left:0;width:18px;height:18px;display:block;"
+                        :style="{ clipPath: `inset(0 ${100 - calcularPorcentagem(produto.mediaAvaliacoes || 0, n)}% 0 0)` }">
+                        <path d="M128,22.9l27.5,55.7l61.5,8.9l-44.5,43.4l10.5,61.3L128,163.8l-55,28.9l10.5-61.3L39,87.5l61.5-8.9L128,22.9z"
+                          fill="#ffc107"/>
+                      </svg>
+
+                    </span>
+                  </div>
+
+                  <span class="text-muted ms-2 small fw-bold">
+                    {{ (produto.mediaAvaliacoes || 0).toFixed(1).replace('.', ',') }}
+                    <span class="fw-normal">({{ produto.avaliacoes?.length || 0 }})</span>
+                  </span>
+                </div>
+
+                <button class="btn-premium w-100 mt-auto py-2" style="font-size: 0.9rem;">
+                  Adicionar ao Carrinho
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
   </div>
 </template>
 
 <script setup>
 import { ref, onMounted } from "vue";
 import { useRouter } from "vue-router";
-import api from "../../services/api";
+import api, { listarProdutos } from "../../services/api";
 
 const router = useRouter();
+const produtos = ref([]);
 
 // Variáveis de Estado da Interface
 const estaLogado = ref(false);
@@ -357,6 +419,7 @@ onMounted(() => {
     }
   }
   carregarCategorias();
+  carregarProdutos();
 });
 
 // Ação de Sair
@@ -439,6 +502,24 @@ const carregarCategorias = async () => {
   } catch (error) {
     console.error("Erro ao buscar categorias:", error);
   }
+};
+
+const carregarProdutos = async () => {
+  try {
+    const resposta = await listarProdutos();
+    produtos.value = resposta.data;
+    console.log(produtos.value)
+  } catch (error) {
+    console.error("Erro ao buscar produtos:", error);
+  }
+};
+
+const calcularPorcentagem = (media, posicao) => {
+  const m = parseFloat(media);
+  const preenchimento = m - (posicao - 1);
+  if (preenchimento >= 1) return 100;
+  if (preenchimento <= 0) return 0;
+  return Math.round(preenchimento * 100);
 };
 
 const novoProduto = ref({

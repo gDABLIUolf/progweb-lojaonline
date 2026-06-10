@@ -8,10 +8,12 @@ import com.vesteBem.model.ItemPedido;
 import com.vesteBem.model.Pedido;
 import com.vesteBem.model.Produto;
 import com.vesteBem.model.Usuario;
+import com.vesteBem.model.Carrinho;
 import com.vesteBem.repository.ItemPedidoRepository;
 import com.vesteBem.repository.PedidoRepository;
 import com.vesteBem.repository.ProdutoRepository;
 import com.vesteBem.repository.UsuarioRepository;
+import com.vesteBem.repository.CarrinhoRepository;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.stereotype.Service;
 import java.util.List;
@@ -22,13 +24,16 @@ public class PedidoService {
     private final ItemPedidoRepository itemPedidoRepository;
     private final UsuarioRepository usuarioRepository;
     private final ProdutoRepository produtoRepository;
+    private final CarrinhoRepository carrinhoRepository;
 
     public PedidoService(PedidoRepository pedidoRepository, ItemPedidoRepository itemPedidoRepository,
-                         UsuarioRepository usuarioRepository, ProdutoRepository produtoRepository) {
+                         UsuarioRepository usuarioRepository, ProdutoRepository produtoRepository,
+                         CarrinhoRepository carrinhoRepository) {
         this.pedidoRepository = pedidoRepository;
         this.itemPedidoRepository = itemPedidoRepository;
         this.usuarioRepository = usuarioRepository;
         this.produtoRepository = produtoRepository;
+        this.carrinhoRepository = carrinhoRepository;
     }
 
     @Transactional
@@ -61,6 +66,7 @@ public class PedidoService {
         }
         return pedido;
     }
+
     @Transactional(readOnly = true)
     public List<PedidoResponseDTO> buscarHistoricoPorUsuario(Long usuarioId) {
         List<Pedido> pedidos = pedidoRepository.findByUsuarioId(usuarioId);
@@ -84,5 +90,45 @@ public class PedidoService {
         String statusFormatado = novoStatus.trim().toUpperCase();
         pedido.setStatus(statusFormatado);
         return pedidoRepository.save(pedido);
+    }
+
+    @Transactional
+    public Pedido finalizarCarrinho(Long usuarioId) {
+        Usuario usuario = usuarioRepository.findById(usuarioId)
+                .orElseThrow(() -> new IllegalArgumentException("Usuário não encontrado!"));
+
+        Carrinho carrinho = carrinhoRepository.findByUsuarioId(usuarioId)
+                .orElseThrow(() -> new IllegalArgumentException("Carrinho não encontrado!"));
+
+        if (carrinho.getItens().isEmpty()) {
+            throw new IllegalArgumentException("O carrinho está vazio.");
+        }
+
+        Pedido pedido = new Pedido(usuario);
+        pedido = pedidoRepository.save(pedido);
+
+        for (var itemCarrinho : carrinho.getItens()) {
+            Produto produto = itemCarrinho.getProduto();
+
+            if (produto.getQuantidadeEstoque() < itemCarrinho.getQuantidade()) {
+                throw new IllegalArgumentException("Estoque insuficiente para o produto: " + produto.getNome());
+            }
+
+            produto.setQuantidadeEstoque(produto.getQuantidadeEstoque() - itemCarrinho.getQuantidade());
+            produtoRepository.save(produto);
+
+            ItemPedido itemPedido = new ItemPedido(
+                    pedido,
+                    produto,
+                    itemCarrinho.getQuantidade(),
+                    produto.getPreco()
+            );
+            itemPedidoRepository.save(itemPedido);
+        }
+
+        carrinho.getItens().clear();
+        carrinhoRepository.save(carrinho);
+
+        return pedido;
     }
 }

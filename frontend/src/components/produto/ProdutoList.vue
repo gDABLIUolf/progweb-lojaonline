@@ -82,10 +82,12 @@
       <div v-else class="produtos-wrapper-container">
         <div class="row g-4">
           <div
-            class="col-12 col-md-6 col-lg-4"
-            v-for="(produto, index) in (mostrarTodos ? produtos : produtos.slice(0, 21))"
+            v-for="(produto, index) in (mostrarTodos || isCatalogoPage ? produtos : produtos.slice(0, 21))"
             :key="produto.id"
-            :class="{ 'item-ofuscado': !mostrarTodos && produtos.length > 18 && index >= 18 }"
+            :class="[
+              isCatalogoPage ? 'col-12 col-md-6 col-lg-4 col-xl-3' : 'col-12 col-md-6 col-lg-4',
+              { 'item-ofuscado': !mostrarTodos && !isCatalogoPage && produtos.length > 18 && index >= 18 }
+            ]"
             :data-index="index"
           >
             <ProdutoCard
@@ -95,9 +97,9 @@
           </div>
         </div>
 
-        <!-- Botão "Mostrar Todos" sobrepondo a linha cortada -->
-        <div v-if="!mostrarTodos && produtos.length > 18" class="botao-ver-mais-wrapper">
-          <button @click="mostrarTodos = true" class="btn btn-mostrar-todos shadow-lg">
+        <!-- Botão "Mostrar Todos" sobrepondo a linha cortada (redireciona para o catálogo) -->
+        <div v-if="!mostrarTodos && !isCatalogoPage && produtos.length > 18" class="botao-ver-mais-wrapper">
+          <button @click="irParaCatalogo" class="btn btn-mostrar-todos shadow-lg">
             <i class="ph ph-squares-four me-2"></i>
             Mostrar Todos ({{ produtos.length }} produtos)
           </button>
@@ -109,6 +111,7 @@
 
 <script setup>
 import { ref, watch, onMounted, onBeforeUnmount } from "vue";
+import { useRouter } from "vue-router";
 import ProdutoCard from "./ProdutoCard.vue";
 
 const props = defineProps({
@@ -128,9 +131,19 @@ const props = defineProps({
     type: String,
     default: "",
   },
+  isCatalogoPage: {
+    type: Boolean,
+    default: false,
+  },
 });
 
 const emit = defineEmits(["adicionar-carrinho", "filtrar"]);
+
+const router = useRouter();
+
+const irParaCatalogo = () => {
+  router.push("/produtos");
+};
 
 const filtroNome = ref(props.filtroNomeInicial);
 const categoriasSelecionadas = ref([...props.filtroCategoriasInicial]);

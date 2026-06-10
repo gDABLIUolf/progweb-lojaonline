@@ -22,13 +22,20 @@
         </a>
 
         <template v-if="estaLogado">
-          <div class="d-flex align-items-center gap-2">
-            <span class="user-name"> Olá, {{ nomeUsuario }} </span>
+          <div class="d-flex align-items-center gap-3">
+            <RouterLink
+              to="/perfil"
+              title="Meu Perfil"
+              class="text-dark text-decoration-none d-flex align-items-center gap-2"
+            >
+              <i class="ph ph-user-circle fs-4"></i>
+              <span class="user-name">Olá, {{ nomeUsuario }}</span>
+            </RouterLink>
 
             <a
               @click.prevent="$emit('logout')"
               title="Sair"
-              class="text-dark fs-4 ms-2"
+              class="text-dark fs-4"
               style="cursor: pointer"
             >
               <i class="ph ph-sign-out"></i>

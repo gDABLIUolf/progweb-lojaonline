@@ -1,5 +1,5 @@
 <template>
-  <div class="home-wrapper">
+  <div class="produtos-view-wrapper">
     <Navbar
       :esta-logado="estaLogado"
       :is-admin="isAdmin"
@@ -8,33 +8,10 @@
       @logout="fazerLogout"
     />
 
-    <HeroSection />
-
-    <AdminPanel
-      v-if="isAdmin"
-      @nova-categoria="modalCategoriaAberta = true"
-      @novo-produto="modalProdutoAberta = true"
-    />
-
-    <CategoriaModal
-      v-model:open="modalCategoriaAberta"
-      @categoria-salva="carregarCategorias"
-    />
-
-    <ProdutoModal
-      v-model:open="modalProdutoAberta"
-      :categorias="categorias"
-      @produto-salvo="carregarCategorias"
-    />
-
-    <CategoriaCarrossel
-      :categorias="categorias"
-      @selecionar-categoria="filtrarPorCarrosselCategoria"
-    />
-
     <ProdutoList
       :produtos="produtos"
       :categorias="categorias"
+      :is-catalogo-page="true"
       :filtro-categorias-inicial="filtroCategoriasAtual"
       :filtro-nome-inicial="filtroNomeAtual"
       @adicionar-carrinho="adicionarAoCarrinho"
@@ -100,18 +77,8 @@ import { ref, onMounted, computed } from "vue";
 import { useRouter } from "vue-router";
 
 import Navbar from "../../components/layout/Navbar.vue";
-import HeroSection from "../../components/home/Home.vue";
-
-import AdminPanel from "../../components/admin/AdminPanel.vue";
-import CategoriaModal from "../../components/modal/CategoriaModal.vue";
-import ProdutoModal from "../../components/modal/ProductModal.vue";
-
-import CategoriaList from "../../components/categoria/CategoriaList.vue";
-import CategoriaCarrossel from "../../components/categoria/CategoriaCarrossel.vue";
-
 import ProdutoList from "../../components/produto/ProdutoList.vue";
 import CarrinhoSidebar from "../../components/layout/CarrinhoSidebar.vue";
-
 import api from "../../services/api.js";
 
 const router = useRouter();
@@ -162,12 +129,7 @@ const carregarUsuario = () => {
   }
 
   const permissao = dadosToken.role || "";
-
-  if (permissao.toUpperCase() === "ADMIN") {
-    isAdmin.value = true;
-  } else {
-    isAdmin.value = false;
-  }
+  isAdmin.value = permissao.toUpperCase() === "ADMIN";
 };
 
 const carregarCarrinho = async () => {
@@ -184,15 +146,13 @@ const carregarCarrinho = async () => {
 
 const fazerLogout = () => {
   localStorage.removeItem("token_vestebem");
-
   estaLogado.value = false;
   isAdmin.value = false;
   nomeUsuario.value = "";
   usuarioId.value = null;
   itensCarrinho.value = [];
   subtotalCarrinho.value = 0;
-
-  router.go();
+  router.push("/");
 };
 
 const adicionarAoCarrinho = async (produtoId) => {
@@ -240,7 +200,6 @@ const adicionarItemSidebar = async (produtoId) => {
 };
 
 const categorias = ref([]);
-
 const carregarCategorias = async () => {
   try {
     const resposta = await api.get("/categorias");
@@ -249,9 +208,6 @@ const carregarCategorias = async () => {
     console.error("Erro:", error);
   }
 };
-
-const modalCategoriaAberta = ref(false);
-const modalProdutoAberta = ref(false);
 
 const produtos = ref([]);
 const filtroNomeAtual = ref("");
@@ -283,46 +239,19 @@ const aplicarFiltros = ({ nome, categoriasIds }) => {
   carregarProdutos();
 };
 
-const filtrarPorCarrosselCategoria = (categoriaId) => {
-  filtroCategoriasAtual.value = [categoriaId];
-  carregarProdutos();
-
-  const produtosSecao = document.querySelector(".produtos");
-  if (produtosSecao) {
-    produtosSecao.scrollIntoView({ behavior: "smooth" });
-  }
-};
-
 onMounted(async () => {
   carregarUsuario();
   if (usuarioId.value) {
     await carregarCarrinho();
   }
-
   await Promise.all([carregarCategorias(), carregarProdutos()]);
 });
 </script>
 
 <style scoped>
-.home-wrapper {
+.produtos-view-wrapper {
   min-height: 100vh;
-  background-color: var(--bg-color);
-}
-
-.fade-in-up {
-  animation: fadeInUp 0.8s cubic-bezier(0.25, 1, 0.5, 1) forwards;
-}
-
-@keyframes fadeInUp {
-  from {
-    opacity: 0;
-    transform: translateY(24px);
-  }
-
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+  background-color: var(--bg-color, #ffffff);
 }
 
 .btn-carrinho-flutuante {
@@ -330,7 +259,7 @@ onMounted(async () => {
   right: 0;
   top: 50%;
   transform: translateY(-50%);
-  background: var(--primary-color);
+  background: var(--primary-color, #111);
   color: white;
   border: none;
   border-radius: 12px 0 0 12px;
@@ -381,18 +310,27 @@ onMounted(async () => {
 }
 
 .modal-content {
-  background: var(--bg-color);
+  background: var(--bg-color, #ffffff);
   width: 100%;
   max-width: 450px;
-  border-radius: var(--radius-lg);
+  border-radius: var(--radius-lg, 16px);
   padding: 2.5rem;
   box-shadow: 0 25px 50px rgba(0, 0, 0, 0.1);
   text-align: center;
 }
 
-@media (max-width: 992px) {
-  .home-wrapper {
-    overflow-x: hidden;
+.fade-in-up {
+  animation: fadeInUp 0.8s cubic-bezier(0.25, 1, 0.5, 1) forwards;
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(24px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
   }
 }
 </style>

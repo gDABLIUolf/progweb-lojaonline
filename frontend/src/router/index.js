@@ -5,6 +5,8 @@ import HomeView from "../views/shop/HomeView.vue";
 import CadastroView from "../views/auth/CadastroView.vue";
 import CarrinhoView from "../views/shop/CarrinhoView.vue";
 import ProdutoView from "../views/shop/ProdutoView.vue";
+import PerfilView from "../views/shop/PerfilView.vue";
+import ProdutosView from "../views/shop/ProdutosView.vue";
 
 const router = createRouter({
   history: createWebHistory(),
@@ -14,6 +16,8 @@ const router = createRouter({
     { path: "/cadastro", name: "cadastro", component: CadastroView },
     { path: "/carrinho", name: "carrinho", component: CarrinhoView },
     { path: "/produto/:id", name: "produto-detalhes", component: ProdutoView },
+    { path: "/perfil", name: "perfil", component: PerfilView },
+    { path: "/produtos", name: "produtos", component: ProdutosView },
   ],
 });
 

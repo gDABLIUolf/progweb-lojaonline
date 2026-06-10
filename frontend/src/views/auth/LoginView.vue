@@ -1,7 +1,7 @@
 <template>
   <div class="login-container">
     <div class="login-card fade-in">
-      <div class="brand-logo">VesteBem.</div>
+      <RouterLink to="/" class="brand-logo text-decoration-none d-block">VesteBem.</RouterLink>
       <p class="auth-subtitle">Insira o seu e-mail e senha para entrar.</p>
 
       <div
@@ -103,8 +103,8 @@ const fazerLogin = async () => {
     // Se a sua API devolve a Role do utilizador no login, guardamos também!
     // localStorage.setItem('user_role', resposta.data.role);
 
-    // 3. Sucesso! Manda o utilizador para a Home
-    router.push("/");
+    // 3. Sucesso! Manda o utilizador para a Home e recarrega a página para inicializar os estados
+    window.location.href = "/";
   } catch (error) {
     console.error("Erro na API:", error);
     // 4. Captura o 401/403 do Java e avisa o utilizador
@@ -154,6 +154,11 @@ onMounted(() => {
   color: var(--text-primary);
   text-align: center;
   margin-bottom: 0.5rem;
+  transition: opacity 0.2s ease;
+}
+
+.brand-logo:hover {
+  opacity: 0.8;
 }
 
 .auth-subtitle {

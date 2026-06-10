@@ -8,6 +8,7 @@ import ProdutoView from "../views/shop/ProdutoView.vue";
 import PerfilView from "../views/shop/PerfilView.vue";
 import ProdutosView from "../views/shop/ProdutosView.vue";
 import DescontosView from "../views/shop/DescontosView.vue";
+import PagamentoView from "../views/shop/PagamentoView.vue";
 
 import AdminView from "../views/admin/AdminView.vue";
 
@@ -22,6 +23,7 @@ const router = createRouter({
     { path: "/perfil", name: "perfil", component: PerfilView },
     { path: "/produtos", name: "produtos", component: ProdutosView },
     { path: "/descontos", name: "descontos", component: DescontosView },
+    { path: "/pagamento", name: "pagamento", component: PagamentoView },
     { path: "/admin", name: "admin", component: AdminView },
   ],
 });

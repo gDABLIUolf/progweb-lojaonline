@@ -44,18 +44,19 @@ public class PedidoService {
                 .orElseThrow(()-> new IllegalArgumentException("Usuário não encontrado!"));
 
         Pedido pedido = new Pedido(usuario);
+        pedido.setStatus("CONCLUIDO");
         pedido = pedidoRepository.save(pedido);
 
         for (ItemPedidoRequestDTO itemDTO : pedidoRequestDTO.itens()){
             Produto produto = produtoRepository.findById(itemDTO.produtoId())
                     .orElseThrow(()-> new IllegalArgumentException("Produto ID " + itemDTO.produtoId() + " não encontrado!"));
 
-            if (produto.getQuantidadeEstoque() < itemDTO.quantidade()) {
+            if (produto.getQuantidadeEstoque() < 1) {
                 throw new IllegalArgumentException("Estoque insuficiente para o produto: " + produto.getNome() +
                         ". Disponível em estoque: " + produto.getQuantidadeEstoque());
             }
 
-            produto.setQuantidadeEstoque(produto.getQuantidadeEstoque() - itemDTO.quantidade());
+            produto.setQuantidadeEstoque(produto.getQuantidadeEstoque() - 1);
             produtoRepository.save(produto);
 
             BigDecimal precoOriginal = produto.getPreco();
@@ -115,16 +116,17 @@ public class PedidoService {
         }
 
         Pedido pedido = new Pedido(usuario);
+        pedido.setStatus("CONCLUIDO");
         pedido = pedidoRepository.save(pedido);
 
         for (var itemCarrinho : carrinho.getItens()) {
             Produto produto = itemCarrinho.getProduto();
 
-            if (produto.getQuantidadeEstoque() < itemCarrinho.getQuantidade()) {
+            if (produto.getQuantidadeEstoque() < 1) {
                 throw new IllegalArgumentException("Estoque insuficiente para o produto: " + produto.getNome());
             }
 
-            produto.setQuantidadeEstoque(produto.getQuantidadeEstoque() - itemCarrinho.getQuantidade());
+            produto.setQuantidadeEstoque(produto.getQuantidadeEstoque() - 1);
             produtoRepository.save(produto);
 
             BigDecimal precoOriginal = produto.getPreco();

@@ -128,6 +128,9 @@
                   type="button"
                 >
                   Concluídos
+                  <span v-if="pedidosCompletos.length > 0" class="badge rounded-pill bg-dark ms-2">
+                    {{ pedidosCompletos.length }}
+                  </span>
                 </button>
               </li>
             </ul>
@@ -158,7 +161,7 @@
                           <div class="small text-muted">{{ formatarData(pedido.dataCriacao) }}</div>
                         </div>
                         <span :class="['badge-status', getStatusClass(pedido.status)]">
-                          {{ pedido.status }}
+                          {{ getStatusLabel(pedido.status) }}
                         </span>
                       </div>
 
@@ -195,7 +198,7 @@
                           <div class="small text-muted">{{ formatarData(pedido.dataCriacao) }}</div>
                         </div>
                         <span :class="['badge-status', getStatusClass(pedido.status)]">
-                          {{ pedido.status }}
+                          {{ getStatusLabel(pedido.status) }}
                         </span>
                       </div>
 
@@ -237,9 +240,11 @@
       :is-open="sidebarAberta"
       :itens="itensCarrinho"
       :subtotal="subtotalCarrinho"
+      :usuario-id="usuarioId"
       @close="sidebarAberta = false"
       @adicionar-item="adicionarItemSidebar"
       @remover-item="removerItemSidebar"
+      @carrinho-atualizado="carregarCarrinho"
     />
 
     <!-- Rodapé Premium -->
@@ -366,15 +371,17 @@ const carregarCarrinho = async () => {
 };
 
 const pedidosAbertos = computed(() => {
-  return orders.value.filter(
-    (o) => o.status !== "ENTREGUE" && o.status !== "CANCELADO"
-  );
+  return orders.value.filter((o) => {
+    const s = (o.status || "").toUpperCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+    return s !== "CONCLUIDO" && s !== "CANCELADO" && s !== "ENTREGUE";
+  });
 });
 
 const pedidosCompletos = computed(() => {
-  return orders.value.filter(
-    (o) => o.status === "ENTREGUE" || o.status === "CANCELADO"
-  );
+  return orders.value.filter((o) => {
+    const s = (o.status || "").toUpperCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+    return s === "CONCLUIDO" || s === "CANCELADO" || s === "ENTREGUE";
+  });
 });
 
 const salvarDados = async () => {
@@ -475,9 +482,23 @@ const getStatusClass = (status) => {
   const s = status.toUpperCase();
   if (s === "PENDENTE") return "status-pendente";
   if (s === "PAGO" || s === "A_CAMINHO" || s === "PROCESSANDO") return "status-processando";
-  if (s === "ENTREGUE") return "status-entregue";
+  if (s === "ENTREGUE" || s === "CONCLUIDO") return "status-entregue";
   if (s === "CANCELADO") return "status-cancelado";
   return "status-padrao";
+};
+
+const getStatusLabel = (status) => {
+  if (!status) return "";
+  const labels = {
+    PENDENTE: "Pendente",
+    PAGO: "Pago",
+    PROCESSANDO: "Processando",
+    A_CAMINHO: "A caminho",
+    ENTREGUE: "Concluído",
+    CONCLUIDO: "Concluído",
+    CANCELADO: "Cancelado",
+  };
+  return labels[status.toUpperCase()] || status;
 };
 
 onMounted(async () => {

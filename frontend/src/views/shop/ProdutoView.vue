@@ -230,9 +230,11 @@
       :is-open="sidebarAberta"
       :itens="itensCarrinho"
       :subtotal="subtotalCarrinho"
+      :usuario-id="usuarioId"
       @close="sidebarAberta = false"
       @adicionar-item="adicionarItemSidebar"
       @remover-item="removerItemSidebar"
+      @carrinho-atualizado="carregarCarrinho"
     />
 
     <!-- Modal de login necessário -->

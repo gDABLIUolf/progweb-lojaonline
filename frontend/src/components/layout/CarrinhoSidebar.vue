@@ -221,39 +221,12 @@ const toggleTodos = () => {
 };
 
 // ── Checkout parcial ──────────────────────────────────────────────────────────
-const finalizarSelecionados = async () => {
+const finalizarSelecionados = () => {
   if (!props.usuarioId || nenhumSelecionado.value) return;
-  finalizando.value = true;
-  try {
-    const itensPayload = itensParaCheckout.value.map((item) => ({
-      produtoId: item.produtoId,
-      quantidade: item.quantidade,
-    }));
-
-    await api.post("/pedidos/checkout", {
-      usuarioId: props.usuarioId,
-      itens: itensPayload,
-    });
-
-    // Remover do carrinho os itens pedidos
-    await Promise.all(
-      itensParaCheckout.value.map((item) =>
-        api.delete(`/carrinhos/${props.usuarioId}/remover-tudo/${item.produtoId}`)
-      )
-    );
-
-    alert("Pedido realizado com sucesso!");
-    emit("carrinho-atualizado");
-    emit("close");
-
-    if (todosSelecionados.value) {
-      router.push("/");
-    }
-  } catch (error) {
-    alert(error.response?.data || "Erro ao finalizar compra.");
-  } finally {
-    finalizando.value = false;
-  }
+  
+  localStorage.setItem("vestebem_checkout_itens", JSON.stringify(itensParaCheckout.value));
+  emit("close");
+  router.push("/pagamento");
 };
 </script>
 

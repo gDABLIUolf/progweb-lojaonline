@@ -324,42 +324,11 @@ const removerItem = async (produtoId) => {
   }
 };
 
-const finalizarCompra = async () => {
+const finalizarCompra = () => {
   if (itensSelecionados.value.length === 0) return;
 
-  finalizando.value = true;
-  try {
-    // Montar payload apenas com os itens selecionados
-    const itensPayload = itensParaCheckout.value.map((item) => ({
-      produtoId: item.produtoId,
-      quantidade: item.quantidade,
-    }));
-
-    await api.post("/pedidos/checkout", {
-      usuarioId: usuarioId.value,
-      itens: itensPayload,
-    });
-
-    alert("Pedido realizado com sucesso!");
-
-    // Remover do carrinho apenas os itens que foram pedidos (em paralelo)
-    await Promise.all(
-      itensParaCheckout.value.map((item) =>
-        api.delete(`/carrinhos/${usuarioId.value}/remover-tudo/${item.produtoId}`)
-      )
-    );
-
-    // Se o carrinho ficou vazio, ir para home; caso contrário, recarregar
-    if (todosSelecionados.value) {
-      router.push("/");
-    } else {
-      await carregarCarrinho();
-    }
-  } catch (error) {
-    alert(error.response?.data || "Erro ao finalizar compra.");
-  } finally {
-    finalizando.value = false;
-  }
+  localStorage.setItem("vestebem_checkout_itens", JSON.stringify(itensParaCheckout.value));
+  router.push("/pagamento");
 };
 
 onMounted(() => {

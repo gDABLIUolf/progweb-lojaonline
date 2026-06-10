@@ -16,11 +16,13 @@
           <span class="text-muted small">Sem foto</span>
         </div>
 
+
+
         <span
-          v-if="produto.categoriasNomes?.length"
-          class="badge bg-dark position-absolute top-0 start-0 m-3"
+          v-if="produto.desconto > 0"
+          class="badge bg-danger position-absolute top-0 end-0 m-3"
         >
-          {{ produto.categoriasNomes[0] }}
+          -{{ produto.desconto }}%
         </span>
       </div>
     </RouterLink>
@@ -35,8 +37,14 @@
       </p>
 
       <div class="mt-auto">
-        <div class="mb-2">
-          <span class="preco fw-bold fs-5">R$ {{ precoFormatado }}</span>
+        <div class="mb-2 d-flex align-items-center gap-2 flex-wrap">
+          <template v-if="produto.desconto > 0">
+            <span class="preco-antigo text-decoration-line-through">R$ {{ precoFormatado }}</span>
+            <span class="preco fw-bold fs-5 text-danger">R$ {{ precoPromocionalFormatado }}</span>
+          </template>
+          <template v-else>
+            <span class="preco fw-bold fs-5">R$ {{ precoFormatado }}</span>
+          </template>
         </div>
         <button
           class="btn btn-dark rounded-pill w-100 py-2 btn-comprar"
@@ -66,6 +74,16 @@ const temImagem = ref(true);
 const precoFormatado = computed(() => {
   return Number(props.produto.preco).toLocaleString("pt-BR", {
     minimumFractionDigits: 2,
+  });
+});
+
+const precoPromocionalFormatado = computed(() => {
+  if (!props.produto.desconto) return "";
+  const precoOriginal = Number(props.produto.preco);
+  const precoFinal = precoOriginal * (1 - props.produto.desconto / 100);
+  return precoFinal.toLocaleString("pt-BR", {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2
   });
 });
 
@@ -132,5 +150,14 @@ const handleImageError = () => {
 .btn-comprar:hover {
   background: #333;
   transform: scale(1.05);
+}
+
+.preco-antigo {
+  font-size: 0.9rem;
+  color: var(--text-secondary, #86868b);
+}
+
+.text-danger {
+  color: #e53e3e !important;
 }
 </style>

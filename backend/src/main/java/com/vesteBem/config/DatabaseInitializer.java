@@ -57,13 +57,27 @@ public class DatabaseInitializer implements CommandLineRunner {
         BigDecimal preco;
         int categoriaIndex;
         String[] imagens;
+        Integer desconto;
+        Boolean destaqueCarrossel;
+        String imagemCarrosselPath;
 
         ProductSeed(String nome, String descricao, String preco, int categoriaIndex, String[] imagens) {
+            this(nome, descricao, preco, categoriaIndex, imagens, 0, false, null);
+        }
+
+        ProductSeed(String nome, String descricao, String preco, int categoriaIndex, String[] imagens, Integer desconto) {
+            this(nome, descricao, preco, categoriaIndex, imagens, desconto, false, null);
+        }
+
+        ProductSeed(String nome, String descricao, String preco, int categoriaIndex, String[] imagens, Integer desconto, Boolean destaqueCarrossel, String imagemCarrosselPath) {
             this.nome = nome;
             this.descricao = descricao;
             this.preco = new BigDecimal(preco);
             this.categoriaIndex = categoriaIndex;
             this.imagens = imagens;
+            this.desconto = desconto;
+            this.destaqueCarrossel = destaqueCarrossel;
+            this.imagemCarrosselPath = imagemCarrosselPath;
         }
     }
 
@@ -153,7 +167,7 @@ public class DatabaseInitializer implements CommandLineRunner {
         if (produtoRepository.count() == 0) {
             ProductSeed[] seeds = new ProductSeed[] {
                 // 1-5 Alfaiataria (0)
-                new ProductSeed("Blazer Slim Lã Fria Grafite", "Blazer estruturado com corte slim, lapela chanfrada e abotoamento simples. Confeccionado em lã fria premium italiana, perfeito para composições formais elegantes.", "1290.00", 0, new String[]{"/img/prod_gray_blazer.png"}),
+                new ProductSeed("Blazer Slim Lã Fria Grafite", "Blazer estruturado com corte slim, lapela chanfrada e abotoamento simples. Confeccionado em lã fria premium italiana, perfeito para composições formais elegantes.", "1290.00", 0, new String[]{"/img/prod_gray_blazer.png"}, 10),
                 new ProductSeed("Calça Alfaiataria Linho Cru", "Calça de alfaiataria com corte reto, bolsos faca e vinco marcado. Feita em linho puro respirável, oferecendo leveza e sofisticação natural.", "489.00", 0, new String[]{"/img/cat_trousers.png"}),
                 new ProductSeed("Colete Alfaiataria Minimalista Preto", "Colete clássico com ajuste traseiro em fivela e abotoamento frontal embutido. Ideal para sobreposições elegantes ou uso como peça única.", "359.00", 0, new String[]{"/img/cat_tailoring.png"}),
                 new ProductSeed("Paletó Clássico Crepe Preto", "Paletó em crepe encorpado de caimento pesado, lapelas de cetim e modelagem levemente oversized, unindo modernidade e rigor clássico.", "1490.00", 0, new String[]{"/img/cat_tailoring.png", "/img/prod_gray_blazer.png"}),
@@ -167,14 +181,14 @@ public class DatabaseInitializer implements CommandLineRunner {
                 new ProductSeed("Camiseta Gola Alta Pima Cinza", "Camiseta com gola alta ajustada, confeccionada em algodão pima peruano de alta densidade.", "249.00", 1, new String[]{"/img/cat_basics.png", "/img/prod_black_tshirt.png"}),
 
                 // 11-15 Malhas & Tricot (2)
-                new ProductSeed("Suéter Cashmere Gola Alta Camel", "Suéter luxuoso em puro cashmere mongol. Gola alta aconchegante, punhos canelados e caimento clássico e atemporal.", "1890.00", 2, new String[]{"/img/cat_knitwear.png"}),
+                new ProductSeed("Suéter Cashmere Gola Alta Camel", "Suéter luxuoso em puro cashmere mongol. Gola alta aconchegante, punhos canelados e caimento clássico e atemporal.", "1890.00", 2, new String[]{"/img/cat_knitwear.png"}, 25, true, "/img/promo_sueter_desconto.png"),
                 new ProductSeed("Cardigan Tricot Oversized Gelo", "Cardigan amplo em tricot texturizado com botões de chifre natural. Perfeito para sobreposições modernas e aconchegantes.", "589.00", 2, new String[]{"/img/cat_knitwear.png"}),
                 new ProductSeed("Suéter Lã Merino Canelado Off-White", "Suéter com gola redonda em lã merino extrafina canelada, unindo aquecimento leve e toque extremamente suave.", "790.00", 2, new String[]{"/img/cat_knitwear.png"}),
                 new ProductSeed("Blusa Tricot Gola Canoa Preta", "Blusa de tricot fino com decote canoa e mangas 7/8. Visual clean e sofisticado para noites frescas.", "349.00", 2, new String[]{"/img/cat_knitwear.png"}),
                 new ProductSeed("Vestido Midi Tricot Canelado Areia", "Vestido midi de tricot canelado que delineia o corpo com extremo conforto e sofisticação minimalista.", "499.00", 2, new String[]{"/img/cat_knitwear.png"}),
 
                 // 16-20 Casacos & Blazers (3)
-                new ProductSeed("Sobretudo Lã e Alpaca Camel", "Sobretudo longo trespassado confeccionado em mescla nobre de lã virgem e alpaca. Bolsos embutidos e faixa opcional para amarração.", "2490.00", 3, new String[]{"/img/prod_camel_coat.png"}),
+                new ProductSeed("Sobretudo Lã e Alpaca Camel", "Sobretudo longo trespassado confeccionado em mescla nobre de lã virgem e alpaca. Bolsos embutidos e faixa opcional para amarração.", "2490.00", 3, new String[]{"/img/prod_camel_coat.png"}, 30, true, "/img/promo_sobretudo_desconto.png"),
                 new ProductSeed("Trench Coat Impermeável Fendi", "O clássico casaco de chuva em sarja impermeável com abotoamento duplo, lapelas largas e cinto ajustável.", "1290.00", 3, new String[]{"/img/cat_outerwear.png"}),
                 new ProductSeed("Jaqueta Couro Pelica Minimalista Preta", "Jaqueta de couro legítimo extremamente macio, com ferragens em chumbo escuro fosco e silhueta limpa.", "1990.00", 3, new String[]{"/img/cat_outerwear.png"}),
                 new ProductSeed("Blazer Oversized Linho Preto", "Blazer com modelagem ampla e moderna, confeccionado em linho belga estruturado com forro parcial respirável.", "789.00", 3, new String[]{"/img/prod_gray_blazer.png"}),
@@ -182,20 +196,20 @@ public class DatabaseInitializer implements CommandLineRunner {
 
                 // 21-25 Calças Clean (4)
                 new ProductSeed("Calça Reta Gabardine Bege", "Calça clássica de gabardine de algodão com corte reto impecável, ideal para compor com camisas e blazers.", "399.00", 4, new String[]{"/img/cat_trousers.png"}),
-                new ProductSeed("Pantalona Fluida Crepe Preta", "Pantalona de cintura alta com caimento super fluido, cós largo estruturado e bolsos faca nas laterais.", "459.00", 4, new String[]{"/img/cat_trousers.png"}),
+                new ProductSeed("Pantalona Fluida Crepe Preta", "Pantalona de cintura alta com caimento super fluido, cós largo estruturado e bolsos faca nas laterais.", "459.00", 4, new String[]{"/img/cat_trousers.png"}, 15),
                 new ProductSeed("Calça Wide Leg Linho Off-White", "Calça de linho com modelagem wide leg, pregas frontais e caimento leve. Perfeita para os dias de verão.", "520.00", 4, new String[]{"/img/cat_trousers.png"}),
                 new ProductSeed("Calça Utility Minimalista Oliva", "Calça de sarja de algodão de alta densidade com bolsos cargo ultra-discretos e costuras reforçadas.", "419.00", 4, new String[]{"/img/cat_trousers.png"}),
                 new ProductSeed("Calça Jogger Seda Chumbo", "Calça estilo jogger com punhos em elástico embutido, cós com cordão de seda e caimento luxuoso.", "890.00", 4, new String[]{"/img/cat_trousers.png"}),
 
                 // 26-30 Camisaria Fina (5)
-                new ProductSeed("Camisa Seda Pura Branca", "Camisa clássica de botões em seda pura premium. Caimento fluido, punhos largos e botões de madrepérola legítima.", "1190.00", 5, new String[]{"/img/cat_shirts.png"}),
+                new ProductSeed("Camisa Seda Pura Branca", "Camisa clássica de botões em seda pura premium. Caimento fluido, punhos largos e botões de madrepérola legítima.", "1190.00", 5, new String[]{"/img/cat_shirts.png"}, 20, true, "/img/promo_camisa_desconto.png"),
                 new ProductSeed("Camisa Linho Premium Azul Claríssimo", "Camisa casual chique em linho belga amaciado. Colarinho levemente desestruturado e toque arejado.", "389.00", 5, new String[]{"/img/prod_blue_shirt.png"}),
                 new ProductSeed("Camisa Algodão Egípcio Preta", "Camisa formal em tricoline de algodão egípcio fio 120. Caimento estruturado e acabamento impecável.", "489.00", 5, new String[]{"/img/cat_shirts.png"}),
                 new ProductSeed("Chemise Midi Linho Cru", "Vestido camisa com comprimento midi, abotoamento frontal completo e cinto de mesmo tecido para ajuste.", "590.00", 5, new String[]{"/img/cat_shirts.png", "/img/prod_blue_shirt.png"}),
                 new ProductSeed("Camisa Algodão Cetim Off-White", "Camisa de algodão premium com acabamento acetinado que reflete a luz sutilmente. Visual luxuoso.", "450.00", 5, new String[]{"/img/cat_shirts.png"}),
 
                 // 31-35 Vestidos Minimalistas (6)
-                new ProductSeed("Vestido Longo Crepe Minimal Preto", "Vestido de festa longo com corte reto e fenda traseira discreta. Costas abertas com alças finas elegantes.", "1390.00", 6, new String[]{"/img/prod_black_dress.png"}),
+                new ProductSeed("Vestido Longo Crepe Minimal Preto", "Vestido de festa longo com corte reto e fenda traseira discreta. Costas abertas com alças finas elegantes.", "1390.00", 6, new String[]{"/img/prod_black_dress.png"}, 40),
                 new ProductSeed("Vestido Midi Gola Alta Silk Off-White", "Vestido midi sem mangas com gola alta drapeada e caimento enviesado que acompanha o movimento.", "890.00", 6, new String[]{"/img/cat_dresses.png"}),
                 new ProductSeed("Vestido Slip Dress Seda Champanhe", "O slip dress definitivo em seda pura, com decote bobo discreto e alças reguláveis. Um clássico chique.", "1290.00", 6, new String[]{"/img/cat_dresses.png"}),
                 new ProductSeed("Vestido Cache-Coeur Linho Areia", "Vestido transpassado midi de linho estruturado, com amarração lateral interna e caimento evasê limpo.", "659.00", 6, new String[]{"/img/cat_dresses.png"}),
@@ -225,6 +239,12 @@ public class DatabaseInitializer implements CommandLineRunner {
 
             for (ProductSeed seed : seeds) {
                 Produto p = new Produto(seed.nome, seed.descricao, seed.preco, 50);
+                p.setDesconto(seed.desconto);
+                p.setDestaqueCarrossel(seed.destaqueCarrossel);
+                if (seed.imagemCarrosselPath != null) {
+                    p.setImagemCarrossel(lerImagem(seed.imagemCarrosselPath));
+                    p.setTipoImagemCarrossel("image/png");
+                }
                 p.setCategorias(List.of(cats[seed.categoriaIndex]));
 
                 for (String imgPath : seed.imagens) {

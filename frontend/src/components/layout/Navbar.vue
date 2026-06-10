@@ -50,6 +50,14 @@
         >
           Produtos
         </RouterLink>
+
+        <RouterLink 
+          to="/descontos" 
+          class="nav-menu-item" 
+          :class="{ active: isItemActive('descontos') }"
+        >
+          Descontos
+        </RouterLink>
         
         <a 
           href="#promocoes" 
@@ -70,13 +78,14 @@
       </div>
 
       <div class="nav-icons d-flex gap-3 align-items-center">
-        <span
+        <RouterLink
           v-if="isAdmin"
-          class="badge bg-primary rounded-pill px-3 py-2 fw-normal"
+          to="/admin"
+          class="badge bg-primary rounded-pill px-3 py-2 fw-normal text-white text-decoration-none"
         >
           <i class="ph ph-shield-check me-1"></i>
           Admin
-        </span>
+        </RouterLink>
 
         <template v-if="estaLogado">
           <div class="d-flex align-items-center gap-3">
@@ -181,7 +190,7 @@ const handleScroll = () => {
 
   const categoriasEl = document.getElementById("categorias-secao");
   const produtosEl = document.querySelector(".produtos");
-  const promocoesEl = document.getElementById("newsletter-secao");
+  const promocoesEl = document.getElementById("promocoes-secao");
   const contatoEl = document.getElementById("contato-secao");
 
   if (contatoEl && scrollPosition >= contatoEl.offsetTop) {
@@ -207,6 +216,9 @@ const isItemActive = (item) => {
   }
   if (item === "categorias") {
     return route.path === "/produtos" && route.query.categoria;
+  }
+  if (item === "descontos") {
+    return route.path === "/descontos";
   }
   return false;
 };
@@ -247,14 +259,9 @@ const irParaCategorias = () => {
 };
 
 const irParaPromocoes = () => {
-  const el = document.getElementById("footer");
+  const el = document.getElementById("promocoes-secao");
   if (el) {
     el.scrollIntoView({ behavior: "smooth" });
-    const targetEl = document.getElementById("newsletter-secao");
-    if (targetEl) {
-      targetEl.classList.add("highlight-pulse");
-      setTimeout(() => targetEl.classList.remove("highlight-pulse"), 2000);
-    }
   } else {
     router.push("/#promocoes");
   }
@@ -473,6 +480,12 @@ const irParaContato = () => {
 
 .badge {
   font-size: 0.85rem;
+  transition: all 0.3s ease;
+}
+
+.badge:hover {
+  opacity: 0.9;
+  transform: translateY(-2px);
 }
 
 @media (max-width: 992px) {

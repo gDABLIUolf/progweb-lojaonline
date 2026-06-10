@@ -17,5 +17,8 @@ public record UsuarioAtualizacaoDTO(
 
         @Schema(description = "Nova senha (opcional, deixar vazio para manter a atual)", example = "NovaSenha123!")
         @Size(min = 6, message = "A senha deve ter no mínimo 6 caracteres")
-        String senha
+        String senha,
+
+        @Schema(description = "Papel do usuário (ADMIN ou CLIENTE)", example = "CLIENTE")
+        String role
 ) {}

@@ -45,4 +45,36 @@ public class AvaliacaoController {
                 .stream().map(AvaliacaoResponseDTO::new).toList();
         return ResponseEntity.ok(lista);
     }
+
+    @GetMapping
+    @Operation(summary = "Listar todas as avaliações")
+    public ResponseEntity<List<AvaliacaoResponseDTO>> listarTodas() {
+        List<AvaliacaoResponseDTO> lista = avaliacaoService.listarTodas()
+                .stream().map(AvaliacaoResponseDTO::new).toList();
+        return ResponseEntity.ok(lista);
+    }
+
+    @PutMapping("/{id}")
+    @Operation(summary = "Atualizar uma avaliação")
+    public ResponseEntity<?> atualizar(
+            @PathVariable Long id,
+            @RequestBody @Valid AvaliacaoRequestDTO dto) {
+        try {
+            Avaliacao avaliacaoAtualizada = avaliacaoService.atualizar(id, dto);
+            return ResponseEntity.ok(new AvaliacaoResponseDTO(avaliacaoAtualizada));
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+
+    @DeleteMapping("/{id}")
+    @Operation(summary = "Deletar uma avaliação")
+    public ResponseEntity<Void> deletar(@PathVariable Long id) {
+        try {
+            avaliacaoService.deletar(id);
+            return ResponseEntity.noContent().build();
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.notFound().build();
+        }
+    }
 }

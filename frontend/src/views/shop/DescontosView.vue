@@ -1,5 +1,5 @@
 <template>
-  <div class="home-wrapper">
+  <div class="descontos-view-wrapper">
     <Navbar
       :esta-logado="estaLogado"
       :is-admin="isAdmin"
@@ -8,25 +8,16 @@
       @logout="fazerLogout"
     />
 
-    <HeroSection />
-
-    <div id="categorias-secao">
-      <CategoriaCarrossel
-        :categorias="categorias"
-        @selecionar-categoria="filtrarPorCarrosselCategoria"
-      />
-    </div>
-
     <ProdutoList
       :produtos="produtos"
       :categorias="categorias"
+      :is-catalogo-page="true"
+      titulo="Descontos Exclusivos"
       :filtro-categorias-inicial="filtroCategoriasAtual"
       :filtro-nome-inicial="filtroNomeAtual"
       @adicionar-carrinho="adicionarAoCarrinho"
       @filtrar="aplicarFiltros"
     />
-
-    <DescontoCarrossel />
 
     <!-- Botão flutuante para abrir o carrinho -->
     <button
@@ -45,11 +36,9 @@
       :is-open="sidebarAberta"
       :itens="itensCarrinho"
       :subtotal="subtotalCarrinho"
-      :usuario-id="usuarioId"
       @close="sidebarAberta = false"
       @adicionar-item="adicionarItemSidebar"
       @remover-item="removerItemSidebar"
-      @carrinho-atualizado="carregarCarrinho"
     />
 
     <!-- Modal de login necessário -->
@@ -88,21 +77,13 @@
 </template>
 
 <script setup>
-import { ref, onMounted, computed } from "vue";
+import { ref, onMounted, computed, watch } from "vue";
 import { useRouter, useRoute, onBeforeRouteLeave } from "vue-router";
 
 import Navbar from "../../components/layout/Navbar.vue";
-import HeroSection from "../../components/home/Home.vue";
-
-
-import CategoriaList from "../../components/categoria/CategoriaList.vue";
-import CategoriaCarrossel from "../../components/categoria/CategoriaCarrossel.vue";
-
 import ProdutoList from "../../components/produto/ProdutoList.vue";
-import DescontoCarrossel from "../../components/home/DescontoCarrossel.vue";
 import CarrinhoSidebar from "../../components/layout/CarrinhoSidebar.vue";
 import Footer from "../../components/layout/Footer.vue";
-
 import api from "../../services/api.js";
 
 const router = useRouter();
@@ -138,7 +119,7 @@ const decodificarJWT = (token) => {
   }
 };
 
-const carregarUsuario = async () => {
+const carregarUsuario = () => {
   const token = localStorage.getItem("token_vestebem");
   if (!token) return;
 
@@ -149,22 +130,12 @@ const carregarUsuario = async () => {
 
   usuarioId.value = dadosToken.usuarioId || dadosToken.id || null;
 
+  if (dadosToken.sub) {
+    nomeUsuario.value = dadosToken.sub.split("@")[0];
+  }
+
   const permissao = dadosToken.role || "";
   isAdmin.value = permissao.toUpperCase() === "ADMIN";
-
-  // Buscar o nome real do banco de dados
-  if (usuarioId.value) {
-    try {
-      const resposta = await api.get(`/usuarios/${usuarioId.value}`);
-      const nomeCompleto = resposta.data.nome || "";
-      nomeUsuario.value = nomeCompleto.split(" ")[0]; // apenas o primeiro nome
-    } catch {
-      // Fallback para o email se a busca falhar
-      if (dadosToken.sub) {
-        nomeUsuario.value = dadosToken.sub.split("@")[0];
-      }
-    }
-  }
 };
 
 const carregarCarrinho = async () => {
@@ -181,15 +152,13 @@ const carregarCarrinho = async () => {
 
 const fazerLogout = () => {
   localStorage.removeItem("token_vestebem");
-
   estaLogado.value = false;
   isAdmin.value = false;
   nomeUsuario.value = "";
   usuarioId.value = null;
   itensCarrinho.value = [];
   subtotalCarrinho.value = 0;
-
-  router.go();
+  router.push("/");
 };
 
 const adicionarAoCarrinho = async (produtoId) => {
@@ -237,7 +206,6 @@ const adicionarItemSidebar = async (produtoId) => {
 };
 
 const categorias = ref([]);
-
 const carregarCategorias = async () => {
   try {
     const resposta = await api.get("/categorias");
@@ -246,8 +214,6 @@ const carregarCategorias = async () => {
     console.error("Erro:", error);
   }
 };
-
-
 
 const produtos = ref([]);
 const filtroNomeAtual = ref("");
@@ -264,6 +230,10 @@ const carregarProdutos = async () => {
         params.append("categoriasIds", id);
       });
     }
+    
+    // Forçar apenas produtos com desconto
+    params.append("apenasDescontos", "true");
+
     const queryStr = params.toString();
     const url = queryStr ? `/produtos?${queryStr}` : "/produtos";
     const response = await api.get(url);
@@ -281,89 +251,66 @@ const carregarProdutos = async () => {
       }
     }, 50);
   } catch (error) {
-    console.error("Erro ao carregar produtos:", error);
+    console.error("Erro ao carregar produtos em promoção:", error);
   }
 };
 
 const aplicarFiltros = ({ nome, categoriasIds }) => {
   filtroNomeAtual.value = nome;
   filtroCategoriasAtual.value = categoriasIds;
-  carregarProdutos();
-};
 
-const filtrarPorCarrosselCategoria = (categoriaId) => {
-  filtroCategoriasAtual.value = [categoriaId];
-  carregarProdutos();
-
-  const produtosSecao = document.querySelector(".produtos");
-  if (produtosSecao) {
-    produtosSecao.scrollIntoView({ behavior: "smooth" });
+  const query = {};
+  if (nome) query.nome = nome;
+  if (categoriasIds && categoriasIds.length > 0) {
+    query.categoria = categoriasIds[0];
   }
-};
-
-const verificarHashEScroll = () => {
-  const hash = window.location.hash;
-  if (hash === "#promocoes" || hash === "#contato" || hash === "#categorias-secao") {
-    if (hash === "#categorias-secao") {
-      const el = document.getElementById("categorias-secao");
-      if (el) {
-        el.scrollIntoView({ behavior: "smooth" });
-      }
-    } else if (hash === "#promocoes") {
-      const el = document.getElementById("promocoes-secao");
-      if (el) {
-        el.scrollIntoView({ behavior: "smooth" });
-      }
-    } else {
-      const el = document.getElementById("footer");
-      if (el) {
-        el.scrollIntoView({ behavior: "smooth" });
-        const targetEl = document.getElementById("contato-secao");
-        if (targetEl) {
-          targetEl.classList.add("highlight-pulse");
-          setTimeout(() => targetEl.classList.remove("highlight-pulse"), 2000);
-        }
-      }
-    }
-  }
+  
+  router.push({ path: route.path, query });
+  carregarProdutos();
 };
 
 onBeforeRouteLeave((to, from) => {
   sessionStorage.setItem("scroll_position_" + from.path, window.scrollY);
 });
 
+watch(
+  () => [route.query.categoria, route.query.nome],
+  ([newCat, newNome]) => {
+    if (newCat) {
+      const catId = Number(newCat);
+      filtroCategoriasAtual.value = !isNaN(catId) ? [catId] : [];
+    } else {
+      filtroCategoriasAtual.value = [];
+    }
+    filtroNomeAtual.value = newNome || "";
+    carregarProdutos();
+  }
+);
+
 onMounted(async () => {
-  await carregarUsuario();
+  carregarUsuario();
   if (usuarioId.value) {
     await carregarCarrinho();
   }
 
+  if (route.query.categoria) {
+    const catId = Number(route.query.categoria);
+    if (!isNaN(catId)) {
+      filtroCategoriasAtual.value = [catId];
+    }
+  }
+  if (route.query.nome) {
+    filtroNomeAtual.value = route.query.nome;
+  }
+
   await Promise.all([carregarCategorias(), carregarProdutos()]);
-  
-  setTimeout(verificarHashEScroll, 100);
 });
 </script>
 
 <style scoped>
-.home-wrapper {
+.descontos-view-wrapper {
   min-height: 100vh;
-  background-color: var(--bg-color);
-}
-
-.fade-in-up {
-  animation: fadeInUp 0.8s cubic-bezier(0.25, 1, 0.5, 1) forwards;
-}
-
-@keyframes fadeInUp {
-  from {
-    opacity: 0;
-    transform: translateY(24px);
-  }
-
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+  background-color: var(--bg-color, #ffffff);
 }
 
 .btn-carrinho-flutuante {
@@ -371,7 +318,7 @@ onMounted(async () => {
   right: 0;
   top: 50%;
   transform: translateY(-50%);
-  background: var(--primary-color);
+  background: var(--primary-color, #111);
   color: white;
   border: none;
   border-radius: 12px 0 0 12px;
@@ -422,18 +369,27 @@ onMounted(async () => {
 }
 
 .modal-content {
-  background: var(--bg-color);
+  background: var(--bg-color, #ffffff);
   width: 100%;
   max-width: 450px;
-  border-radius: var(--radius-lg);
+  border-radius: var(--radius-lg, 16px);
   padding: 2.5rem;
   box-shadow: 0 25px 50px rgba(0, 0, 0, 0.1);
   text-align: center;
 }
 
-@media (max-width: 992px) {
-  .home-wrapper {
-    overflow-x: hidden;
+.fade-in-up {
+  animation: fadeInUp 0.8s cubic-bezier(0.25, 1, 0.5, 1) forwards;
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(24px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
   }
 }
 </style>

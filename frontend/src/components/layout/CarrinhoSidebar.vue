@@ -74,9 +74,24 @@
             />
             <div class="flex-grow-1">
               <p class="fw-bold mb-0 small text-truncate" style="max-width: 130px">{{ item.produtoNome }}</p>
-              <p class="text-muted mb-1" style="font-size: 0.78rem">
-                R$ {{ item.precoUnitario.toFixed(2) }}
-              </p>
+              <div class="d-flex align-items-center gap-1 flex-wrap mb-1">
+                <template v-if="item.desconto > 0">
+                  <span class="text-decoration-line-through text-muted" style="font-size: 0.72rem">
+                    R$ {{ item.precoOriginal.toFixed(2) }}
+                  </span>
+                  <span class="fw-bold text-danger" style="font-size: 0.78rem">
+                    R$ {{ item.precoUnitario.toFixed(2) }}
+                  </span>
+                  <span class="badge bg-danger rounded-pill px-1.5 py-0.5" style="font-size: 0.6rem; padding: 2px 4px; line-height: 1;">
+                    -{{ item.desconto }}%
+                  </span>
+                </template>
+                <template v-else>
+                  <span class="text-muted" style="font-size: 0.78rem">
+                    R$ {{ item.precoUnitario.toFixed(2) }}
+                  </span>
+                </template>
+              </div>
               <div class="d-flex align-items-center gap-1">
                 <button
                   class="btn-qty-sm"

@@ -71,11 +71,11 @@
 
         <!-- Coluna da Direita: Informações do Produto -->
         <div class="col-lg-6 d-flex flex-column text-start">
-          <div class="mb-3">
+          <div class="mb-3 d-flex flex-wrap gap-2">
             <span
               v-for="cat in produto.categoriasNomes"
               :key="cat"
-              class="badge bg-dark me-2 px-3 py-2 fw-normal"
+              class="badge bg-dark px-3 py-2 fw-normal"
             >
               {{ cat }}
             </span>
@@ -117,8 +117,15 @@
           </div>
 
           <!-- Preço -->
-          <div class="mb-4">
-            <span class="preco-valor display-6 fw-bold">R$ {{ precoFormatado }}</span>
+          <div class="mb-4 d-flex align-items-center gap-3 flex-wrap">
+            <template v-if="produto.desconto > 0">
+              <span class="preco-antigo text-decoration-line-through text-muted fs-4">R$ {{ precoFormatado }}</span>
+              <span class="preco-valor display-6 fw-bold text-danger">R$ {{ precoPromocionalFormatado }}</span>
+              <span class="badge bg-danger rounded-pill px-3 py-2 fw-normal fs-6">-{{ produto.desconto }}%</span>
+            </template>
+            <template v-else>
+              <span class="preco-valor display-6 fw-bold">R$ {{ precoFormatado }}</span>
+            </template>
           </div>
 
           <!-- Descrição -->
@@ -298,6 +305,16 @@ const precoFormatado = computed(() => {
   if (!produto.value) return "0,00";
   return Number(produto.value.preco).toLocaleString("pt-BR", {
     minimumFractionDigits: 2,
+  });
+});
+
+const precoPromocionalFormatado = computed(() => {
+  if (!produto.value || !produto.value.desconto) return "";
+  const precoOriginal = Number(produto.value.preco);
+  const precoFinal = precoOriginal * (1 - produto.value.desconto / 100);
+  return precoFinal.toLocaleString("pt-BR", {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2
   });
 });
 
@@ -571,6 +588,14 @@ onBeforeRouteLeave((to, from) => {
 
 .preco-valor {
   color: var(--primary-color);
+}
+
+.preco-antigo {
+  color: var(--text-secondary, #86868b);
+}
+
+.text-danger {
+  color: #e53e3e !important;
 }
 
 .btn-qty {

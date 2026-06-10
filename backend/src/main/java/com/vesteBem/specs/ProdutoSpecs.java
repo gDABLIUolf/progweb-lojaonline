@@ -10,10 +10,12 @@ import com.vesteBem.model.Produto;
 
 import jakarta.persistence.criteria.Join;
 import jakarta.persistence.criteria.Predicate;
+import jakarta.persistence.criteria.Root;
+import jakarta.persistence.criteria.Subquery;
 
 public class ProdutoSpecs {
 
-    public static Specification<Produto> filtrarDinamico(String nome, List<Long> categoriasIds) {
+    public static Specification<Produto> filtrarDinamico(String nome, List<Long> categoriasIds, Boolean apenasDescontos, Boolean destaqueCarrossel) {
         return (root, query, criteriaBuilder) -> {
             List<Predicate> predicados = new ArrayList<>();
 
@@ -26,10 +28,24 @@ public class ProdutoSpecs {
 
             if (categoriasIds != null && !categoriasIds.isEmpty()) {
                 for (Long catId : categoriasIds) {
-                    Join<Produto, Categoria> joinCategorias = root.join("categorias");
-                    predicados.add(criteriaBuilder.equal(joinCategorias.get("id"), catId));
+                    Subquery<Long> subquery = query.subquery(Long.class);
+                    Root<Produto> subqueryRoot = subquery.from(Produto.class);
+                    Join<Produto, Categoria> subqueryJoin = subqueryRoot.join("categorias");
+                    subquery.select(subqueryRoot.get("id"))
+                            .where(criteriaBuilder.equal(subqueryJoin.get("id"), catId));
+                    predicados.add(root.get("id").in(subquery));
                 }
-                query.distinct(true);
+            }
+
+            if (apenasDescontos != null && apenasDescontos) {
+                predicados.add(criteriaBuilder.and(
+                        criteriaBuilder.isNotNull(root.get("desconto")),
+                        criteriaBuilder.greaterThan(root.get("desconto"), 0)
+                ));
+            }
+
+            if (destaqueCarrossel != null) {
+                predicados.add(criteriaBuilder.equal(root.get("destaqueCarrossel"), destaqueCarrossel));
             }
 
             return criteriaBuilder.and(predicados.toArray(new Predicate[0]));

@@ -3,7 +3,7 @@
     <div class="container px-4">
       <div class="d-flex flex-column align-items-center mb-5 gap-3">
         <div class="d-flex align-items-center justify-content-center gap-3 w-100 flex-wrap position-relative">
-          <h2 class="titulo-secao m-0">Nossos Produtos</h2>
+          <h2 class="titulo-secao m-0">{{ titulo }}</h2>
           <button
             @click="alternarBusca"
             class="btn btn-search-toggle"
@@ -134,6 +134,10 @@ const props = defineProps({
   isCatalogoPage: {
     type: Boolean,
     default: false,
+  },
+  titulo: {
+    type: String,
+    default: "Nossos Produtos",
   },
 });
 

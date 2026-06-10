@@ -15,7 +15,7 @@
         <div class="d-flex gap-3 flex-wrap">
           <button
             @click="$emit('nova-categoria')"
-            class="btn-premium d-flex align-items-center gap-2"
+            class="btn-admin-action d-flex align-items-center gap-2"
           >
             <i class="ph ph-tag fs-5"></i>
             Nova Categoria
@@ -23,7 +23,7 @@
 
           <button
             @click="$emit('novo-produto')"
-            class="btn-produto d-flex align-items-center gap-2"
+            class="btn-admin-action d-flex align-items-center gap-2"
           >
             <i class="ph ph-t-shirt fs-5"></i>
             Novo Produto
@@ -58,26 +58,20 @@ defineEmits(["nova-categoria", "novo-produto"]);
   color: var(--primary-color);
 }
 
-.btn-produto {
+.btn-admin-action {
   border: none;
-
   padding: 0.85rem 1.5rem;
-
   border-radius: var(--radius-md);
-
-  background-color: var(--text-secondary);
-
+  background-color: var(--primary-color);
   color: white;
-
   font-weight: 500;
-
   transition: all 0.3s ease;
 }
 
-.btn-produto:hover {
+.btn-admin-action:hover {
   transform: translateY(-2px);
-
-  opacity: 0.95;
+  background-color: #333333;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
 }
 
 .fade-in-up {

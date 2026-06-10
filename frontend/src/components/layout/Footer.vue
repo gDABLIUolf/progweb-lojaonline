@@ -6,12 +6,11 @@
         <div class="footer-brand">
           <h3 class="logo-footer">vesteBem.</h3>
           <p class="brand-desc">
-            O essencial, elevado. Roupas com cortes atemporais, tecidos sustentáveis e qualidade incomparável.
+            O essencial, elevated. Roupas com cortes atemporais, tecidos sustentáveis e qualidade incomparável.
           </p>
           <div class="social-links">
-            <a href="#" title="Instagram"><i class="ph ph-instagram-logo"></i></a>
-            <a href="#" title="Facebook"><i class="ph ph-facebook-logo"></i></a>
-            <a href="#" title="Pinterest"><i class="ph ph-pinterest-logo"></i></a>
+            <a :href="contato.linkInstagram" target="_blank" title="Instagram"><i class="ph ph-instagram-logo"></i></a>
+            <a :href="contato.linkFacebook" target="_blank" title="Facebook"><i class="ph ph-facebook-logo"></i></a>
           </div>
         </div>
 
@@ -21,19 +20,19 @@
           <ul class="contact-list">
             <li>
               <i class="ph ph-phone"></i>
-              <span>(11) 99999-8888</span>
+              <span>{{ contato.telefone }}</span>
             </li>
             <li>
               <i class="ph ph-envelope"></i>
-              <span>suporte@vestebem.com.br</span>
+              <span>{{ contato.email }}</span>
             </li>
             <li>
               <i class="ph ph-map-pin"></i>
-              <span>Av. Paulista, 1000 - São Paulo, SP</span>
+              <span>{{ contato.endereco }}</span>
             </li>
             <li>
               <i class="ph ph-clock"></i>
-              <span>Seg - Sex: 9h às 18h</span>
+              <span>{{ contato.horario }}</span>
             </li>
           </ul>
         </div>
@@ -65,9 +64,29 @@
 </template>
 
 <script setup>
-import { ref } from "vue";
+import { ref, onMounted } from "vue";
+import api from "../../services/api.js";
 
 const emailNewsletter = ref("");
+const contato = ref({
+  telefone: "(11) 99999-8888",
+  email: "suporte@vestebem.com.br",
+  endereco: "Av. Paulista, 1000 - São Paulo, SP",
+  horario: "Seg - Sex: 9h às 18h",
+  linkFacebook: "https://facebook.com",
+  linkInstagram: "https://instagram.com"
+});
+
+const carregarContato = async () => {
+  try {
+    const resposta = await api.get("/contato");
+    if (resposta.data) {
+      contato.value = resposta.data;
+    }
+  } catch (error) {
+    console.error("Erro ao carregar contatos no footer:", error);
+  }
+};
 
 const inscreverNewsletter = () => {
   if (emailNewsletter.value) {
@@ -75,6 +94,10 @@ const inscreverNewsletter = () => {
     emailNewsletter.value = "";
   }
 };
+
+onMounted(() => {
+  carregarContato();
+});
 </script>
 
 <style scoped>

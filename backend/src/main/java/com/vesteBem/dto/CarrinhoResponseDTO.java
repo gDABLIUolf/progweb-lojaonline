@@ -14,6 +14,8 @@ public record CarrinhoResponseDTO(
             Long produtoId,
             String produtoNome,
             Integer quantidade,
+            BigDecimal precoOriginal,
+            Integer desconto,
             BigDecimal precoUnitario,
             BigDecimal precoTotal
     ) {}

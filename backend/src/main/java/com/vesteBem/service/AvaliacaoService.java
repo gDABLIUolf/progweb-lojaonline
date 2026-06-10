@@ -42,4 +42,22 @@ public class AvaliacaoService {
     public List<Avaliacao> listarAvaliacoesPorProduto(Long produtoId) {
         return avaliacaoRepository.findByProdutoId(produtoId);
     }
+
+    public List<Avaliacao> listarTodas() {
+        return avaliacaoRepository.findAll();
+    }
+
+    public void deletar(Long id) {
+        Avaliacao avaliacao = avaliacaoRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Avaliação não encontrada com o ID: " + id));
+        avaliacaoRepository.delete(avaliacao);
+    }
+
+    public Avaliacao atualizar(Long id, AvaliacaoRequestDTO dto) {
+        Avaliacao avaliacao = avaliacaoRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Avaliação não encontrada com o ID: " + id));
+        avaliacao.setNota(dto.nota());
+        avaliacao.setComentario(dto.comentario());
+        return avaliacaoRepository.save(avaliacao);
+    }
 }

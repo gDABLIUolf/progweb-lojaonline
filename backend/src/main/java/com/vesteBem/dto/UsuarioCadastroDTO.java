@@ -19,5 +19,8 @@ public record UsuarioCadastroDTO(
         @Schema(description = "Senha de acesso (será criptografada no banco)", example = "SenhaForte123!")
         @NotBlank(message = "A senha é obrigatória")
         @Size(min = 6, message = "A senha deve ter no mínimo 6 caracteres")
-        String senha
+        String senha,
+
+        @Schema(description = "Papel do usuário (ADMIN ou CLIENTE)", example = "CLIENTE")
+        String role
 ) {}

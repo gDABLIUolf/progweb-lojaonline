@@ -2,40 +2,53 @@
   <div v-if="open" class="modal-overlay" @click="fechar">
     <div class="modal-content fade-in-up" @click.stop>
       <div class="d-flex justify-content-between align-items-center mb-4">
-        <h3 class="fw-bold mb-0">{{ categoriaParaEditar ? "Editar Categoria" : "Nova Categoria" }}</h3>
+        <h3 class="fw-bold mb-0">{{ usuarioParaEditar ? "Editar Usuário" : "Novo Usuário" }}</h3>
 
         <button @click="fechar" class="btn-close-modal">
           <i class="ph ph-x"></i>
         </button>
       </div>
 
-      <form @submit.prevent="salvarCategoria">
+      <form @submit.prevent="salvarUsuario">
         <div class="mb-3">
-          <label class="form-label text-muted small fw-bold">
-            NOME DA CATEGORIA
-          </label>
-
+          <label class="form-label text-muted small fw-bold">NOME COMPLETO</label>
           <input
             type="text"
-            v-model="novaCategoria.nome"
+            v-model="formDados.nome"
             class="form-control-premium"
-            placeholder="Ex: Moda Inverno"
             required
           />
         </div>
 
-        <div class="mb-4">
-          <label class="form-label text-muted small fw-bold">
-            IMAGEM DE DESTAQUE {{ categoriaParaEditar ? "(OPCIONAL)" : "" }}
-          </label>
-
+        <div class="mb-3">
+          <label class="form-label text-muted small fw-bold">E-MAIL</label>
           <input
-            type="file"
-            @change="capturarImagem"
+            type="email"
+            v-model="formDados.email"
             class="form-control-premium"
-            accept="image/png,image/jpeg,image/webp"
-            :required="!categoriaParaEditar"
+            required
           />
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label text-muted small fw-bold">
+            SENHA {{ usuarioParaEditar ? "(OPCIONAL)" : "" }}
+          </label>
+          <input
+            type="password"
+            v-model="formDados.senha"
+            class="form-control-premium"
+            :placeholder="usuarioParaEditar ? 'Mantenha em branco para não alterar' : 'Mínimo de 6 caracteres'"
+            :required="!usuarioParaEditar"
+          />
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label text-muted small fw-bold">PAPEL (ROLE)</label>
+          <select v-model="formDados.role" class="form-control-premium" required>
+            <option value="CLIENTE">Cliente</option>
+            <option value="ADMIN">Administrador</option>
+          </select>
         </div>
 
         <div v-if="erroModal" class="alert alert-danger py-2 mb-3">
@@ -43,7 +56,7 @@
         </div>
 
         <button type="submit" class="btn-premium w-100" :disabled="salvando">
-          {{ salvando ? "Salvando..." : (categoriaParaEditar ? "Salvar Alterações" : "Salvar Categoria") }}
+          {{ salvando ? "Salvando..." : (usuarioParaEditar ? "Salvar Alterações" : "Salvar Usuário") }}
         </button>
       </form>
     </div>
@@ -59,38 +72,34 @@ const props = defineProps({
     type: Boolean,
     default: false,
   },
-  categoriaParaEditar: {
+  usuarioParaEditar: {
     type: Object,
     default: null,
   }
 });
 
-const emit = defineEmits(["update:open", "categoria-salva"]);
+const emit = defineEmits(["update:open", "usuario-salvo"]);
 
-const novaCategoria = ref({
+const estadoInicial = () => ({
   nome: "",
+  email: "",
+  senha: "",
+  role: "CLIENTE",
 });
 
-const arquivoImagem = ref(null);
+const formDados = ref(estadoInicial());
 const erroModal = ref("");
 const salvando = ref(false);
 
 const fechar = () => {
   emit("update:open", false);
-  novaCategoria.value = {
-    nome: "",
-  };
-  arquivoImagem.value = null;
+  formDados.value = estadoInicial();
   erroModal.value = "";
 };
 
-const capturarImagem = (event) => {
-  arquivoImagem.value = event.target.files[0];
-};
-
-const salvarCategoria = async () => {
-  if (!props.categoriaParaEditar && !arquivoImagem.value) {
-    erroModal.value = "Selecione uma imagem.";
+const salvarUsuario = async () => {
+  if (!props.usuarioParaEditar && formDados.value.senha.length < 6) {
+    erroModal.value = "A senha deve ter pelo menos 6 caracteres.";
     return;
   }
 
@@ -98,36 +107,27 @@ const salvarCategoria = async () => {
   erroModal.value = "";
 
   try {
-    const formData = new FormData();
+    const payload = {
+      nome: formDados.value.nome,
+      email: formDados.value.email,
+      role: formDados.value.role,
+    };
 
-    const jsonBlob = new Blob(
-      [
-        JSON.stringify({
-          nome: novaCategoria.value.nome,
-        }),
-      ],
-      {
-        type: "application/json",
-      },
-    );
-
-    formData.append("dados", jsonBlob);
-
-    if (arquivoImagem.value) {
-      formData.append("imagem", arquivoImagem.value);
+    if (formDados.value.senha) {
+      payload.senha = formDados.value.senha;
     }
 
-    if (props.categoriaParaEditar) {
-      await api.put(`/categorias/${props.categoriaParaEditar.id}`, formData);
+    if (props.usuarioParaEditar) {
+      await api.put(`/usuarios/${props.usuarioParaEditar.id}`, payload);
     } else {
-      await api.post("/categorias", formData);
+      await api.post("/usuarios", payload);
     }
 
-    emit("categoria-salva");
+    emit("usuario-salvo");
     fechar();
   } catch (error) {
     console.error(error);
-    erroModal.value = "Erro ao salvar categoria.";
+    erroModal.value = error.response?.data || "Erro ao salvar usuário.";
   } finally {
     salvando.value = false;
   }
@@ -137,10 +137,18 @@ watch(
   () => props.open,
   (aberto) => {
     document.body.style.overflow = aberto ? "hidden" : "";
-    if (aberto && props.categoriaParaEditar) {
-      novaCategoria.value.nome = props.categoriaParaEditar.nome;
-    } else if (aberto) {
-      novaCategoria.value.nome = "";
+    if (aberto) {
+      if (props.usuarioParaEditar) {
+        formDados.value = {
+          nome: props.usuarioParaEditar.nome,
+          email: props.usuarioParaEditar.email,
+          senha: "",
+          role: props.usuarioParaEditar.role || "CLIENTE",
+        };
+      } else {
+        formDados.value = estadoInicial();
+      }
+      erroModal.value = "";
     }
   },
 );
@@ -159,8 +167,8 @@ onUnmounted(() => {
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 10500;
   padding: 1rem;
+  z-index: 10500;
 }
 
 .modal-content {

@@ -78,9 +78,24 @@
 
               <div class="flex-grow-1">
                 <h6 class="fw-bold mb-1">{{ item.produtoNome }}</h6>
-                <p class="text-muted small mb-0">
-                  R$ {{ item.precoUnitario.toFixed(2) }} cada
-                </p>
+                <div class="d-flex align-items-center gap-2 flex-wrap">
+                  <template v-if="item.desconto > 0">
+                    <span class="text-decoration-line-through text-muted small">
+                      R$ {{ item.precoOriginal.toFixed(2) }}
+                    </span>
+                    <span class="fw-bold text-danger small">
+                      R$ {{ item.precoUnitario.toFixed(2) }} cada
+                    </span>
+                    <span class="badge bg-danger rounded-pill px-2 py-0.5" style="font-size: 0.7rem; line-height: 1;">
+                      -{{ item.desconto }}%
+                    </span>
+                  </template>
+                  <template v-else>
+                    <span class="text-muted small">
+                      R$ {{ item.precoUnitario.toFixed(2) }} cada
+                    </span>
+                  </template>
+                </div>
               </div>
 
               <div class="d-flex align-items-center gap-2">

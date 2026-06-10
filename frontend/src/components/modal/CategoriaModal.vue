@@ -2,7 +2,7 @@
   <div v-if="open" class="modal-overlay" @click="fechar">
     <div class="modal-content fade-in-up" @click.stop>
       <div class="d-flex justify-content-between align-items-center mb-4">
-        <h3 class="fw-bold mb-0">Nova Categoria</h3>
+        <h3 class="fw-bold mb-0">{{ categoriaParaEditar ? "Editar Categoria" : "Nova Categoria" }}</h3>
 
         <button @click="fechar" class="btn-close-modal">
           <i class="ph ph-x"></i>
@@ -26,7 +26,7 @@
 
         <div class="mb-4">
           <label class="form-label text-muted small fw-bold">
-            IMAGEM DE DESTAQUE
+            IMAGEM DE DESTAQUE {{ categoriaParaEditar ? "(OPCIONAL)" : "" }}
           </label>
 
           <input
@@ -34,7 +34,7 @@
             @change="capturarImagem"
             class="form-control-premium"
             accept="image/png,image/jpeg,image/webp"
-            required
+            :required="!categoriaParaEditar"
           />
         </div>
 
@@ -43,7 +43,7 @@
         </div>
 
         <button type="submit" class="btn-premium w-100" :disabled="salvando">
-          {{ salvando ? "Salvando..." : "Salvar Categoria" }}
+          {{ salvando ? "Salvando..." : (categoriaParaEditar ? "Salvar Alterações" : "Salvar Categoria") }}
         </button>
       </form>
     </div>
@@ -52,7 +52,6 @@
 
 <script setup>
 import { ref, watch, onUnmounted } from "vue";
-
 import api from "../../services/api";
 
 const props = defineProps({
@@ -60,6 +59,10 @@ const props = defineProps({
     type: Boolean,
     default: false,
   },
+  categoriaParaEditar: {
+    type: Object,
+    default: null,
+  }
 });
 
 const emit = defineEmits(["update:open", "categoria-salva"]);
@@ -69,17 +72,14 @@ const novaCategoria = ref({
 });
 
 const arquivoImagem = ref(null);
-
 const erroModal = ref("");
 const salvando = ref(false);
 
 const fechar = () => {
   emit("update:open", false);
-
   novaCategoria.value = {
     nome: "",
   };
-
   arquivoImagem.value = null;
   erroModal.value = "";
 };
@@ -89,7 +89,7 @@ const capturarImagem = (event) => {
 };
 
 const salvarCategoria = async () => {
-  if (!arquivoImagem.value) {
+  if (!props.categoriaParaEditar && !arquivoImagem.value) {
     erroModal.value = "Selecione uma imagem.";
     return;
   }
@@ -113,16 +113,20 @@ const salvarCategoria = async () => {
 
     formData.append("dados", jsonBlob);
 
-    formData.append("imagem", arquivoImagem.value);
+    if (arquivoImagem.value) {
+      formData.append("imagem", arquivoImagem.value);
+    }
 
-    await api.post("/categorias", formData);
+    if (props.categoriaParaEditar) {
+      await api.put(`/categorias/${props.categoriaParaEditar.id}`, formData);
+    } else {
+      await api.post("/categorias", formData);
+    }
 
     emit("categoria-salva");
-
     fechar();
   } catch (error) {
     console.error(error);
-
     erroModal.value = "Erro ao salvar categoria.";
   } finally {
     salvando.value = false;
@@ -133,6 +137,11 @@ watch(
   () => props.open,
   (aberto) => {
     document.body.style.overflow = aberto ? "hidden" : "";
+    if (aberto && props.categoriaParaEditar) {
+      novaCategoria.value.nome = props.categoriaParaEditar.nome;
+    } else if (aberto) {
+      novaCategoria.value.nome = "";
+    }
   },
 );
 
@@ -144,65 +153,45 @@ onUnmounted(() => {
 <style scoped>
 .modal-overlay {
   position: fixed;
-
   inset: 0;
-
   background: rgba(0, 0, 0, 0.45);
-
   backdrop-filter: blur(4px);
-
   display: flex;
   align-items: center;
   justify-content: center;
-
-  z-index: 1000;
-
+  z-index: 10500;
   padding: 1rem;
 }
 
 .modal-content {
   width: 100%;
   max-width: 450px;
-
   background: var(--bg-color);
-
   border-radius: var(--radius-lg);
-
   padding: 2rem;
-
   box-shadow: 0 25px 50px rgba(0, 0, 0, 0.12);
 }
 
 .btn-close-modal {
   border: none;
   background: transparent;
-
   font-size: 1.5rem;
-
   cursor: pointer;
 }
 
 .form-control-premium {
   width: 100%;
-
   padding: 1rem 1.2rem;
-
   border-radius: var(--radius-md);
-
   border: 1px solid #e2e8f0;
-
   background: #f8fafc;
-
   transition: 0.3s;
 }
 
 .form-control-premium:focus {
   outline: none;
-
   border-color: var(--primary-color);
-
   background: white;
-
   box-shadow: 0 0 0 4px rgba(15, 23, 42, 0.05);
 }
 
@@ -215,7 +204,6 @@ onUnmounted(() => {
     opacity: 0;
     transform: translateY(20px);
   }
-
   to {
     opacity: 1;
     transform: translateY(0);

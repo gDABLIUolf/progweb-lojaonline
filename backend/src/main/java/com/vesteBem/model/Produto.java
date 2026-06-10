@@ -26,6 +26,18 @@ public class Produto {
     @Column(nullable = false)
     private Integer quantidadeEstoque;
 
+    @Column(nullable = false, columnDefinition = "integer default 0")
+    private Integer desconto = 0;
+
+    @Column(nullable = false)
+    private Boolean destaqueCarrossel = false;
+
+    @Lob
+    @Column(name = "imagem_carrossel")
+    private byte[] imagemCarrossel;
+
+    private String tipoImagemCarrossel;
+
     @OneToMany(mappedBy = "produto", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<ProdutoImagem> imagens = new ArrayList<>();
 
@@ -76,4 +88,16 @@ public class Produto {
 
     public List<Avaliacao> getAvaliacoes() { return avaliacoes; }
     public void setAvaliacoes(List<Avaliacao> avaliacoes) { this.avaliacoes = avaliacoes; }
+
+    public Integer getDesconto() { return desconto; }
+    public void setDesconto(Integer desconto) { this.desconto = desconto; }
+
+    public Boolean getDestaqueCarrossel() { return destaqueCarrossel; }
+    public void setDestaqueCarrossel(Boolean destaqueCarrossel) { this.destaqueCarrossel = destaqueCarrossel; }
+
+    public byte[] getImagemCarrossel() { return imagemCarrossel; }
+    public void setImagemCarrossel(byte[] imagemCarrossel) { this.imagemCarrossel = imagemCarrossel; }
+
+    public String getTipoImagemCarrossel() { return tipoImagemCarrossel; }
+    public void setTipoImagemCarrossel(String tipoImagemCarrossel) { this.tipoImagemCarrossel = tipoImagemCarrossel; }
 }

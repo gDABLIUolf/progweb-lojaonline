@@ -5,10 +5,12 @@ import java.time.LocalDateTime;
 
 public record AvaliacaoResponseDTO(
         Long id,
-        Double nota, // Trocado para Double
+        Double nota,
         String comentario,
         LocalDateTime dataAvaliacao,
-        String nomeUsuario
+        String nomeUsuario,
+        Long produtoId,
+        String produtoNome
 ) {
     public AvaliacaoResponseDTO(Avaliacao avaliacao) {
         this(
@@ -16,7 +18,9 @@ public record AvaliacaoResponseDTO(
                 avaliacao.getNota(),
                 avaliacao.getComentario(),
                 avaliacao.getDataAvaliacao(),
-                avaliacao.getUsuario().getEmail().split("@")[0] 
+                avaliacao.getUsuario().getNome().split(" ")[0], // Use first name if available, fallback email prefix was split
+                avaliacao.getProduto().getId(),
+                avaliacao.getProduto().getNome()
         );
     }
 }

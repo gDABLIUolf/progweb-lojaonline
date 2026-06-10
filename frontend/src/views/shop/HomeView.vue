@@ -10,29 +10,23 @@
 
     <HeroSection />
 
-    <AdminPanel
-      v-if="isAdmin"
-      @nova-categoria="modalCategoriaAberta = true"
-      @novo-produto="modalProdutoAberta = true"
-    />
-
-    <CategoriaModal
-      v-model:open="modalCategoriaAberta"
-      @categoria-salva="carregarCategorias"
-    />
-
-    <ProdutoModal
-      v-model:open="modalProdutoAberta"
-      :categorias="categorias"
-      @produto-salvo="carregarCategorias"
-    />
-
-    <CategoriaCarrossel :categorias="categorias" />
+    <div id="categorias-secao">
+      <CategoriaCarrossel
+        :categorias="categorias"
+        @selecionar-categoria="filtrarPorCarrosselCategoria"
+      />
+    </div>
 
     <ProdutoList
       :produtos="produtos"
+      :categorias="categorias"
+      :filtro-categorias-inicial="filtroCategoriasAtual"
+      :filtro-nome-inicial="filtroNomeAtual"
       @adicionar-carrinho="adicionarAoCarrinho"
+      @filtrar="aplicarFiltros"
     />
+
+    <DescontoCarrossel />
 
     <!-- Botão flutuante para abrir o carrinho -->
     <button
@@ -51,9 +45,11 @@
       :is-open="sidebarAberta"
       :itens="itensCarrinho"
       :subtotal="subtotalCarrinho"
+      :usuario-id="usuarioId"
       @close="sidebarAberta = false"
       @adicionar-item="adicionarItemSidebar"
       @remover-item="removerItemSidebar"
+      @carrinho-atualizado="carregarCarrinho"
     />
 
     <!-- Modal de login necessário -->
@@ -85,29 +81,32 @@
         </button>
       </div>
     </div>
+
+    <!-- Rodapé Premium -->
+    <Footer />
   </div>
 </template>
 
 <script setup>
 import { ref, onMounted, computed } from "vue";
-import { useRouter } from "vue-router";
+import { useRouter, useRoute, onBeforeRouteLeave } from "vue-router";
 
 import Navbar from "../../components/layout/Navbar.vue";
-import HeroSection from "../../components/home/home.vue";
+import HeroSection from "../../components/home/Home.vue";
 
-import AdminPanel from "../../components/admin/AdminPanel.vue";
-import CategoriaModal from "../../components/modal/CategoriaModal.vue";
-import ProdutoModal from "../../components/modal/ProductModal.vue";
 
 import CategoriaList from "../../components/categoria/CategoriaList.vue";
 import CategoriaCarrossel from "../../components/categoria/CategoriaCarrossel.vue";
 
 import ProdutoList from "../../components/produto/ProdutoList.vue";
+import DescontoCarrossel from "../../components/home/DescontoCarrossel.vue";
 import CarrinhoSidebar from "../../components/layout/CarrinhoSidebar.vue";
+import Footer from "../../components/layout/Footer.vue";
 
 import api from "../../services/api.js";
 
 const router = useRouter();
+const route = useRoute();
 const estaLogado = ref(false);
 const isAdmin = ref(false);
 const nomeUsuario = ref("");
@@ -139,7 +138,7 @@ const decodificarJWT = (token) => {
   }
 };
 
-const carregarUsuario = () => {
+const carregarUsuario = async () => {
   const token = localStorage.getItem("token_vestebem");
   if (!token) return;
 
@@ -150,16 +149,21 @@ const carregarUsuario = () => {
 
   usuarioId.value = dadosToken.usuarioId || dadosToken.id || null;
 
-  if (dadosToken.sub) {
-    nomeUsuario.value = dadosToken.sub.split("@")[0];
-  }
-
   const permissao = dadosToken.role || "";
+  isAdmin.value = permissao.toUpperCase() === "ADMIN";
 
-  if (permissao.toUpperCase() === "ADMIN") {
-    isAdmin.value = true;
-  } else {
-    isAdmin.value = false;
+  // Buscar o nome real do banco de dados
+  if (usuarioId.value) {
+    try {
+      const resposta = await api.get(`/usuarios/${usuarioId.value}`);
+      const nomeCompleto = resposta.data.nome || "";
+      nomeUsuario.value = nomeCompleto.split(" ")[0]; // apenas o primeiro nome
+    } catch {
+      // Fallback para o email se a busca falhar
+      if (dadosToken.sub) {
+        nomeUsuario.value = dadosToken.sub.split("@")[0];
+      }
+    }
   }
 };
 
@@ -243,27 +247,100 @@ const carregarCategorias = async () => {
   }
 };
 
-const modalCategoriaAberta = ref(false);
-const modalProdutoAberta = ref(false);
+
 
 const produtos = ref([]);
+const filtroNomeAtual = ref("");
+const filtroCategoriasAtual = ref([]);
 
 const carregarProdutos = async () => {
   try {
-    const response = await api.get("/produtos");
+    const params = new URLSearchParams();
+    if (filtroNomeAtual.value) {
+      params.append("nome", filtroNomeAtual.value);
+    }
+    if (filtroCategoriasAtual.value && filtroCategoriasAtual.value.length > 0) {
+      filtroCategoriasAtual.value.forEach(id => {
+        params.append("categoriasIds", id);
+      });
+    }
+    const queryStr = params.toString();
+    const url = queryStr ? `/produtos?${queryStr}` : "/produtos";
+    const response = await api.get(url);
     produtos.value = response.data;
+
+    // Restaura a posição de scroll salva se estiver retornando de um produto
+    setTimeout(() => {
+      const isReturning = sessionStorage.getItem("is_returning");
+      if (isReturning === "true") {
+        const scrollPos = sessionStorage.getItem("scroll_position_" + route.path);
+        if (scrollPos) {
+          window.scrollTo(0, parseInt(scrollPos));
+        }
+        sessionStorage.removeItem("is_returning");
+      }
+    }, 50);
   } catch (error) {
     console.error("Erro ao carregar produtos:", error);
   }
 };
 
+const aplicarFiltros = ({ nome, categoriasIds }) => {
+  filtroNomeAtual.value = nome;
+  filtroCategoriasAtual.value = categoriasIds;
+  carregarProdutos();
+};
+
+const filtrarPorCarrosselCategoria = (categoriaId) => {
+  filtroCategoriasAtual.value = [categoriaId];
+  carregarProdutos();
+
+  const produtosSecao = document.querySelector(".produtos");
+  if (produtosSecao) {
+    produtosSecao.scrollIntoView({ behavior: "smooth" });
+  }
+};
+
+const verificarHashEScroll = () => {
+  const hash = window.location.hash;
+  if (hash === "#promocoes" || hash === "#contato" || hash === "#categorias-secao") {
+    if (hash === "#categorias-secao") {
+      const el = document.getElementById("categorias-secao");
+      if (el) {
+        el.scrollIntoView({ behavior: "smooth" });
+      }
+    } else if (hash === "#promocoes") {
+      const el = document.getElementById("promocoes-secao");
+      if (el) {
+        el.scrollIntoView({ behavior: "smooth" });
+      }
+    } else {
+      const el = document.getElementById("footer");
+      if (el) {
+        el.scrollIntoView({ behavior: "smooth" });
+        const targetEl = document.getElementById("contato-secao");
+        if (targetEl) {
+          targetEl.classList.add("highlight-pulse");
+          setTimeout(() => targetEl.classList.remove("highlight-pulse"), 2000);
+        }
+      }
+    }
+  }
+};
+
+onBeforeRouteLeave((to, from) => {
+  sessionStorage.setItem("scroll_position_" + from.path, window.scrollY);
+});
+
 onMounted(async () => {
-  carregarUsuario();
+  await carregarUsuario();
   if (usuarioId.value) {
     await carregarCarrinho();
   }
 
   await Promise.all([carregarCategorias(), carregarProdutos()]);
+  
+  setTimeout(verificarHashEScroll, 100);
 });
 </script>
 

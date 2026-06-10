@@ -10,7 +10,9 @@
             e tecidos sustentáveis. Um toque suave e um caimento impecável.
           </p>
 
-          <button class="btn-premium mt-3">Comprar Coleção</button>
+          <RouterLink to="/produtos" class="btn-premium mt-3 text-decoration-none d-inline-block text-center">
+            Comprar Coleção
+          </RouterLink>
         </div>
 
         <div class="hero-img-wrap fade-in-up" style="transition-delay: 0.2s">
@@ -80,12 +82,6 @@ import heroImage from "../../assets/img/hero_minimal_fashion_1780402716026.png";
   width: 100%;
   height: 100%;
   object-fit: cover;
-
-  transition: transform 0.6s ease;
-}
-
-.hero-img:hover {
-  transform: scale(1.03);
 }
 
 .fade-in-up {

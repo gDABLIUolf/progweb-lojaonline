@@ -8,6 +8,8 @@ public record ProdutoRequestDTO(
         String descricao,
         BigDecimal preco,
         Integer quantidadeEstoque,
-        List<Long> categoriasIds // Alterado de Long para List<Long>
+        List<Long> categoriasIds, // Alterado de Long para List<Long>
+        Integer desconto,
+        Boolean destaqueCarrossel
 ) {
 }

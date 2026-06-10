@@ -42,13 +42,15 @@ public class ProdutoController {
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<ProdutoResponseDTO> criar(
             @RequestPart("dados") @Valid ProdutoRequestDTO dto,
-            @RequestPart(value = "imagens", required = false) List<MultipartFile> imagens) throws IOException {
+            @RequestPart(value = "imagens", required = false) List<MultipartFile> imagens,
+            @RequestPart(value = "imagemCarrossel", required = false) MultipartFile imagemCarrossel) throws IOException {
 
-        ProdutoResponseDTO salvo = produtoService.cadastrar(dto, imagens);
+        ProdutoResponseDTO salvo = produtoService.cadastrar(dto, imagens, imagemCarrossel);
         return ResponseEntity.status(HttpStatus.CREATED).body(salvo);
     }
 
     @GetMapping("/{id}/imagem")
+    @org.springframework.transaction.annotation.Transactional(readOnly = true)
     public ResponseEntity<byte[]> buscarImagem(@PathVariable Long id) {
         return produtoRepository.findById(id)
                 .filter(p -> p.getImagens() != null && !p.getImagens().isEmpty())
@@ -59,6 +61,17 @@ public class ProdutoController {
                             .header(HttpHeaders.CONTENT_TYPE, imagem.getTipo())
                             .body(imagem.getDados());
                 })
+                .orElse(ResponseEntity.status(HttpStatus.NOT_FOUND).build());
+    }
+
+    @GetMapping("/{id}/imagem-carrossel")
+    @org.springframework.transaction.annotation.Transactional(readOnly = true)
+    public ResponseEntity<byte[]> buscarImagemCarrossel(@PathVariable Long id) {
+        return produtoRepository.findById(id)
+                .filter(p -> p.getImagemCarrossel() != null)
+                .map(p -> ResponseEntity.ok()
+                        .header(HttpHeaders.CONTENT_TYPE, p.getTipoImagemCarrossel() != null ? p.getTipoImagemCarrossel() : "image/png")
+                        .body(p.getImagemCarrossel()))
                 .orElse(ResponseEntity.status(HttpStatus.NOT_FOUND).build());
     }
     @GetMapping("/{id}/galeria")
@@ -73,6 +86,7 @@ public class ProdutoController {
     }
 
     @GetMapping("/imagem/{imagemId}")
+    @org.springframework.transaction.annotation.Transactional(readOnly = true)
     public ResponseEntity<byte[]> buscarImagemPorId(@PathVariable Long imagemId) {
         ProdutoImagem imagem = produtoImagemRepository.findById(imagemId)
                 .orElseThrow(() -> new RuntimeException("Imagem não encontrada"));
@@ -90,8 +104,24 @@ public class ProdutoController {
 
     @GetMapping
     @Operation(summary = "Listar produtos (Vitrine)")
-    public ResponseEntity<List<ProdutoResponseDTO>> listarVitrine() {
-        return ResponseEntity.ok(produtoService.listarTodos());
+    public ResponseEntity<List<ProdutoResponseDTO>> listarVitrine(
+            @RequestParam(required = false) String nome,
+            @RequestParam(required = false) List<Long> categoriasIds,
+            @RequestParam(required = false) Boolean apenasDescontos,
+            @RequestParam(required = false) Boolean destaqueCarrossel) {
+        return ResponseEntity.ok(produtoService.listarTodos(nome, categoriasIds, apenasDescontos, destaqueCarrossel));
+    }
+
+    @PutMapping(value = "/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @Operation(summary = "Atualizar um produto existente")
+    public ResponseEntity<ProdutoResponseDTO> atualizar(
+            @PathVariable Long id,
+            @RequestPart("dados") @Valid ProdutoRequestDTO dto,
+            @RequestPart(value = "imagens", required = false) List<MultipartFile> imagens,
+            @RequestPart(value = "imagemCarrossel", required = false) MultipartFile imagemCarrossel) throws IOException {
+
+        ProdutoResponseDTO atualizado = produtoService.atualizar(id, dto, imagens, imagemCarrossel);
+        return ResponseEntity.ok(atualizado);
     }
 
     @DeleteMapping("/{id}")

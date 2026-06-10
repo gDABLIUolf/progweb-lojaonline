@@ -1,7 +1,7 @@
 <template>
   <div class="login-container">
     <div class="login-card fade-in">
-      <div class="brand-logo">VesteBem.</div>
+      <RouterLink to="/" class="brand-logo text-decoration-none d-block">VesteBem.</RouterLink>
       <p class="auth-subtitle">Crie sua conta para começar.</p>
 
       <div v-if="erro" class="alert alert-danger py-2 mb-3" style="font-size: 0.9rem; border-radius: var(--radius-sm)">
@@ -89,9 +89,9 @@ const fazerCadastro = async () => {
     
     sucesso.value = true;
     
-    // Redireciona para o login após 2 segundos
+    // Redireciona para o login após 2 segundos e limpa estados anteriores
     setTimeout(() => {
-      router.push("/login");
+      window.location.href = "/login";
     }, 2000);
     
   } catch (error) {
@@ -138,6 +138,11 @@ onMounted(() => {
   color: var(--text-primary);
   text-align: center;
   margin-bottom: 0.5rem;
+  transition: opacity 0.2s ease;
+}
+
+.brand-logo:hover {
+  opacity: 0.8;
 }
 
 .auth-subtitle {

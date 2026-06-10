@@ -16,7 +16,10 @@ public record ProdutoResponseDTO(
         List<String> categoriasNomes,
         List<Long> imagensIds, // NOVO: IDs para buscar as fotos individualmente
         Double mediaAvaliacoes,
-        List<AvaliacaoResponseDTO> avaliacoes
+        List<AvaliacaoResponseDTO> avaliacoes,
+        Integer desconto,
+        Boolean destaqueCarrossel,
+        Boolean temImagemCarrossel
 ) {
     public ProdutoResponseDTO(Produto produto) {
         this(
@@ -40,7 +43,16 @@ public record ProdutoResponseDTO(
 
                 // Avaliações
                 produto.getAvaliacoes() != null ?
-                        produto.getAvaliacoes().stream().map(AvaliacaoResponseDTO::new).toList() : List.of()
+                        produto.getAvaliacoes().stream().map(AvaliacaoResponseDTO::new).toList() : List.of(),
+
+                // Mapeamento de Desconto
+                produto.getDesconto() != null ? produto.getDesconto() : 0,
+
+                // Mapeamento de Destaque Carrossel
+                produto.getDestaqueCarrossel() != null ? produto.getDestaqueCarrossel() : false,
+
+                // Mapeamento de existência da Imagem do Carrossel
+                produto.getImagemCarrossel() != null
         );
     }
 }

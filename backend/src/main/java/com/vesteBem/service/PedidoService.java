@@ -16,6 +16,8 @@ import com.vesteBem.repository.UsuarioRepository;
 import com.vesteBem.repository.CarrinhoRepository;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.stereotype.Service;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.List;
 
 @Service
@@ -56,11 +58,19 @@ public class PedidoService {
             produto.setQuantidadeEstoque(produto.getQuantidadeEstoque() - itemDTO.quantidade());
             produtoRepository.save(produto);
 
+            BigDecimal precoOriginal = produto.getPreco();
+            Integer desconto = produto.getDesconto();
+            BigDecimal precoUnitario = precoOriginal;
+            if (desconto != null && desconto > 0) {
+                precoUnitario = precoOriginal.multiply(BigDecimal.valueOf(100 - desconto))
+                        .divide(BigDecimal.valueOf(100), 2, java.math.RoundingMode.HALF_UP);
+            }
+
             ItemPedido itemPedido = new ItemPedido(
                     pedido,
                     produto,
                     itemDTO.quantidade(),
-                    produto.getPreco()
+                    precoUnitario
             );
             itemPedidoRepository.save(itemPedido);
         }
@@ -117,11 +127,19 @@ public class PedidoService {
             produto.setQuantidadeEstoque(produto.getQuantidadeEstoque() - itemCarrinho.getQuantidade());
             produtoRepository.save(produto);
 
+            BigDecimal precoOriginal = produto.getPreco();
+            Integer desconto = produto.getDesconto();
+            BigDecimal precoUnitario = precoOriginal;
+            if (desconto != null && desconto > 0) {
+                precoUnitario = precoOriginal.multiply(BigDecimal.valueOf(100 - desconto))
+                        .divide(BigDecimal.valueOf(100), 2, java.math.RoundingMode.HALF_UP);
+            }
+
             ItemPedido itemPedido = new ItemPedido(
                     pedido,
                     produto,
                     itemCarrinho.getQuantidade(),
-                    produto.getPreco()
+                    precoUnitario
             );
             itemPedidoRepository.save(itemPedido);
         }

@@ -77,6 +77,22 @@ public class CarrinhoService {
         return converterParaDTO(carrinho);
     }
 
+    @Transactional
+    public CarrinhoResponseDTO removerItemCompleto(Long usuarioId, Long produtoId) {
+        Carrinho carrinho = carrinhoRepository.findByUsuarioId(usuarioId)
+                .orElseThrow(() -> new IllegalArgumentException("Carrinho não encontrado para este usuário."));
+
+        ItemCarrinho item = carrinho.getItens().stream()
+                .filter(i -> i.getProduto().getId().equals(produtoId))
+                .findFirst()
+                .orElseThrow(() -> new IllegalArgumentException("Produto não está no carrinho."));
+
+        carrinho.getItens().remove(item);
+        carrinhoRepository.save(carrinho);
+        return converterParaDTO(carrinho);
+    }
+
+    @org.springframework.transaction.annotation.Transactional(readOnly = true)
     public CarrinhoResponseDTO listarCarrinho(Long usuarioId) {
         Carrinho carrinho = carrinhoRepository.findByUsuarioId(usuarioId)
                 .orElseThrow(() -> new IllegalArgumentException("Carrinho não encontrado para este usuário."));
@@ -87,13 +103,22 @@ public class CarrinhoService {
         BigDecimal subtotal = BigDecimal.ZERO;
 
         List<ItemResponseDTO> itensDTO = carrinho.getItens().stream().map(item -> {
-            BigDecimal precoTotalItem = item.getProduto().getPreco().multiply(BigDecimal.valueOf(item.getQuantidade()));
+            BigDecimal precoOriginal = item.getProduto().getPreco();
+            Integer desconto = item.getProduto().getDesconto();
+            BigDecimal precoUnitario = precoOriginal;
+            if (desconto != null && desconto > 0) {
+                precoUnitario = precoOriginal.multiply(BigDecimal.valueOf(100 - desconto))
+                        .divide(BigDecimal.valueOf(100), 2, java.math.RoundingMode.HALF_UP);
+            }
+            BigDecimal precoTotalItem = precoUnitario.multiply(BigDecimal.valueOf(item.getQuantidade()));
             return new ItemResponseDTO(
                     item.getId(),
                     item.getProduto().getId(),
                     item.getProduto().getNome(),
                     item.getQuantidade(),
-                    item.getProduto().getPreco(),
+                    precoOriginal,
+                    desconto != null ? desconto : 0,
+                    precoUnitario,
                     precoTotalItem
             );
         }).collect(Collectors.toList());

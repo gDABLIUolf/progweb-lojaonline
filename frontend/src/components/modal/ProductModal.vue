@@ -2,7 +2,7 @@
   <div v-if="open" class="modal-overlay" @click="fechar">
     <div class="modal-content fade-in-up" @click.stop>
       <div class="d-flex justify-content-between align-items-center mb-4">
-        <h3 class="fw-bold mb-0">Novo Produto</h3>
+        <h3 class="fw-bold mb-0">{{ produtoParaEditar ? "Editar Produto" : "Novo Produto" }}</h3>
 
         <button @click="fechar" class="btn-close-modal">
           <i class="ph ph-x"></i>
@@ -61,6 +61,33 @@
           </div>
         </div>
 
+        <!-- Desconto e Destaque Carrossel -->
+        <div class="row mb-3 align-items-center">
+          <div class="col-6">
+            <label class="form-label text-muted small fw-bold"> DESCONTO (%) </label>
+            <input
+              type="number"
+              min="0"
+              max="100"
+              v-model="novoProduto.desconto"
+              class="form-control-premium"
+            />
+          </div>
+          <div class="col-6 d-flex align-items-center">
+            <div class="form-check mt-3">
+              <input
+                class="form-check-input"
+                type="checkbox"
+                id="destaqueCarrossel"
+                v-model="novoProduto.destaqueCarrossel"
+              />
+              <label class="form-check-label fw-bold small text-muted ms-1" for="destaqueCarrossel">
+                DESTAQUE CARROSSEL
+              </label>
+            </div>
+          </div>
+        </div>
+
         <div class="mb-3">
           <label class="form-label text-muted small fw-bold">
             CATEGORIAS
@@ -91,9 +118,9 @@
           </small>
         </div>
 
-        <div class="mb-4">
+        <div class="mb-3">
           <label class="form-label text-muted small fw-bold">
-            IMAGEM DO PRODUTO
+            IMAGENS DO PRODUTO (1:1)
           </label>
 
           <input
@@ -102,6 +129,20 @@
             accept="image/*"
             multiple
             @change="capturarImagens"
+          />
+        </div>
+
+        <!-- Imagem do Carrossel Promocional -->
+        <div class="mb-4" v-if="novoProduto.destaqueCarrossel">
+          <label class="form-label text-muted small fw-bold">
+            IMAGEM DE BANNER CARROSSEL (16:9)
+          </label>
+
+          <input
+            type="file"
+            class="form-control-premium"
+            accept="image/*"
+            @change="capturarImagemCarrossel"
           />
         </div>
 
@@ -114,7 +155,7 @@
           class="btn-premium w-100"
           :disabled="salvando || novoProduto.categoriasIds.length === 0"
         >
-          {{ salvando ? "Salvando..." : "Salvar Produto" }}
+          {{ salvando ? "Salvando..." : (produtoParaEditar ? "Salvar Alterações" : "Salvar Produto") }}
         </button>
       </form>
     </div>
@@ -123,7 +164,6 @@
 
 <script setup>
 import { ref, watch, onUnmounted } from "vue";
-
 import api from "../../services/api";
 
 const props = defineProps({
@@ -131,11 +171,14 @@ const props = defineProps({
     type: Boolean,
     default: false,
   },
-
   categorias: {
     type: Array,
     default: () => [],
   },
+  produtoParaEditar: {
+    type: Object,
+    default: null,
+  }
 });
 
 const emit = defineEmits(["update:open", "produto-salvo"]);
@@ -146,17 +189,20 @@ const estadoInicial = () => ({
   preco: "",
   quantidadeEstoque: "",
   categoriasIds: [],
+  desconto: 0,
+  destaqueCarrossel: false,
 });
 
 const novoProduto = ref(estadoInicial());
-
 const arquivosImagens = ref([]);
+const arquivoImagemCarrossel = ref(null);
 const erroModal = ref("");
 const salvando = ref(false);
 
 const limparFormulario = () => {
   novoProduto.value = estadoInicial();
-  arquivoImagem.value = null;
+  arquivosImagens.value = [];
+  arquivoImagemCarrossel.value = null;
   erroModal.value = "";
 };
 
@@ -169,11 +215,30 @@ const capturarImagens = (event) => {
   arquivosImagens.value = Array.from(event.target.files).slice(0, 5);
 };
 
+const capturarImagemCarrossel = (event) => {
+  arquivoImagemCarrossel.value = event.target.files[0];
+};
+
 const salvarProduto = async () => {
   if (novoProduto.value.categoriasIds.length === 0) {
     erroModal.value = "Selecione pelo menos uma categoria.";
-
     return;
+  }
+
+  // Validação: Pelo menos uma imagem do produto (1:1)
+  const temImagemExistente = props.produtoParaEditar && props.produtoParaEditar.imagensIds && props.produtoParaEditar.imagensIds.length > 0;
+  if (arquivosImagens.value.length === 0 && !temImagemExistente) {
+    erroModal.value = "O produto deve possuir pelo menos uma imagem (proporção 1:1).";
+    return;
+  }
+
+  // Validação: Imagem do carrossel (16:9) se destaqueCarrossel for verdadeiro
+  if (novoProduto.value.destaqueCarrossel) {
+    const temBannerExistente = props.produtoParaEditar && props.produtoParaEditar.temImagemCarrossel;
+    if (!arquivoImagemCarrossel.value && !temBannerExistente) {
+      erroModal.value = "Para destacar o produto no carrossel, é obrigatório enviar a imagem de banner (proporção 16:9).";
+      return;
+    }
   }
 
   salvando.value = true;
@@ -193,12 +258,20 @@ const salvarProduto = async () => {
       formData.append("imagens", file);
     });
 
-    await api.post("/produtos", formData);
+    if (arquivoImagemCarrossel.value) {
+      formData.append("imagemCarrossel", arquivoImagemCarrossel.value);
+    }
 
+    if (props.produtoParaEditar) {
+      await api.put(`/produtos/${props.produtoParaEditar.id}`, formData);
+    } else {
+      await api.post("/produtos", formData);
+    }
+
+    emit("produto-salvo");
     fechar();
   } catch (error) {
     console.error(error);
-
     erroModal.value = "Erro ao salvar produto.";
   } finally {
     salvando.value = false;
@@ -209,6 +282,29 @@ watch(
   () => props.open,
   (aberto) => {
     document.body.style.overflow = aberto ? "hidden" : "";
+    if (aberto) {
+      if (props.produtoParaEditar) {
+        const catIds = props.produtoParaEditar.categoriasNomes
+          ? props.categorias
+              .filter(c => props.produtoParaEditar.categoriasNomes.includes(c.nome))
+              .map(c => c.id)
+          : [];
+        novoProduto.value = {
+          nome: props.produtoParaEditar.nome,
+          descricao: props.produtoParaEditar.descricao,
+          preco: props.produtoParaEditar.preco,
+          quantidadeEstoque: props.produtoParaEditar.quantidadeEstoque,
+          categoriasIds: catIds,
+          desconto: props.produtoParaEditar.desconto || 0,
+          destaqueCarrossel: props.produtoParaEditar.destaqueCarrossel || false,
+        };
+      } else {
+        novoProduto.value = estadoInicial();
+      }
+      arquivosImagens.value = [];
+      arquivoImagemCarrossel.value = null;
+      erroModal.value = "";
+    }
   },
 );
 
@@ -221,66 +317,46 @@ onUnmounted(() => {
 .modal-overlay {
   position: fixed;
   inset: 0;
-
   background: rgba(0, 0, 0, 0.45);
-
   backdrop-filter: blur(4px);
-
   display: flex;
   align-items: center;
   justify-content: center;
-
   padding: 1rem;
-
-  z-index: 1000;
+  z-index: 10500;
 }
 
 .modal-content {
   width: 100%;
   max-width: 550px;
-
   max-height: 90vh;
   overflow-y: auto;
-
   background: var(--bg-color);
-
   border-radius: var(--radius-lg);
-
   padding: 2rem;
-
   box-shadow: 0 25px 50px rgba(0, 0, 0, 0.12);
 }
 
 .btn-close-modal {
   border: none;
   background: transparent;
-
   font-size: 1.5rem;
-
   cursor: pointer;
 }
 
 .form-control-premium {
   width: 100%;
-
   padding: 1rem 1.2rem;
-
   border-radius: var(--radius-md);
-
   border: 1px solid #e2e8f0;
-
   background: #f8fafc;
-
   transition: 0.3s;
 }
 
 .form-control-premium:focus {
   outline: none;
-
   border-color: var(--primary-color);
-
   background: white;
-
   box-shadow: 0 0 0 4px rgba(15, 23, 42, 0.05);
 }
 
@@ -288,13 +364,9 @@ onUnmounted(() => {
   display: flex;
   flex-wrap: wrap;
   gap: 1rem;
-
   padding: 1rem;
-
   border-radius: var(--radius-md);
-
   border: 1px solid #e2e8f0;
-
   background: #f8fafc;
 }
 
@@ -307,7 +379,6 @@ onUnmounted(() => {
     opacity: 0;
     transform: translateY(20px);
   }
-
   to {
     opacity: 1;
     transform: translateY(0);

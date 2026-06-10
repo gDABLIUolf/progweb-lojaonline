@@ -20,10 +20,14 @@ public class TokenService {
     public String gerarToken(Usuario usuario) {
         try {
             Algorithm algorithm = Algorithm.HMAC256(secret);
+
+            String permissaoDoUsuario = usuario.getRole().name();
+
             return JWT.create()
-                    .withIssuer("VesteBem API") // Quem está emitindo o token
-                    .withSubject(usuario.getEmail()) // O "dono" do token
-                    .withExpiresAt(gerarDataExpiracao()) // Quando expira
+                    .withIssuer("VesteBem API")
+                    .withSubject(usuario.getEmail())
+                    .withClaim("role", permissaoDoUsuario)
+                    .withExpiresAt(gerarDataExpiracao())
                     .sign(algorithm);
         } catch (JWTCreationException exception) {
             throw new RuntimeException("Erro ao gerar token JWT", exception);

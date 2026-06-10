@@ -4,6 +4,7 @@ import com.vesteBem.dto.ProdutoRequestDTO;
 import com.vesteBem.dto.ProdutoResponseDTO;
 import com.vesteBem.model.Categoria;
 import com.vesteBem.model.Produto;
+import com.vesteBem.model.ProdutoImagem;
 import com.vesteBem.repository.CategoriaRepository;
 import com.vesteBem.repository.ProdutoRepository;
 import org.springframework.stereotype.Service;
@@ -24,8 +25,7 @@ public class ProdutoService {
         this.categoriaRepository = categoriaRepository;
     }
 
-    public ProdutoResponseDTO cadastrar(ProdutoRequestDTO dto, MultipartFile imagem) throws IOException {
-
+    public ProdutoResponseDTO cadastrar(ProdutoRequestDTO dto, List<MultipartFile> imagens) throws IOException {
         List<Categoria> categorias = categoriaRepository.findAllById(dto.categoriasIds());
 
         Produto produto = new Produto();
@@ -35,19 +35,23 @@ public class ProdutoService {
         produto.setQuantidadeEstoque(dto.quantidadeEstoque());
         produto.setCategorias(categorias);
 
-        if (imagem != null && !imagem.isEmpty()) {
-            produto.setImagem(imagem.getBytes());
-            produto.setTipoImagem(imagem.getContentType());
+        if (imagens != null && !imagens.isEmpty()) {
+            for (MultipartFile file : imagens.stream().limit(5).collect(Collectors.toList())) {
+                ProdutoImagem imagem = new ProdutoImagem();
+                imagem.setDados(file.getBytes());
+                imagem.setTipo(file.getContentType());
+                imagem.setProduto(produto);
+                produto.getImagens().add(imagem);
+            }
         }
 
         Produto produtoSalvo = produtoRepository.save(produto);
-        // Usa o construtor inteligente que criamos no DTO
-        return new ProdutoResponseDTO(produtoSalvo); 
+        return new ProdutoResponseDTO(produtoSalvo);
     }
 
     public List<ProdutoResponseDTO> listarTodos() {
         return produtoRepository.findAll().stream()
-                .map(ProdutoResponseDTO::new) // Converte a lista de forma inteligente
+                .map(ProdutoResponseDTO::new)
                 .collect(Collectors.toList());
     }
 
@@ -57,7 +61,7 @@ public class ProdutoService {
         return new ProdutoResponseDTO(produto);
     }
 
-    public ProdutoResponseDTO atualizar(Long id, ProdutoRequestDTO dto, MultipartFile imagem) throws IOException {
+    public ProdutoResponseDTO atualizar(Long id, ProdutoRequestDTO dto, List<MultipartFile> imagens) throws IOException {
         Produto produto = produtoRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Produto não encontrado com o ID: " + id));
 
@@ -69,9 +73,16 @@ public class ProdutoService {
         produto.setQuantidadeEstoque(dto.quantidadeEstoque());
         produto.setCategorias(categorias);
 
-        if (imagem != null && !imagem.isEmpty()) {
-            produto.setImagem(imagem.getBytes());
-            produto.setTipoImagem(imagem.getContentType());
+        if (imagens != null && !imagens.isEmpty()) {
+            produto.getImagens().clear();
+
+            for (MultipartFile file : imagens.stream().limit(5).collect(Collectors.toList())) {
+                ProdutoImagem imagem = new ProdutoImagem();
+                imagem.setDados(file.getBytes());
+                imagem.setTipo(file.getContentType());
+                imagem.setProduto(produto);
+                produto.getImagens().add(imagem);
+            }
         }
 
         Produto produtoAtualizado = produtoRepository.save(produto);

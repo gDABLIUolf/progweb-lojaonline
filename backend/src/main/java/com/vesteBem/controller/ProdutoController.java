@@ -3,6 +3,8 @@ package com.vesteBem.controller;
 import com.vesteBem.dto.ProdutoRequestDTO;
 import com.vesteBem.dto.ProdutoResponseDTO;
 import com.vesteBem.model.Produto;
+import com.vesteBem.model.ProdutoImagem;
+import com.vesteBem.repository.ProdutoImagemRepository;
 import com.vesteBem.repository.ProdutoRepository;
 import com.vesteBem.service.ProdutoService;
 import com.vesteBem.specs.ProdutoSpecs;
@@ -29,26 +31,55 @@ public class ProdutoController {
 
     private final ProdutoService produtoService;
     private final ProdutoRepository produtoRepository;
+    private final ProdutoImagemRepository produtoImagemRepository;
 
-    public ProdutoController(ProdutoService produtoService, ProdutoRepository produtoRepository) {
+    public ProdutoController(ProdutoService produtoService, ProdutoRepository produtoRepository, ProdutoImagemRepository produtoImagemRepository) {
         this.produtoService = produtoService;
         this.produtoRepository = produtoRepository;
+        this.produtoImagemRepository = produtoImagemRepository;
     }
 
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    @Operation(summary = "Cadastrar produto vinculado a múltiplas categorias com imagem")
     public ResponseEntity<ProdutoResponseDTO> criar(
             @RequestPart("dados") @Valid ProdutoRequestDTO dto,
-            @RequestPart(value = "imagem", required = false) MultipartFile imagem) throws IOException {
+            @RequestPart(value = "imagens", required = false) List<MultipartFile> imagens) throws IOException {
 
-        ProdutoResponseDTO salvo = produtoService.cadastrar(dto, imagem);
+        ProdutoResponseDTO salvo = produtoService.cadastrar(dto, imagens);
         return ResponseEntity.status(HttpStatus.CREATED).body(salvo);
     }
 
-    @GetMapping
-    @Operation(summary = "Listar produtos (Vitrine)")
-    public ResponseEntity<List<ProdutoResponseDTO>> listarVitrine() {
-        return ResponseEntity.ok(produtoService.listarTodos());
+    @GetMapping("/{id}/imagem")
+    public ResponseEntity<byte[]> buscarImagem(@PathVariable Long id) {
+        return produtoRepository.findById(id)
+                .filter(p -> p.getImagens() != null && !p.getImagens().isEmpty())
+                .map(p -> {
+                    // Pega a primeira da lista (a capa)
+                    var imagem = p.getImagens().get(0);
+                    return ResponseEntity.ok()
+                            .header(HttpHeaders.CONTENT_TYPE, imagem.getTipo())
+                            .body(imagem.getDados());
+                })
+                .orElse(ResponseEntity.status(HttpStatus.NOT_FOUND).build());
+    }
+    @GetMapping("/{id}/galeria")
+    public ResponseEntity<List<Long>> listarGaleria(@PathVariable Long id) {
+        Produto produto = produtoRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Produto não encontrado"));
+
+        List<Long> ids = produto.getImagens().stream()
+                .map(ProdutoImagem::getId)
+                .collect(Collectors.toList());
+        return ResponseEntity.ok(ids);
+    }
+
+    @GetMapping("/imagem/{imagemId}")
+    public ResponseEntity<byte[]> buscarImagemPorId(@PathVariable Long imagemId) {
+        ProdutoImagem imagem = produtoImagemRepository.findById(imagemId)
+                .orElseThrow(() -> new RuntimeException("Imagem não encontrada"));
+
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_TYPE, imagem.getTipo())
+                .body(imagem.getDados());
     }
 
     @GetMapping("/{id}")
@@ -57,26 +88,10 @@ public class ProdutoController {
         return ResponseEntity.ok(produtoService.buscarPorId(id));
     }
 
-    @GetMapping("/{id}/imagem")
-    @Operation(summary = "Buscar a imagem do produto")
-    public ResponseEntity<byte[]> buscarImagem(@PathVariable Long id) {
-        return produtoRepository.findById(id)
-                .filter(produto -> produto.getImagem() != null)
-                .map(produto -> ResponseEntity.ok()
-                        .header(HttpHeaders.CONTENT_TYPE, produto.getTipoImagem())
-                        .body(produto.getImagem()))
-                .orElse(ResponseEntity.status(HttpStatus.NOT_FOUND).build());
-    }
-
-    @PutMapping(value = "/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    @Operation(summary = "Atualizar um produto existente com nova imagem")
-    public ResponseEntity<ProdutoResponseDTO> atualizar(
-            @PathVariable Long id,
-            @RequestPart("dados") @Valid ProdutoRequestDTO dto,
-            @RequestPart(value = "imagem", required = false) MultipartFile imagem) throws IOException {
-
-        ProdutoResponseDTO atualizado = produtoService.atualizar(id, dto, imagem);
-        return ResponseEntity.ok(atualizado);
+    @GetMapping
+    @Operation(summary = "Listar produtos (Vitrine)")
+    public ResponseEntity<List<ProdutoResponseDTO>> listarVitrine() {
+        return ResponseEntity.ok(produtoService.listarTodos());
     }
 
     @DeleteMapping("/{id}")
@@ -84,21 +99,5 @@ public class ProdutoController {
     public ResponseEntity<Void> eliminar(@PathVariable Long id) {
         produtoService.deletar(id);
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
-    }
-
-    @GetMapping("/busca")
-    @Operation(summary = "Busca dinâmica por nome e múltiplas categorias")
-    public ResponseEntity<List<ProdutoResponseDTO>> buscarDinamicamente(
-            @RequestParam(required = false) String nome,
-            @RequestParam(required = false) List<Long> categorias) {
-
-        Specification<Produto> regraDeBusca = ProdutoSpecs.filtrarDinamico(nome, categorias);
-        List<Produto> resultadosEntity = produtoRepository.findAll(regraDeBusca);
-
-        List<ProdutoResponseDTO> resultadosDTO = resultadosEntity.stream()
-                .map(ProdutoResponseDTO::new) // Usa o construtor inteligente que resolve tudo
-                .collect(Collectors.toList());
-
-        return ResponseEntity.ok(resultadosDTO);
     }
 }

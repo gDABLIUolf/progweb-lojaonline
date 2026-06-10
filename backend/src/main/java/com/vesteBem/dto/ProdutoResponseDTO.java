@@ -2,6 +2,7 @@ package com.vesteBem.dto;
 
 import com.vesteBem.model.Categoria;
 import com.vesteBem.model.Produto;
+import com.vesteBem.model.ProdutoImagem;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -13,6 +14,7 @@ public record ProdutoResponseDTO(
         BigDecimal preco,
         Integer quantidadeEstoque,
         List<String> categoriasNomes,
+        List<Long> imagensIds, // NOVO: IDs para buscar as fotos individualmente
         Double mediaAvaliacoes,
         List<AvaliacaoResponseDTO> avaliacoes
 ) {
@@ -23,14 +25,20 @@ public record ProdutoResponseDTO(
                 produto.getDescricao(),
                 produto.getPreco(),
                 produto.getQuantidadeEstoque(),
-                produto.getCategorias() != null ? 
+
+                // Mapeamento de Categorias
+                produto.getCategorias() != null ?
                         produto.getCategorias().stream().map(Categoria::getNome).toList() : List.of(),
-                
-                // Calcula a média das notas (ex: 4.5). Se não tiver avaliação, retorna 0.0
+
+                // Mapeamento de IDs de Imagens
+                produto.getImagens() != null ?
+                        produto.getImagens().stream().map(ProdutoImagem::getId).toList() : List.of(),
+
+                // Média de Avaliações
                 produto.getAvaliacoes() != null && !produto.getAvaliacoes().isEmpty() ?
                         Math.round(produto.getAvaliacoes().stream().mapToDouble(a -> a.getNota()).average().orElse(0.0) * 10.0) / 10.0 : 0.0,
-                
-                // Converte as avaliações para DTO
+
+                // Avaliações
                 produto.getAvaliacoes() != null ?
                         produto.getAvaliacoes().stream().map(AvaliacaoResponseDTO::new).toList() : List.of()
         );

@@ -1,30 +1,34 @@
 <template>
   <div class="card shadow-sm border-0 h-100 produto-card">
-    <div class="produto-img-container position-relative">
-      <img
-        v-if="temImagem"
-        :src="imagemUrl"
-        :alt="produto.nome"
-        class="produto-img"
-        @error="handleImageError"
-      />
-      <div
-        v-else
-        class="produto-img d-flex align-items-center justify-content-center bg-light"
-      >
-        <span class="text-muted small">Sem foto</span>
-      </div>
+    <RouterLink :to="'/produto/' + produto.id" class="text-decoration-none">
+      <div class="produto-img-container position-relative">
+        <img
+          v-if="temImagem"
+          :src="imagemUrl"
+          :alt="produto.nome"
+          class="produto-img"
+          @error="handleImageError"
+        />
+        <div
+          v-else
+          class="produto-img d-flex align-items-center justify-content-center bg-light"
+        >
+          <span class="text-muted small">Sem foto</span>
+        </div>
 
-      <span
-        v-if="produto.categoriasNomes?.length"
-        class="badge bg-dark position-absolute top-0 start-0 m-3"
-      >
-        {{ produto.categoriasNomes[0] }}
-      </span>
-    </div>
+        <span
+          v-if="produto.categoriasNomes?.length"
+          class="badge bg-dark position-absolute top-0 start-0 m-3"
+        >
+          {{ produto.categoriasNomes[0] }}
+        </span>
+      </div>
+    </RouterLink>
 
     <div class="card-body d-flex flex-column">
-      <h3 class="produto-titulo mb-2">{{ produto.nome }}</h3>
+      <RouterLink :to="'/produto/' + produto.id" class="text-decoration-none text-dark">
+        <h3 class="produto-titulo mb-2">{{ produto.nome }}</h3>
+      </RouterLink>
 
       <p class="text-muted small mb-3 flex-grow-1 produto-descricao">
         {{ produto.descricao }}

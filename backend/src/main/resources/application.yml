@@ -6,6 +6,9 @@ spring:
       max-file-size: 5MB
       max-request-size: 5MB
 
+  jackson:
+    time-zone: GMT-4
+
   datasource:
     url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5432/lojaonline}
     username: ${SPRING_DATASOURCE_USERNAME:lojaonline}
@@ -20,6 +23,8 @@ spring:
       hibernate:
         dialect: org.hibernate.dialect.PostgreSQLDialect
         format_sql: true
+        jdbc:
+          time_zone: GMT-4
 
   devtools:
     restart:

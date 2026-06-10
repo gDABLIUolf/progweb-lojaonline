@@ -155,7 +155,7 @@
                       <div class="d-flex justify-content-between align-items-start flex-wrap gap-2 mb-3">
                         <div>
                           <span class="text-muted small fw-bold">PEDIDO #{{ pedido.id }}</span>
-                          <div class="small text-muted">{{ formatarData(pedido.dataCriacao) }}</div>
+                          <div class="small text-muted">{{ formatarData(pedido.dataCriacao, true) }}</div>
                         </div>
                         <span :class="['badge-status', getStatusClass(pedido.status)]">
                           {{ pedido.status }}
@@ -192,7 +192,7 @@
                       <div class="d-flex justify-content-between align-items-start flex-wrap gap-2 mb-3">
                         <div>
                           <span class="text-muted small fw-bold">PEDIDO #{{ pedido.id }}</span>
-                          <div class="small text-muted">{{ formatarData(pedido.dataCriacao) }}</div>
+                          <div class="small text-muted">{{ formatarData(pedido.dataCriacao, true) }}</div>
                         </div>
                         <span :class="['badge-status', getStatusClass(pedido.status)]">
                           {{ pedido.status }}
@@ -254,6 +254,7 @@ import Navbar from "../../components/layout/Navbar.vue";
 import CarrinhoSidebar from "../../components/layout/CarrinhoSidebar.vue";
 import Footer from "../../components/layout/Footer.vue";
 import api from "../../services/api.js";
+import { formatarData } from "../../utils/date.js";
 
 const router = useRouter();
 
@@ -454,21 +455,6 @@ const adicionarItemSidebar = async (produtoId) => {
   }
 };
 
-const formatarData = (dataStr) => {
-  if (!dataStr) return "";
-  try {
-    const dateObj = new Date(dataStr);
-    return dateObj.toLocaleDateString("pt-BR", {
-      day: "2-digit",
-      month: "2-digit",
-      year: "numeric",
-      hour: "2-digit",
-      minute: "2-digit",
-    });
-  } catch {
-    return dataStr;
-  }
-};
 
 const getStatusClass = (status) => {
   if (!status) return "";

@@ -476,6 +476,7 @@ import ProdutoModal from "../../components/modal/ProductModal.vue";
 import UsuarioModal from "../../components/modal/UsuarioModal.vue";
 import AvaliacaoModal from "../../components/modal/AvaliacaoModal.vue";
 import api from "../../services/api.js";
+import { formatarData } from "../../utils/date.js";
 
 const router = useRouter();
 
@@ -872,19 +873,6 @@ const calcularPrecoPromocional = (preco, desconto) => {
   });
 };
 
-const formatarData = (dataStr) => {
-  if (!dataStr) return "";
-  try {
-    const d = new Date(dataStr);
-    return d.toLocaleDateString("pt-BR", {
-      day: "2-digit",
-      month: "2-digit",
-      year: "numeric"
-    });
-  } catch {
-    return dataStr;
-  }
-};
 
 const handleImageError = (event) => {
   event.target.style.display = 'none';

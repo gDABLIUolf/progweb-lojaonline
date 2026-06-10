@@ -277,6 +277,7 @@ import Navbar from "../../components/layout/Navbar.vue";
 import CarrinhoSidebar from "../../components/layout/CarrinhoSidebar.vue";
 import Footer from "../../components/layout/Footer.vue";
 import api from "../../services/api";
+import { formatarData } from "../../utils/date.js";
 
 const route = useRoute();
 const router = useRouter();
@@ -461,19 +462,6 @@ const calcularPorcentagem = (media, posicao) => {
   return Math.round(preenchimento * 100);
 };
 
-const formatarData = (dataStr) => {
-  if (!dataStr) return "";
-  try {
-    const dateObj = new Date(dataStr);
-    return dateObj.toLocaleDateString("pt-BR", {
-      day: "2-digit",
-      month: "2-digit",
-      year: "numeric",
-    });
-  } catch {
-    return dataStr;
-  }
-};
 
 const incrementarQtd = () => {
   quantidadeSelecionada.value++;

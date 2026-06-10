@@ -9,41 +9,10 @@
     />
 
     <div class="container py-5 text-start">
-      <!-- Painel Header Premium -->
-      <div class="admin-header-card p-5 rounded-4 text-white mb-5 d-flex justify-content-between align-items-center flex-wrap gap-4">
-        <div>
-          <span class="badge bg-primary px-3 py-2 rounded-pill mb-3 fw-normal">Área Administrativa</span>
-          <h1 class="fw-bold mb-2">Painel de Controle</h1>
-          <p class="mb-0 text-white-50 font-normal">Gerencie o catálogo, coleções, avaliações, contatos e usuários da vesteBem.</p>
-        </div>
-        <div class="d-flex gap-3 text-start flex-wrap">
-          <div class="stat-card p-3 px-4 rounded-3 bg-white bg-opacity-10 backdrop-blur">
-            <span class="d-block text-white-50 small">Produtos</span>
-            <span class="fs-3 fw-bold">{{ produtos.length }}</span>
-          </div>
-          <div class="stat-card p-3 px-4 rounded-3 bg-white bg-opacity-10 backdrop-blur">
-            <span class="d-block text-white-50 small">Categorias</span>
-            <span class="fs-3 fw-bold">{{ categorias.length }}</span>
-          </div>
-          <div class="stat-card p-3 px-4 rounded-3 bg-white bg-opacity-10 backdrop-blur">
-            <span class="d-block text-white-50 small">Avaliações</span>
-            <span class="fs-3 fw-bold">{{ avaliacoes.length }}</span>
-          </div>
-          <div class="stat-card p-3 px-4 rounded-3 bg-white bg-opacity-10 backdrop-blur">
-            <span class="d-block text-white-50 small">Usuários</span>
-            <span class="fs-3 fw-bold">{{ usuarios.length }}</span>
-          </div>
-        </div>
-      </div>
+
 
       <div class="row g-4 text-start">
-        <!-- Ações Principais (AdminPanel para Criação de Coleção/Produto) -->
-        <div class="col-12 px-0">
-          <AdminPanel
-            @nova-categoria="abrirNovaCategoria"
-            @novo-produto="abrirNovoProduto"
-          />
-        </div>
+
 
         <!-- Abas de Gerenciamento -->
         <div class="col-12 mt-4 px-0">
@@ -110,7 +79,8 @@
               <!-- Aba de Produtos -->
               <div v-if="abaAtiva === 'produtos'">
                 <!-- Barra de Pesquisa de Produtos -->
-                <div class="d-flex mb-4">
+                <!-- Barra de Pesquisa de Produtos e Botão Novo -->
+                <div class="d-flex mb-4 align-items-center gap-3 flex-wrap">
                   <div class="position-relative flex-grow-1">
                     <span class="position-absolute top-50 translate-middle-y start-0 ps-3 text-muted">
                       <i class="ph ph-magnifying-glass fs-5"></i>
@@ -123,6 +93,9 @@
                       style="padding-left: 2.75rem !important;"
                     />
                   </div>
+                  <button @click="abrirNovoProduto" class="btn-admin-action d-inline-flex align-items-center gap-2">
+                    <i class="ph ph-t-shirt fs-5"></i> Novo Produto
+                  </button>
                 </div>
 
                 <div v-if="produtos.length === 0" class="text-center py-5 text-muted">
@@ -195,7 +168,8 @@
               <!-- Aba de Categorias -->
               <div v-if="abaAtiva === 'categorias'">
                 <!-- Barra de Pesquisa de Categorias -->
-                <div class="d-flex mb-4">
+                <!-- Barra de Pesquisa de Categorias e Botão Nova -->
+                <div class="d-flex mb-4 align-items-center gap-3 flex-wrap">
                   <div class="position-relative flex-grow-1">
                     <span class="position-absolute top-50 translate-middle-y start-0 ps-3 text-muted">
                       <i class="ph ph-magnifying-glass fs-5"></i>
@@ -208,6 +182,9 @@
                       style="padding-left: 2.75rem !important;"
                     />
                   </div>
+                  <button @click="abrirNovaCategoria" class="btn-admin-action d-inline-flex align-items-center gap-2">
+                    <i class="ph ph-tag fs-5"></i> Nova Categoria
+                  </button>
                 </div>
 
                 <div v-if="categorias.length === 0" class="text-center py-5 text-muted">
@@ -493,7 +470,7 @@ import { useRouter } from "vue-router";
 import Navbar from "../../components/layout/Navbar.vue";
 import CarrinhoSidebar from "../../components/layout/CarrinhoSidebar.vue";
 import Footer from "../../components/layout/Footer.vue";
-import AdminPanel from "../../components/admin/AdminPanel.vue";
+
 import CategoriaModal from "../../components/modal/CategoriaModal.vue";
 import ProdutoModal from "../../components/modal/ProductModal.vue";
 import UsuarioModal from "../../components/modal/UsuarioModal.vue";
@@ -1059,5 +1036,24 @@ onMounted(async () => {
   background-color: white;
   z-index: 2;
   box-shadow: inset 0 -2px 0 #f1f5f9;
+}
+
+.btn-admin-action {
+  border: none;
+  padding: 0.85rem 1.5rem;
+  border-radius: var(--radius-md, 8px);
+  background-color: var(--primary-color, #111);
+  color: white;
+  font-weight: 500;
+  transition: all 0.3s ease;
+  cursor: pointer;
+  text-decoration: none;
+}
+
+.btn-admin-action:hover {
+  transform: translateY(-2px);
+  background-color: #333333;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+  color: white;
 }
 </style>

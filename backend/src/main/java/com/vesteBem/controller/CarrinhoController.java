@@ -40,6 +40,16 @@ public class CarrinhoController {
         }
     }
 
+    @DeleteMapping("/{usuarioId}/remover-tudo/{produtoId}")
+    @Operation(summary = "Remover item completo", description = "Remove todas as unidades de um produto do carrinho de uma vez.")
+    public ResponseEntity<Object> removerItemCompleto(@PathVariable Long usuarioId, @PathVariable Long produtoId) {
+        try {
+            return ResponseEntity.ok(carrinhoService.removerItemCompleto(usuarioId, produtoId));
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+        }
+    }
+
     @GetMapping("/{usuarioId}")
     @Operation(summary = "Listar carrinho", description = "Retorna todos os itens do carrinho e o subtotal calculado.")
     public ResponseEntity<Object> listarCarrinho(@PathVariable Long usuarioId) {

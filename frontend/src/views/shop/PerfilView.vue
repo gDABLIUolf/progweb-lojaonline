@@ -241,6 +241,9 @@
       @adicionar-item="adicionarItemSidebar"
       @remover-item="removerItemSidebar"
     />
+
+    <!-- Rodapé Premium -->
+    <Footer />
   </div>
 </template>
 
@@ -249,6 +252,7 @@ import { ref, onMounted, computed } from "vue";
 import { useRouter } from "vue-router";
 import Navbar from "../../components/layout/Navbar.vue";
 import CarrinhoSidebar from "../../components/layout/CarrinhoSidebar.vue";
+import Footer from "../../components/layout/Footer.vue";
 import api from "../../services/api.js";
 
 const router = useRouter();

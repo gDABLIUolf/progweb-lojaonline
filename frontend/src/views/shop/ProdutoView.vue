@@ -257,14 +257,18 @@
         </button>
       </div>
     </div>
+
+    <!-- Rodapé Premium -->
+    <Footer />
   </div>
 </template>
 
 <script setup>
 import { ref, onMounted, computed } from "vue";
-import { useRoute, useRouter } from "vue-router";
+import { useRoute, useRouter, onBeforeRouteLeave } from "vue-router";
 import Navbar from "../../components/layout/Navbar.vue";
 import CarrinhoSidebar from "../../components/layout/CarrinhoSidebar.vue";
+import Footer from "../../components/layout/Footer.vue";
 import api from "../../services/api";
 
 const route = useRoute();
@@ -482,6 +486,10 @@ onMounted(async () => {
     await carregarCarrinho();
   }
   await carregarProduto();
+});
+
+onBeforeRouteLeave((to, from) => {
+  sessionStorage.setItem("is_returning", "true");
 });
 </script>
 

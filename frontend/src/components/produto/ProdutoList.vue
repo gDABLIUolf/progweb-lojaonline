@@ -3,7 +3,7 @@
     <div class="container px-4">
       <div class="d-flex flex-column align-items-center mb-5 gap-3">
         <div class="d-flex align-items-center justify-content-center gap-3 w-100 flex-wrap position-relative">
-          <h2 class="titulo-secao m-0">Todos os Produtos</h2>
+          <h2 class="titulo-secao m-0">Nossos Produtos</h2>
           <button
             @click="alternarBusca"
             class="btn btn-search-toggle"
@@ -162,6 +162,16 @@ watch(() => props.filtroCategoriasInicial, (newVal) => {
   if (newVal.length > 0) {
     buscaExpandida.value = true;
     showCategoriasMenu.value = true;
+
+    // Rola para a seção de produtos para deixar a busca e resultados visíveis
+    setTimeout(() => {
+      const el = document.querySelector(".produtos");
+      if (el) {
+        const yOffset = -80;
+        const y = el.getBoundingClientRect().top + window.pageYOffset + yOffset;
+        window.scrollTo({ top: y, behavior: "smooth" });
+      }
+    }, 100);
   }
 }, { deep: true });
 
@@ -169,6 +179,16 @@ watch(() => props.filtroNomeInicial, (newVal) => {
   filtroNome.value = newVal;
   if (newVal) {
     buscaExpandida.value = true;
+
+    // Rola para a seção de produtos
+    setTimeout(() => {
+      const el = document.querySelector(".produtos");
+      if (el) {
+        const yOffset = -80;
+        const y = el.getBoundingClientRect().top + window.pageYOffset + yOffset;
+        window.scrollTo({ top: y, behavior: "smooth" });
+      }
+    }, 100);
   }
 });
 
@@ -183,6 +203,14 @@ const alternarBusca = () => {
     setTimeout(() => {
       if (inputBusca.value) {
         inputBusca.value.focus();
+      }
+      
+      // Rola para a seção de produtos
+      const el = document.querySelector(".produtos");
+      if (el) {
+        const yOffset = -80;
+        const y = el.getBoundingClientRect().top + window.pageYOffset + yOffset;
+        window.scrollTo({ top: y, behavior: "smooth" });
       }
     }, 100);
   }
@@ -334,7 +362,7 @@ onBeforeUnmount(() => {
   border: 1px solid #dee2e6;
   border-radius: 16px;
   padding: 20px;
-  z-index: 1100;
+  z-index: 9995;
   text-align: left;
   animation: slideDown 0.3s cubic-bezier(0.25, 0.8, 0.25, 1) forwards;
 }

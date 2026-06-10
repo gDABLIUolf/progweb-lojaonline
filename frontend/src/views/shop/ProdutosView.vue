@@ -69,19 +69,24 @@
         </button>
       </div>
     </div>
+
+    <!-- Rodapé Premium -->
+    <Footer />
   </div>
 </template>
 
 <script setup>
-import { ref, onMounted, computed } from "vue";
-import { useRouter } from "vue-router";
+import { ref, onMounted, computed, watch } from "vue";
+import { useRouter, useRoute, onBeforeRouteLeave } from "vue-router";
 
 import Navbar from "../../components/layout/Navbar.vue";
 import ProdutoList from "../../components/produto/ProdutoList.vue";
 import CarrinhoSidebar from "../../components/layout/CarrinhoSidebar.vue";
+import Footer from "../../components/layout/Footer.vue";
 import api from "../../services/api.js";
 
 const router = useRouter();
+const route = useRoute();
 const estaLogado = ref(false);
 const isAdmin = ref(false);
 const nomeUsuario = ref("");
@@ -228,6 +233,18 @@ const carregarProdutos = async () => {
     const url = queryStr ? `/produtos?${queryStr}` : "/produtos";
     const response = await api.get(url);
     produtos.value = response.data;
+
+    // Restaura a posição de scroll salva se estiver retornando de um produto
+    setTimeout(() => {
+      const isReturning = sessionStorage.getItem("is_returning");
+      if (isReturning === "true") {
+        const scrollPos = sessionStorage.getItem("scroll_position_" + route.path);
+        if (scrollPos) {
+          window.scrollTo(0, parseInt(scrollPos));
+        }
+        sessionStorage.removeItem("is_returning");
+      }
+    }, 50);
   } catch (error) {
     console.error("Erro ao carregar produtos:", error);
   }
@@ -236,15 +253,70 @@ const carregarProdutos = async () => {
 const aplicarFiltros = ({ nome, categoriasIds }) => {
   filtroNomeAtual.value = nome;
   filtroCategoriasAtual.value = categoriasIds;
+
+  const query = {};
+  if (nome) query.nome = nome;
+  if (categoriasIds && categoriasIds.length > 0) {
+    query.categoria = categoriasIds[0];
+  }
+  
+  router.push({ path: route.path, query });
   carregarProdutos();
 };
+
+const verificarHashEScroll = () => {
+  const hash = window.location.hash;
+  if (hash === "#promocoes" || hash === "#contato" || hash === "#categorias-secao") {
+    const el = document.getElementById("footer");
+    if (el) {
+      el.scrollIntoView({ behavior: "smooth" });
+      const targetId = hash === "#promocoes" ? "newsletter-secao" : "contato-secao";
+      const targetEl = document.getElementById(targetId);
+      if (targetEl) {
+        targetEl.classList.add("highlight-pulse");
+        setTimeout(() => targetEl.classList.remove("highlight-pulse"), 2000);
+      }
+    }
+  }
+};
+
+onBeforeRouteLeave((to, from) => {
+  sessionStorage.setItem("scroll_position_" + from.path, window.scrollY);
+});
+
+watch(
+  () => [route.query.categoria, route.query.nome],
+  ([newCat, newNome]) => {
+    if (newCat) {
+      const catId = Number(newCat);
+      filtroCategoriasAtual.value = !isNaN(catId) ? [catId] : [];
+    } else {
+      filtroCategoriasAtual.value = [];
+    }
+    filtroNomeAtual.value = newNome || "";
+    carregarProdutos();
+  }
+);
 
 onMounted(async () => {
   carregarUsuario();
   if (usuarioId.value) {
     await carregarCarrinho();
   }
+
+  if (route.query.categoria) {
+    const catId = Number(route.query.categoria);
+    if (!isNaN(catId)) {
+      filtroCategoriasAtual.value = [catId];
+    }
+  }
+  if (route.query.nome) {
+    filtroNomeAtual.value = route.query.nome;
+  }
+
   await Promise.all([carregarCategorias(), carregarProdutos()]);
+
+  setTimeout(verificarHashEScroll, 100);
 });
 </script>
 

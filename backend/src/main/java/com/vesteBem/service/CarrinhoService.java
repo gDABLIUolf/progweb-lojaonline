@@ -77,6 +77,21 @@ public class CarrinhoService {
         return converterParaDTO(carrinho);
     }
 
+    @Transactional
+    public CarrinhoResponseDTO removerItemCompleto(Long usuarioId, Long produtoId) {
+        Carrinho carrinho = carrinhoRepository.findByUsuarioId(usuarioId)
+                .orElseThrow(() -> new IllegalArgumentException("Carrinho não encontrado para este usuário."));
+
+        ItemCarrinho item = carrinho.getItens().stream()
+                .filter(i -> i.getProduto().getId().equals(produtoId))
+                .findFirst()
+                .orElseThrow(() -> new IllegalArgumentException("Produto não está no carrinho."));
+
+        carrinho.getItens().remove(item);
+        carrinhoRepository.save(carrinho);
+        return converterParaDTO(carrinho);
+    }
+
     public CarrinhoResponseDTO listarCarrinho(Long usuarioId) {
         Carrinho carrinho = carrinhoRepository.findByUsuarioId(usuarioId)
                 .orElseThrow(() -> new IllegalArgumentException("Carrinho não encontrado para este usuário."));

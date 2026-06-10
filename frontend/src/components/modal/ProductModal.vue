@@ -232,7 +232,7 @@ onUnmounted(() => {
 
   padding: 1rem;
 
-  z-index: 1000;
+  z-index: 10500;
 }
 
 .modal-content {

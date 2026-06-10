@@ -27,10 +27,12 @@
       @produto-salvo="carregarCategorias"
     />
 
-    <CategoriaCarrossel
-      :categorias="categorias"
-      @selecionar-categoria="filtrarPorCarrosselCategoria"
-    />
+    <div id="categorias-secao">
+      <CategoriaCarrossel
+        :categorias="categorias"
+        @selecionar-categoria="filtrarPorCarrosselCategoria"
+      />
+    </div>
 
     <ProdutoList
       :produtos="produtos"
@@ -58,9 +60,11 @@
       :is-open="sidebarAberta"
       :itens="itensCarrinho"
       :subtotal="subtotalCarrinho"
+      :usuario-id="usuarioId"
       @close="sidebarAberta = false"
       @adicionar-item="adicionarItemSidebar"
       @remover-item="removerItemSidebar"
+      @carrinho-atualizado="carregarCarrinho"
     />
 
     <!-- Modal de login necessário -->
@@ -92,12 +96,15 @@
         </button>
       </div>
     </div>
+
+    <!-- Rodapé Premium -->
+    <Footer />
   </div>
 </template>
 
 <script setup>
 import { ref, onMounted, computed } from "vue";
-import { useRouter } from "vue-router";
+import { useRouter, useRoute, onBeforeRouteLeave } from "vue-router";
 
 import Navbar from "../../components/layout/Navbar.vue";
 import HeroSection from "../../components/home/Home.vue";
@@ -111,10 +118,12 @@ import CategoriaCarrossel from "../../components/categoria/CategoriaCarrossel.vu
 
 import ProdutoList from "../../components/produto/ProdutoList.vue";
 import CarrinhoSidebar from "../../components/layout/CarrinhoSidebar.vue";
+import Footer from "../../components/layout/Footer.vue";
 
 import api from "../../services/api.js";
 
 const router = useRouter();
+const route = useRoute();
 const estaLogado = ref(false);
 const isAdmin = ref(false);
 const nomeUsuario = ref("");
@@ -146,7 +155,7 @@ const decodificarJWT = (token) => {
   }
 };
 
-const carregarUsuario = () => {
+const carregarUsuario = async () => {
   const token = localStorage.getItem("token_vestebem");
   if (!token) return;
 
@@ -157,16 +166,21 @@ const carregarUsuario = () => {
 
   usuarioId.value = dadosToken.usuarioId || dadosToken.id || null;
 
-  if (dadosToken.sub) {
-    nomeUsuario.value = dadosToken.sub.split("@")[0];
-  }
-
   const permissao = dadosToken.role || "";
+  isAdmin.value = permissao.toUpperCase() === "ADMIN";
 
-  if (permissao.toUpperCase() === "ADMIN") {
-    isAdmin.value = true;
-  } else {
-    isAdmin.value = false;
+  // Buscar o nome real do banco de dados
+  if (usuarioId.value) {
+    try {
+      const resposta = await api.get(`/usuarios/${usuarioId.value}`);
+      const nomeCompleto = resposta.data.nome || "";
+      nomeUsuario.value = nomeCompleto.split(" ")[0]; // apenas o primeiro nome
+    } catch {
+      // Fallback para o email se a busca falhar
+      if (dadosToken.sub) {
+        nomeUsuario.value = dadosToken.sub.split("@")[0];
+      }
+    }
   }
 };
 
@@ -272,6 +286,18 @@ const carregarProdutos = async () => {
     const url = queryStr ? `/produtos?${queryStr}` : "/produtos";
     const response = await api.get(url);
     produtos.value = response.data;
+
+    // Restaura a posição de scroll salva se estiver retornando de um produto
+    setTimeout(() => {
+      const isReturning = sessionStorage.getItem("is_returning");
+      if (isReturning === "true") {
+        const scrollPos = sessionStorage.getItem("scroll_position_" + route.path);
+        if (scrollPos) {
+          window.scrollTo(0, parseInt(scrollPos));
+        }
+        sessionStorage.removeItem("is_returning");
+      }
+    }, 50);
   } catch (error) {
     console.error("Erro ao carregar produtos:", error);
   }
@@ -293,13 +319,42 @@ const filtrarPorCarrosselCategoria = (categoriaId) => {
   }
 };
 
+const verificarHashEScroll = () => {
+  const hash = window.location.hash;
+  if (hash === "#promocoes" || hash === "#contato" || hash === "#categorias-secao") {
+    if (hash === "#categorias-secao") {
+      const el = document.getElementById("categorias-secao");
+      if (el) {
+        el.scrollIntoView({ behavior: "smooth" });
+      }
+    } else {
+      const el = document.getElementById("footer");
+      if (el) {
+        el.scrollIntoView({ behavior: "smooth" });
+        const targetId = hash === "#promocoes" ? "newsletter-secao" : "contato-secao";
+        const targetEl = document.getElementById(targetId);
+        if (targetEl) {
+          targetEl.classList.add("highlight-pulse");
+          setTimeout(() => targetEl.classList.remove("highlight-pulse"), 2000);
+        }
+      }
+    }
+  }
+};
+
+onBeforeRouteLeave((to, from) => {
+  sessionStorage.setItem("scroll_position_" + from.path, window.scrollY);
+});
+
 onMounted(async () => {
-  carregarUsuario();
+  await carregarUsuario();
   if (usuarioId.value) {
     await carregarCarrinho();
   }
 
   await Promise.all([carregarCategorias(), carregarProdutos()]);
+  
+  setTimeout(verificarHashEScroll, 100);
 });
 </script>
 

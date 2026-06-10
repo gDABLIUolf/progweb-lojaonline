@@ -1,15 +1,16 @@
 package com.vesteBem.service;
 
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
+
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Service;
+
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.exceptions.JWTCreationException;
 import com.vesteBem.model.Usuario;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Service;
-
-import java.time.Instant;
-import java.time.LocalDateTime;
-import java.time.ZoneOffset;
 
 @Service
 public class TokenService {
@@ -23,6 +24,7 @@ public class TokenService {
             return JWT.create()
                     .withIssuer("VesteBem API") // Quem está emitindo o token
                     .withSubject(usuario.getEmail()) // O "dono" do token
+                    .withClaim("usuarioId", usuario.getId()) // Informações adicionais (claims)
                     .withExpiresAt(gerarDataExpiracao()) // Quando expira
                     .sign(algorithm);
         } catch (JWTCreationException exception) {

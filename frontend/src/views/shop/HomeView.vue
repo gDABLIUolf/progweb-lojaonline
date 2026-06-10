@@ -2,15 +2,10 @@
   <div class="home-wrapper">
     <nav class="navbar">
       <div class="container d-flex justify-content-between align-items-center">
-        <a href="#" class="logo text-dark text-decoration-none fs-4 fw-bold"
-          >vesteBem.</a
-        >
+        <a href="#" class="logo text-dark text-decoration-none fs-4 fw-bold">vesteBem.</a>
 
         <div class="nav-icons d-flex gap-3 align-items-center">
-          <span
-            v-if="isAdmin"
-            class="badge bg-primary rounded-pill px-3 py-2 fw-normal"
-          >
+          <span v-if="isAdmin" class="badge bg-primary rounded-pill px-3 py-2 fw-normal">
             <i class="ph ph-shield-check me-1"></i> Admin
           </span>
 
@@ -19,32 +14,20 @@
           </a>
 
           <div v-if="estaLogado" class="d-flex align-items-center gap-2">
-            <span class="text-dark fw-medium" style="font-size: 0.95rem"
-              >Olá, {{ nomeUsuario }}</span
-            >
-            <a
-              @click.prevent="fazerLogout"
-              title="Sair"
-              class="text-dark fs-4 ms-2"
-              style="cursor: pointer"
-            >
+            <span class="text-dark fw-medium" style="font-size: 0.95rem">Olá, {{ nomeUsuario }}</span>
+            <a @click.prevent="fazerLogout" title="Sair" class="text-dark fs-4 ms-2" style="cursor: pointer">
               <i class="ph ph-sign-out"></i>
             </a>
           </div>
 
-          <RouterLink
-            v-else
-            to="/login"
-            title="Minha Conta"
-            class="text-dark fs-4"
-          >
+          <RouterLink v-else to="/login" title="Minha Conta" class="text-dark fs-4">
             <i class="ph ph-user"></i>
           </RouterLink>
 
-          <a href="#" title="Carrinho" class="text-dark fs-4 position-relative">
+          <RouterLink to="/carrinho" title="Carrinho" class="text-dark fs-4 position-relative">
             <i class="ph ph-handbag"></i>
-            <span class="cart-count">2</span>
-          </a>
+            <span v-if="itensCarrinho.length > 0" class="cart-count">{{ itensCarrinho.length }}</span>
+          </RouterLink>
         </div>
       </div>
     </nav>
@@ -63,11 +46,8 @@
           </div>
 
           <div class="hero-img-wrap fade-in-up" style="transition-delay: 0.2s">
-            <img
-              src="../../assets/img/hero_minimal_fashion_1780402716026.png"
-              alt="vesteBem Minimal Fashion"
-              class="hero-img"
-            />
+            <img src="../../assets/img/hero_minimal_fashion_1780402716026.png" alt="vesteBem Minimal Fashion"
+              class="hero-img" />
           </div>
         </div>
       </div>
@@ -75,15 +55,9 @@
 
     <section v-if="isAdmin" class="admin-panel py-5 fade-in-up">
       <div class="container">
-        <div
-          class="p-4 rounded-4 shadow-sm bg-white"
-          style="border-left: 5px solid var(--primary-color)"
-        >
+        <div class="p-4 rounded-4 shadow-sm bg-white" style="border-left: 5px solid var(--primary-color)">
           <div class="d-flex align-items-center mb-3">
-            <i
-              class="ph ph-wrench fs-2 me-3"
-              style="color: var(--primary-color)"
-            ></i>
+            <i class="ph ph-wrench fs-2 me-3" style="color: var(--primary-color)"></i>
             <h2 class="mb-0 fs-4 fw-bold">Gestão do Catálogo</h2>
           </div>
           <p class="text-muted mb-4">
@@ -91,17 +65,11 @@
           </p>
 
           <div class="d-flex gap-3 flex-wrap">
-            <button
-              @click="abrirModalCategoria"
-              class="btn-premium d-flex align-items-center gap-2"
-            >
+            <button @click="abrirModalCategoria" class="btn-premium d-flex align-items-center gap-2">
               <i class="ph ph-tag fs-5"></i> Nova Categoria
             </button>
-            <button
-              @click="abrirModalProduto"
-              class="btn-premium d-flex align-items-center gap-2"
-              style="background-color: var(--text-secondary)"
-            >
+            <button @click="abrirModalProduto" class="btn-premium d-flex align-items-center gap-2"
+              style="background-color: var(--text-secondary)">
               <i class="ph ph-t-shirt fs-5"></i> Novo Produto
             </button>
           </div>
@@ -119,36 +87,18 @@
 
         <form @submit.prevent="salvarCategoria">
           <div class="mb-3">
-            <label class="form-label text-muted small fw-bold"
-              >NOME DA CATEGORIA</label
-            >
-            <input
-              type="text"
-              v-model="novaCategoria.nome"
-              class="form-control-premium"
-              placeholder="Ex: Moda Inverno"
-              required
-            />
+            <label class="form-label text-muted small fw-bold">NOME DA CATEGORIA</label>
+            <input type="text" v-model="novaCategoria.nome" class="form-control-premium" placeholder="Ex: Moda Inverno"
+              required />
           </div>
 
           <div class="mb-4">
-            <label class="form-label text-muted small fw-bold"
-              >IMAGEM DE DESTAQUE</label
-            >
-            <input
-              type="file"
-              @change="capturarImagem"
-              class="form-control-premium"
-              accept="image/png, image/jpeg, image/webp"
-              required
-            />
+            <label class="form-label text-muted small fw-bold">IMAGEM DE DESTAQUE</label>
+            <input type="file" @change="capturarImagem" class="form-control-premium"
+              accept="image/png, image/jpeg, image/webp" required />
           </div>
 
-          <div
-            v-if="erroModal"
-            class="alert alert-danger py-2 mb-3"
-            style="font-size: 0.9rem"
-          >
+          <div v-if="erroModal" class="alert alert-danger py-2 mb-3" style="font-size: 0.9rem">
             {{ erroModal }}
           </div>
 
@@ -160,10 +110,7 @@
     </div>
 
     <div v-if="modalProdutoAberta" class="modal-overlay">
-      <div
-        class="modal-content fade-in-up"
-        style="max-width: 550px; max-height: 90vh; overflow-y: auto"
-      >
+      <div class="modal-content fade-in-up" style="max-width: 550px; max-height: 90vh; overflow-y: auto">
         <div class="d-flex justify-content-between align-items-center mb-4">
           <h3 class="fw-bold mb-0">Novo Produto</h3>
           <button @click="fecharModalProduto" class="btn-close-modal">
@@ -173,104 +120,51 @@
 
         <form @submit.prevent="salvarProduto">
           <div class="mb-3">
-            <label class="form-label text-muted small fw-bold"
-              >NOME DO PRODUTO</label
-            >
-            <input
-              type="text"
-              v-model="novoProduto.nome"
-              class="form-control-premium"
-              required
-            />
+            <label class="form-label text-muted small fw-bold">NOME DO PRODUTO</label>
+            <input type="text" v-model="novoProduto.nome" class="form-control-premium" required />
           </div>
 
           <div class="mb-3">
             <label class="form-label text-muted small fw-bold">DESCRIÇÃO</label>
-            <textarea
-              v-model="novoProduto.descricao"
-              class="form-control-premium"
-              rows="3"
-              required
-            ></textarea>
+            <textarea v-model="novoProduto.descricao" class="form-control-premium" rows="3" required></textarea>
           </div>
 
           <div class="row mb-3">
             <div class="col-6">
-              <label class="form-label text-muted small fw-bold"
-                >PREÇO (R$)</label
-              >
-              <input
-                type="number"
-                step="0.01"
-                v-model="novoProduto.preco"
-                class="form-control-premium"
-                required
-              />
+              <label class="form-label text-muted small fw-bold">PREÇO (R$)</label>
+              <input type="number" step="0.01" v-model="novoProduto.preco" class="form-control-premium" required />
             </div>
             <div class="col-6">
               <label class="form-label text-muted small fw-bold">ESTOQUE</label>
-              <input
-                type="number"
-                v-model="novoProduto.quantidadeEstoque"
-                class="form-control-premium"
-                required
-              />
+              <input type="number" v-model="novoProduto.quantidadeEstoque" class="form-control-premium" required />
             </div>
           </div>
 
           <div class="mb-3">
-            <label class="form-label text-muted small fw-bold"
-              >CATEGORIAS</label
-            >
-            <div
-              class="d-flex flex-wrap gap-3 p-3 rounded"
-              style="background: #f8fafc; border: 1px solid #e2e8f0"
-            >
+            <label class="form-label text-muted small fw-bold">CATEGORIAS</label>
+            <div class="d-flex flex-wrap gap-3 p-3 rounded" style="background: #f8fafc; border: 1px solid #e2e8f0">
               <div class="form-check" v-for="cat in categorias" :key="cat.id">
-                <input
-                  class="form-check-input"
-                  type="checkbox"
-                  :value="cat.id"
-                  :id="'cat-' + cat.id"
-                  v-model="novoProduto.categoriasIds"
-                />
+                <input class="form-check-input" type="checkbox" :value="cat.id" :id="'cat-' + cat.id"
+                  v-model="novoProduto.categoriasIds" />
                 <label class="form-check-label" :for="'cat-' + cat.id">
                   {{ cat.nome }}
                 </label>
               </div>
             </div>
-            <small v-if="categorias.length === 0" class="text-danger"
-              >Cadastre uma categoria primeiro!</small
-            >
+            <small v-if="categorias.length === 0" class="text-danger">Cadastre uma categoria primeiro!</small>
           </div>
 
           <div class="mb-4">
-            <label class="form-label text-muted small fw-bold"
-              >IMAGEM DO PRODUTO</label
-            >
-            <input
-              type="file"
-              @change="capturarImagemProduto"
-              class="form-control-premium"
-              accept="image/*"
-            />
+            <label class="form-label text-muted small fw-bold">IMAGEM DO PRODUTO</label>
+            <input type="file" @change="capturarImagemProduto" class="form-control-premium" accept="image/*" />
           </div>
 
-          <div
-            v-if="erroModalProduto"
-            class="alert alert-danger py-2 mb-3"
-            style="font-size: 0.9rem"
-          >
+          <div v-if="erroModalProduto" class="alert alert-danger py-2 mb-3" style="font-size: 0.9rem">
             {{ erroModalProduto }}
           </div>
 
-          <button
-            type="submit"
-            class="btn-premium w-100"
-            :disabled="
-              salvandoProduto || novoProduto.categoriasIds.length === 0
-            "
-          >
+          <button type="submit" class="btn-premium w-100" :disabled="salvandoProduto || novoProduto.categoriasIds.length === 0
+            ">
             {{ salvandoProduto ? "A salvar..." : "Salvar Produto" }}
           </button>
         </form>
@@ -285,17 +179,10 @@
         </p>
 
         <div class="row g-4">
-          <div
-            class="col-md-4"
-            v-for="categoria in categorias"
-            :key="categoria.id"
-          >
+          <div class="col-md-4" v-for="categoria in categorias" :key="categoria.id">
             <div class="cat-card p-4 rounded-4 shadow-sm bg-white">
-              <img
-                :src="`http://localhost:8080/api/categorias/${categoria.id}/imagem`"
-                :alt="categoria.nome"
-                class="hero-img"
-              />
+              <img :src="`http://localhost:8080/api/categorias/${categoria.id}/imagem`" :alt="categoria.nome"
+                class="hero-img" />
               <h3 class="mt-3">{{ categoria.nome }}</h3>
             </div>
           </div>
@@ -306,7 +193,7 @@
     <section class="produtos py-5 bg-light fade-in-up">
       <div class="container text-center">
         <h2 class="mb-5">Nossos Produtos</h2>
-        
+
         <p v-if="produtos.length === 0" class="text-muted mb-5">
           Nenhum produto disponível no momento.
         </p>
@@ -314,18 +201,14 @@
         <div class="row g-4">
           <div class="col-md-3" v-for="produto in produtos" :key="produto.id">
             <div class="card h-100 shadow-sm border-0" style="transition: transform 0.2s;">
-              <img 
-                :src="`http://localhost:8080/api/produtos/${produto.id}/imagem`" 
-                class="card-img-top" 
-                :alt="produto.nome"
-                style="height: 250px; object-fit: cover;"
-              >
+              <img :src="`http://localhost:8080/api/produtos/${produto.id}/imagem`" class="card-img-top"
+                :alt="produto.nome" style="height: 250px; object-fit: cover;">
               <div class="card-body d-flex flex-column text-start">
                 <h5 class="card-title fw-bold mb-1">{{ produto.nome }}</h5>
                 <p class="card-text text-muted small mb-2 text-truncate">{{ produto.descricao }}</p>
-                
+
                 <p class="fs-5 fw-bold mb-1" style="color: var(--primary-color)">R$ {{ produto.preco.toFixed(2) }}</p>
-                
+
                 <div class="mb-3 d-flex align-items-center">
                   <div class="d-flex align-items-center" style="gap: 3px;">
                     <span v-for="n in 5" :key="n"
@@ -333,15 +216,17 @@
 
                       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256"
                         style="width:18px;height:18px;display:block;">
-                        <path d="M128,22.9l27.5,55.7l61.5,8.9l-44.5,43.4l10.5,61.3L128,163.8l-55,28.9l10.5-61.3L39,87.5l61.5-8.9L128,22.9z"
-                          fill="#e0e0e0"/>
+                        <path
+                          d="M128,22.9l27.5,55.7l61.5,8.9l-44.5,43.4l10.5,61.3L128,163.8l-55,28.9l10.5-61.3L39,87.5l61.5-8.9L128,22.9z"
+                          fill="#e0e0e0" />
                       </svg>
 
                       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256"
                         style="position:absolute;top:0;left:0;width:18px;height:18px;display:block;"
                         :style="{ clipPath: `inset(0 ${100 - calcularPorcentagem(produto.mediaAvaliacoes || 0, n)}% 0 0)` }">
-                        <path d="M128,22.9l27.5,55.7l61.5,8.9l-44.5,43.4l10.5,61.3L128,163.8l-55,28.9l10.5-61.3L39,87.5l61.5-8.9L128,22.9z"
-                          fill="#ffc107"/>
+                        <path
+                          d="M128,22.9l27.5,55.7l61.5,8.9l-44.5,43.4l10.5,61.3L128,163.8l-55,28.9l10.5-61.3L39,87.5l61.5-8.9L128,22.9z"
+                          fill="#ffc107" />
                       </svg>
 
                     </span>
@@ -353,7 +238,8 @@
                   </span>
                 </div>
 
-                <button class="btn-premium w-100 mt-auto py-2" style="font-size: 0.9rem;">
+                <button class="btn-premium w-100 mt-auto py-2" style="font-size: 0.9rem;"
+                  @click="adicionarAoCarrinho(produto.id)">
                   Adicionar ao Carrinho
                 </button>
               </div>
@@ -362,8 +248,88 @@
         </div>
       </div>
     </section>
-
   </div>
+
+  <div class="sidebar">
+    <!-- Overlay escuro atrás do sidebar -->
+    <div v-if="sidebarAberta" class="sidebar-overlay" @click="fecharSidebar"></div>
+
+    <!-- Sidebar do Carrinho -->
+    <div class="carrinho-sidebar" :class="{ 'sidebar-open': sidebarAberta }">
+      <div class="d-flex justify-content-between align-items-center mb-4">
+        <h5 class="fw-bold mb-0"><i class="ph ph-handbag me-2"></i>Meu Carrinho</h5>
+        <button class="btn-close-modal" @click="fecharSidebar">
+          <i class="ph ph-x"></i>
+        </button>
+      </div>
+
+      <!-- Carrinho vazio -->
+      <div v-if="itensCarrinho.length === 0" class="text-center py-5">
+        <i class="ph ph-handbag" style="font-size: 3rem; color: var(--text-secondary)"></i>
+        <p class="mt-3 text-muted">O seu carrinho está vazio.</p>
+      </div>
+
+      <!-- Itens do carrinho -->
+      <div v-else class="d-flex flex-column h-100">
+        <div class="sidebar-itens flex-grow-1">
+          <div v-for="item in itensCarrinho" :key="item.itemId"
+            class="sidebar-item d-flex align-items-center gap-3 py-3">
+            <img :src="`http://localhost:8080/api/produtos/${item.produtoId}/imagem`" :alt="item.produtoNome"
+              class="sidebar-item-img rounded-2" />
+            <div class="flex-grow-1">
+              <p class="fw-bold mb-0 small">{{ item.produtoNome }}</p>
+              <p class="text-muted mb-1" style="font-size: 0.8rem">R$ {{ item.precoUnitario.toFixed(2) }}
+              </p>
+              <div class="d-flex align-items-center gap-2">
+                <button class="btn-qty-sm" @click="removerItemSidebar(item.produtoId)">
+                  <i class="ph ph-minus"></i>
+                </button>
+                <span class="fw-bold small">{{ item.quantidade }}</span>
+                <button class="btn-qty-sm" @click="adicionarItemSidebar(item.produtoId)">
+                  <i class="ph ph-plus"></i>
+                </button>
+              </div>
+            </div>
+            <p class="fw-bold mb-0 small" style="color: var(--primary-color)">
+              R$ {{ item.precoTotal.toFixed(2) }}
+            </p>
+          </div>
+        </div>
+
+        <div class="sidebar-footer mt-auto pt-3">
+          <div class="d-flex justify-content-between mb-3">
+            <span class="text-muted">Subtotal</span>
+            <span class="fw-bold">R$ {{ subtotalCarrinho.toFixed(2) }}</span>
+          </div>
+          <RouterLink to="/carrinho" class="btn-premium w-100 text-center text-decoration-none d-block"
+            @click="fecharSidebar">
+            Finalizar Pedido
+          </RouterLink>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal de login necessário -->
+    <div v-if="modalLoginAberto" class="modal-overlay" @click.self="modalLoginAberto = false">
+      <div class="modal-content fade-in-up text-center">
+        <i class="ph ph-lock" style="font-size: 3rem; color: var(--text-secondary)"></i>
+        <h4 class="fw-bold mt-3">Faça login para comprar</h4>
+        <p class="text-muted mb-4">Você precisa estar logado para adicionar produtos ao carrinho.</p>
+        <RouterLink to="/login" class="btn-premium w-100 text-decoration-none d-block mb-3">
+          Fazer Login
+        </RouterLink>
+        <button class="btn btn-link text-muted text-decoration-none" @click="modalLoginAberto = false">
+          Continuar navegando
+        </button>
+      </div>
+    </div>
+    <!-- Botão flutuante para abrir o carrinho -->
+    <button class="btn-carrinho-flutuante" @click="sidebarAberta = true" title="Ver carrinho">
+      <i class="ph ph-handbag"></i>
+      <span v-if="itensCarrinho.length > 0" class="flutuante-count">{{ itensCarrinho.length }}</span>
+    </button>
+  </div>
+
 </template>
 
 <script setup>
@@ -416,6 +382,10 @@ onMounted(() => {
       if (roles.includes("ADMIN") || roles.includes("ROLE_ADMIN")) {
         isAdmin.value = true;
       }
+
+      // Carregar carrinho ao entrar na home
+      const usuarioId = dadosToken.usuarioId || dadosToken.id;
+      if (usuarioId) carregarCarrinho(usuarioId);
     }
   }
   carregarCategorias();
@@ -586,6 +556,84 @@ const salvarProduto = async () => {
     salvandoProduto.value = false;
   }
 };
+
+// Variáveis do sidebar
+const sidebarAberta = ref(false);
+const modalLoginAberto = ref(false);
+const itensCarrinho = ref([]);
+const subtotalCarrinho = ref(0);
+
+const fecharSidebar = () => {
+  sidebarAberta.value = false;
+};
+
+const carregarCarrinho = async (usuarioId) => {
+  try {
+    const resposta = await api.get(`/carrinhos/${usuarioId}`);
+    itensCarrinho.value = resposta.data.itens;
+    subtotalCarrinho.value = resposta.data.subtotal;
+  } catch {
+    itensCarrinho.value = [];
+    subtotalCarrinho.value = 0;
+  }
+};
+
+// Substitui a função adicionarAoCarrinho anterior
+const adicionarAoCarrinho = async (produtoId) => {
+  if (!estaLogado.value) {
+    modalLoginAberto.value = true;
+    return;
+  }
+
+  try {
+    const token = localStorage.getItem("token_vestebem");
+    const payload = JSON.parse(atob(token.split(".")[1]));
+    const usuarioId = payload.usuarioId || payload.id;
+
+    const resposta = await api.post(`/carrinhos/${usuarioId}/adicionar`, {
+      produtoId,
+      quantidade: 1,
+    });
+
+    itensCarrinho.value = resposta.data.itens;
+    subtotalCarrinho.value = resposta.data.subtotal;
+    sidebarAberta.value = true;
+  } catch (error) {
+    alert(error.response?.data || "Erro ao adicionar ao carrinho.");
+  }
+};
+
+const removerItemSidebar = async (produtoId) => {
+  try {
+    const token = localStorage.getItem("token_vestebem");
+    const payload = JSON.parse(atob(token.split(".")[1]));
+    const usuarioId = payload.usuarioId || payload.id;
+
+    const resposta = await api.delete(`/carrinhos/${usuarioId}/remover/${produtoId}`);
+    itensCarrinho.value = resposta.data.itens;
+    subtotalCarrinho.value = resposta.data.subtotal;
+  } catch (error) {
+    alert(error.response?.data || "Erro ao remover item.");
+  }
+};
+
+const adicionarItemSidebar = async (produtoId) => {
+  try {
+    const token = localStorage.getItem("token_vestebem");
+    const payload = JSON.parse(atob(token.split(".")[1]));
+    const usuarioId = payload.usuarioId || payload.id;
+
+    const resposta = await api.post(`/carrinhos/${usuarioId}/adicionar`, {
+      produtoId,
+      quantidade: 1,
+    });
+    itensCarrinho.value = resposta.data.itens;
+    subtotalCarrinho.value = resposta.data.subtotal;
+  } catch (error) {
+    alert(error.response?.data || "Erro ao adicionar item.");
+  }
+};
+
 </script>
 
 <style scoped>
@@ -691,6 +739,7 @@ const salvarProduto = async () => {
     opacity: 0;
     transform: translateY(30px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
@@ -708,6 +757,7 @@ const salvarProduto = async () => {
     text-align: center;
     gap: 3rem;
   }
+
   .hero-text p {
     margin: 0 auto 2rem;
   }
@@ -767,5 +817,116 @@ const salvarProduto = async () => {
   border-color: var(--primary-color);
   background: white;
   box-shadow: 0 0 0 4px rgba(15, 23, 42, 0.05);
+}
+
+.carrinho-sidebar {
+  position: fixed;
+  top: 0;
+  right: -420px;
+  width: 400px;
+  height: 100vh;
+  background: white;
+  box-shadow: -10px 0 40px rgba(0, 0, 0, 0.1);
+  z-index: 9999;
+  padding: 2rem;
+  transition: right 0.3s cubic-bezier(0.25, 1, 0.5, 1);
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+}
+
+.sidebar-open {
+  right: 0;
+}
+
+.sidebar-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.3);
+  backdrop-filter: blur(2px);
+  z-index: 9998;
+}
+
+.sidebar-item {
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.sidebar-item:last-child {
+  border-bottom: none;
+}
+
+.sidebar-item-img {
+  width: 60px;
+  height: 60px;
+  object-fit: cover;
+  flex-shrink: 0;
+}
+
+.sidebar-footer {
+  border-top: 1px solid #f1f5f9;
+}
+
+.btn-qty-sm {
+  width: 24px;
+  height: 24px;
+  border: 1px solid #e2e8f0;
+  border-radius: 50%;
+  background: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 0.75rem;
+  transition: all 0.2s;
+}
+
+.btn-qty-sm:hover {
+  background: var(--primary-color);
+  color: white;
+  border-color: var(--primary-color);
+}
+
+.btn-carrinho-flutuante {
+  position: fixed;
+  right: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  background: var(--primary-color);
+  color: white;
+  border: none;
+  border-radius: 12px 0 0 12px;
+  width: 48px;
+  height: 56px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.4rem;
+  cursor: pointer;
+  z-index: 9997;
+  box-shadow: -4px 0 20px rgba(0, 0, 0, 0.15);
+  transition: width 0.2s ease;
+}
+
+.btn-carrinho-flutuante:hover {
+  width: 56px;
+}
+
+.flutuante-count {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  background: #e53e3e;
+  color: white;
+  font-size: 0.65rem;
+  font-weight: 700;
+  width: 16px;
+  height: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
 }
 </style>

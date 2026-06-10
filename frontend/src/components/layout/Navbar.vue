@@ -45,13 +45,17 @@
           <i class="ph ph-user"></i>
         </RouterLink>
 
-        <a href="#" title="Carrinho" class="text-dark fs-4 position-relative">
+        <RouterLink
+          to="/carrinho"
+          title="Carrinho"
+          class="text-dark fs-4 position-relative"
+        >
           <i class="ph ph-handbag"></i>
 
-          <span class="cart-count">
+          <span v-if="quantidadeCarrinho > 0" class="cart-count">
             {{ quantidadeCarrinho }}
           </span>
-        </a>
+        </RouterLink>
       </div>
     </div>
   </nav>

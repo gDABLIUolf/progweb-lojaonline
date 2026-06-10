@@ -27,6 +27,7 @@ public class TokenService {
                     .withIssuer("VesteBem API")
                     .withSubject(usuario.getEmail())
                     .withClaim("role", permissaoDoUsuario)
+                    .withClaim("usuarioId", usuario.getId())
                     .withExpiresAt(gerarDataExpiracao())
                     .sign(algorithm);
         } catch (JWTCreationException exception) {

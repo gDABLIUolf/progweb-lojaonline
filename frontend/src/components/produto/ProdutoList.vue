@@ -14,7 +14,10 @@
           v-for="produto in produtos"
           :key="produto.id"
         >
-          <ProdutoCard :produto="produto" />
+          <ProdutoCard
+            :produto="produto"
+            @adicionar-carrinho="$emit('adicionar-carrinho', $event)"
+          />
         </div>
       </div>
     </div>
@@ -30,6 +33,8 @@ defineProps({
     default: () => [],
   },
 });
+
+defineEmits(["adicionar-carrinho"]);
 </script>
 
 <style scoped>

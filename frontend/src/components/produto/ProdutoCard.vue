@@ -30,10 +30,15 @@
         {{ produto.descricao }}
       </p>
 
-      <div class="d-flex justify-content-between align-items-center mt-auto">
-        <span class="preco fw-bold fs-5">R$ {{ precoFormatado }}</span>
-        <button class="btn btn-dark rounded-pill px-4 py-2 btn-comprar">
-          Comprar
+      <div class="mt-auto">
+        <div class="mb-2">
+          <span class="preco fw-bold fs-5">R$ {{ precoFormatado }}</span>
+        </div>
+        <button
+          class="btn btn-dark rounded-pill w-100 py-2 btn-comprar"
+          @click="$emit('adicionar-carrinho', produto.id)"
+        >
+          Adicionar ao carrinho
         </button>
       </div>
     </div>
@@ -49,6 +54,8 @@ const props = defineProps({
     required: true,
   },
 });
+
+defineEmits(["adicionar-carrinho"]);
 
 const temImagem = ref(true);
 

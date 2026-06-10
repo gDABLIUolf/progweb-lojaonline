@@ -190,7 +190,7 @@ onUnmounted(() => {
 
 <style scoped>
 .discount-carousel-section {
-  background-color: var(--surface-light);
+  background-color: transparent;
 }
 
 .carousel-container {
@@ -199,6 +199,7 @@ onUnmounted(() => {
   border-radius: var(--radius-lg);
   overflow: hidden;
   box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+  height: 450px;
   min-height: 450px;
   border: 1px solid rgba(255, 255, 255, 0.05);
 }
@@ -206,6 +207,7 @@ onUnmounted(() => {
 .carousel-slide {
   display: flex;
   flex-direction: row;
+  height: 450px;
   min-height: 450px;
   cursor: pointer;
   width: 100%;
@@ -213,11 +215,10 @@ onUnmounted(() => {
 
 /* Coluna de Imagem Promocional */
 .slide-image-wrap {
-  flex: 1.2;
+  flex: 1.5;
   position: relative;
   overflow: hidden;
-  height: 150%;
-  aspect-ratio: 16 / 9;
+  height: 100%;
 }
 
 .slide-image {
@@ -265,7 +266,8 @@ onUnmounted(() => {
 /* Coluna de Conteúdo da Oferta */
 .slide-content {
   flex: 1;
-  padding: 4.5rem;
+  padding: 3rem 4rem;
+  height: 100%;
   display: flex;
   flex-direction: column;
   justify-content: center;

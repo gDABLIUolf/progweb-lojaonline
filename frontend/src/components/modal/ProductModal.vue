@@ -120,7 +120,7 @@
 
         <div class="mb-3">
           <label class="form-label text-muted small fw-bold">
-            IMAGENS DO PRODUTO {{ produtoParaEditar ? "(OPCIONAL)" : "" }}
+            IMAGENS DO PRODUTO (1:1)
           </label>
 
           <input
@@ -135,7 +135,7 @@
         <!-- Imagem do Carrossel Promocional -->
         <div class="mb-4" v-if="novoProduto.destaqueCarrossel">
           <label class="form-label text-muted small fw-bold">
-            IMAGEM DE BANNER CARROSSEL (OPCIONAL)
+            IMAGEM DE BANNER CARROSSEL (16:9)
           </label>
 
           <input
@@ -223,6 +223,22 @@ const salvarProduto = async () => {
   if (novoProduto.value.categoriasIds.length === 0) {
     erroModal.value = "Selecione pelo menos uma categoria.";
     return;
+  }
+
+  // Validação: Pelo menos uma imagem do produto (1:1)
+  const temImagemExistente = props.produtoParaEditar && props.produtoParaEditar.imagensIds && props.produtoParaEditar.imagensIds.length > 0;
+  if (arquivosImagens.value.length === 0 && !temImagemExistente) {
+    erroModal.value = "O produto deve possuir pelo menos uma imagem (proporção 1:1).";
+    return;
+  }
+
+  // Validação: Imagem do carrossel (16:9) se destaqueCarrossel for verdadeiro
+  if (novoProduto.value.destaqueCarrossel) {
+    const temBannerExistente = props.produtoParaEditar && props.produtoParaEditar.temImagemCarrossel;
+    if (!arquivoImagemCarrossel.value && !temBannerExistente) {
+      erroModal.value = "Para destacar o produto no carrossel, é obrigatório enviar a imagem de banner (proporção 16:9).";
+      return;
+    }
   }
 
   salvando.value = true;

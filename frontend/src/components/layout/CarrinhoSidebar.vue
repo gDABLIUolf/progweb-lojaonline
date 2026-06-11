@@ -172,7 +172,6 @@ const props = defineProps({
 
 const emit = defineEmits(["close", "adicionar-item", "remover-item", "carrinho-atualizado"]);
 
-// ── Seleção ──────────────────────────────────────────────────────────────────
 const itensSelecionados = ref([]);
 const finalizando = ref(false);
 
@@ -221,7 +220,6 @@ const toggleTodos = () => {
   }
 };
 
-// ── Checkout parcial ──────────────────────────────────────────────────────────
 const finalizarSelecionados = async () => {
   if (!props.usuarioId || nenhumSelecionado.value) return;
   

@@ -43,7 +43,6 @@ public class PedidoService {
         Usuario usuario = usuarioRepository.findById(pedidoRequestDTO.usuarioId())
                 .orElseThrow(()-> new IllegalArgumentException("Usuário não encontrado!"));
 
-        // 1. Validar estoque antes de formalizar o pedido
         for (ItemPedidoRequestDTO itemDTO : pedidoRequestDTO.itens()){
             Produto produto = produtoRepository.findById(itemDTO.produtoId())
                     .orElseThrow(()-> new IllegalArgumentException("Produto ID " + itemDTO.produtoId() + " não encontrado!"));
@@ -53,14 +52,12 @@ public class PedidoService {
             }
         }
 
-        // 2. Criar pedido com status PENDENTE (aberto)
         Pedido pedido = new Pedido(usuario);
         pedido.setStatus("PENDENTE");
         pedido = pedidoRepository.save(pedido);
 
         BigDecimal total = BigDecimal.ZERO;
 
-        // 3. Salvar os itens do pedido
         for (ItemPedidoRequestDTO itemDTO : pedidoRequestDTO.itens()){
             Produto produto = produtoRepository.findById(itemDTO.produtoId()).get();
 
@@ -84,7 +81,6 @@ public class PedidoService {
             itemPedidoRepository.save(itemPedido);
         }
 
-        // 4. Remover os itens comprados do carrinho
         Carrinho carrinho = carrinhoRepository.findByUsuarioId(usuario.getId()).orElse(null);
         if (carrinho != null) {
             List<Long> produtoIdsParaRemover = pedidoRequestDTO.itens().stream()
@@ -120,11 +116,8 @@ public class PedidoService {
 
         String statusFormatado = novoStatus.trim().toUpperCase();
 
-        // Se estiver concluindo o pedido (e ele não estava concluído antes), atualiza o estoque
-        if ("CONCLUIDO".equals(statusFormatado) && !"CONCLUIDO".equals(pedido.getStatus())) {
+        if (statusFormatado.equals("CONCLUIDO") && !pedido.getStatus().equals("CONCLUIDO")) {
             List<ItemPedido> itens = itemPedidoRepository.findByPedidoId(pedido.getId());
-            
-            // Validar se há estoque para todos os itens
             for (ItemPedido item : itens) {
                 Produto produto = item.getProduto();
                 if (produto.getQuantidadeEstoque() < item.getQuantidade()) {
@@ -132,7 +125,6 @@ public class PedidoService {
                 }
             }
 
-            // Deduzir o estoque
             for (ItemPedido item : itens) {
                 Produto produto = item.getProduto();
                 produto.setQuantidadeEstoque(produto.getQuantidadeEstoque() - item.getQuantidade());
@@ -162,7 +154,6 @@ public class PedidoService {
             throw new IllegalArgumentException("O carrinho está vazio.");
         }
 
-        // 1. Validar estoque antes de formalizar o pedido
         for (var itemCarrinho : carrinho.getItens()) {
             Produto produto = itemCarrinho.getProduto();
             if (produto.getQuantidadeEstoque() < itemCarrinho.getQuantidade()) {
@@ -170,14 +161,12 @@ public class PedidoService {
             }
         }
 
-        // 2. Criar pedido com status PENDENTE
         Pedido pedido = new Pedido(usuario);
         pedido.setStatus("PENDENTE");
         pedido = pedidoRepository.save(pedido);
 
         BigDecimal total = BigDecimal.ZERO;
 
-        // 3. Salvar os itens do pedido
         for (var itemCarrinho : carrinho.getItens()) {
             Produto produto = itemCarrinho.getProduto();
 
@@ -201,7 +190,6 @@ public class PedidoService {
             itemPedidoRepository.save(itemPedido);
         }
 
-        // 4. Limpar o carrinho
         carrinho.getItens().clear();
         carrinhoRepository.save(carrinho);
 

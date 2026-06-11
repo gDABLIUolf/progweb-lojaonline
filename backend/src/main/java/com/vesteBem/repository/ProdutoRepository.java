@@ -1,4 +1,4 @@
-package com.vesteBem.repository;// com.vesteBem.repository.ProdutoRepository
+package com.vesteBem.repository;
 import com.vesteBem.model.Produto;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;

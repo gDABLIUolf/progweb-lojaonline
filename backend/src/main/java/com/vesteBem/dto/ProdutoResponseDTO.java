@@ -14,7 +14,7 @@ public record ProdutoResponseDTO(
         BigDecimal preco,
         Integer quantidadeEstoque,
         List<String> categoriasNomes,
-        List<Long> imagensIds, // NOVO: IDs para buscar as fotos individualmente
+        List<Long> imagensIds,
         Double mediaAvaliacoes,
         List<AvaliacaoResponseDTO> avaliacoes,
         Integer desconto,
@@ -29,29 +29,29 @@ public record ProdutoResponseDTO(
                 produto.getPreco(),
                 produto.getQuantidadeEstoque(),
 
-                // Mapeamento de Categorias
+
                 produto.getCategorias() != null ?
                         produto.getCategorias().stream().map(Categoria::getNome).toList() : List.of(),
 
-                // Mapeamento de IDs de Imagens
+
                 produto.getImagens() != null ?
                         produto.getImagens().stream().map(ProdutoImagem::getId).toList() : List.of(),
 
-                // Média de Avaliações
+
                 produto.getAvaliacoes() != null && !produto.getAvaliacoes().isEmpty() ?
                         Math.round(produto.getAvaliacoes().stream().mapToDouble(a -> a.getNota()).average().orElse(0.0) * 10.0) / 10.0 : 0.0,
 
-                // Avaliações
+
                 produto.getAvaliacoes() != null ?
                         produto.getAvaliacoes().stream().map(AvaliacaoResponseDTO::new).toList() : List.of(),
 
-                // Mapeamento de Desconto
+
                 produto.getDesconto() != null ? produto.getDesconto() : 0,
 
-                // Mapeamento de Destaque Carrossel
+
                 produto.getDestaqueCarrossel() != null ? produto.getDestaqueCarrossel() : false,
 
-                // Mapeamento de existência da Imagem do Carrossel
+
                 produto.getImagemCarrossel() != null
         );
     }

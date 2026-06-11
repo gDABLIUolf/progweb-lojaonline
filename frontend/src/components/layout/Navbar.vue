@@ -203,13 +203,12 @@ const carregarCategorias = async () => {
 const handleScroll = () => {
   if (route.path !== "/") return;
 
-  // Se estiver no final da página, ativa contato
   if (window.innerHeight + window.scrollY >= document.documentElement.scrollHeight - 80) {
     activeSection.value = "contato";
     return;
   }
 
-  const scrollPosition = window.scrollY + 120; // offset do topo
+  const scrollPosition = window.scrollY + 120;
 
   const categoriasEl = document.getElementById("categorias-secao");
   const produtosEl = document.querySelector(".produtos");
@@ -255,7 +254,7 @@ onMounted(() => {
   }
   carregarCategorias();
   window.addEventListener("scroll", handleScroll);
-  setTimeout(handleScroll, 200); // Executa um delay para dar tempo do DOM montar
+  setTimeout(handleScroll, 200);
 });
 
 onUnmounted(() => {
@@ -270,6 +269,17 @@ watch(() => route.path, (newPath) => {
   }
 });
 
+const NAVBAR_OFFSET = 80;
+
+/**
+ * Scrolla suavemente até um elemento descontando a altura da navbar.
+ */
+const scrollParaElemento = (el) => {
+  if (!el) return;
+  const top = el.getBoundingClientRect().top + window.scrollY - NAVBAR_OFFSET;
+  window.scrollTo({ top, behavior: "smooth" });
+};
+
 const irParaInicio = () => {
   if (route.path === "/") {
     window.scrollTo({ top: 0, behavior: "smooth" });
@@ -281,7 +291,7 @@ const irParaInicio = () => {
 const irParaCategorias = () => {
   const el = document.getElementById("categorias-secao");
   if (el) {
-    el.scrollIntoView({ behavior: "smooth" });
+    scrollParaElemento(el);
   } else {
     router.push("/#categorias-secao");
   }
@@ -290,7 +300,7 @@ const irParaCategorias = () => {
 const irParaPromocoes = () => {
   const el = document.getElementById("promocoes-secao");
   if (el) {
-    el.scrollIntoView({ behavior: "smooth" });
+    scrollParaElemento(el);
   } else {
     router.push("/#promocoes");
   }
@@ -299,7 +309,7 @@ const irParaPromocoes = () => {
 const irParaContato = () => {
   const el = document.getElementById("footer");
   if (el) {
-    el.scrollIntoView({ behavior: "smooth" });
+    scrollParaElemento(el);
     const targetEl = document.getElementById("contato-secao");
     if (targetEl) {
       targetEl.classList.add("highlight-pulse");

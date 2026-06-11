@@ -23,7 +23,7 @@ public class ItemPedido {
     private Integer quantidade;
 
     @Column(nullable = false)
-    private BigDecimal precoUnitario; // O "fotograma" do preço no momento da compra
+    private BigDecimal precoUnitario;
 
     public ItemPedido() {}
 
@@ -34,7 +34,7 @@ public class ItemPedido {
         this.precoUnitario = precoUnitario;
     }
 
-    // Getters e Setters
+
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
 

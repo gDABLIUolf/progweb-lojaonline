@@ -28,13 +28,13 @@ public class DatabaseInitializer implements CommandLineRunner {
     private final PasswordEncoder passwordEncoder;
 
     public DatabaseInitializer(CategoriaRepository categoriaRepository,
-                               ProdutoRepository produtoRepository,
-                               UsuarioRepository usuarioRepository,
-                               AvaliacaoRepository avaliacaoRepository,
-                               PedidoRepository pedidoRepository,
-                               ItemPedidoRepository itemPedidoRepository,
-                               CarrinhoRepository carrinhoRepository,
-                               PasswordEncoder passwordEncoder) {
+            ProdutoRepository produtoRepository,
+            UsuarioRepository usuarioRepository,
+            AvaliacaoRepository avaliacaoRepository,
+            PedidoRepository pedidoRepository,
+            ItemPedidoRepository itemPedidoRepository,
+            CarrinhoRepository carrinhoRepository,
+            PasswordEncoder passwordEncoder) {
         this.categoriaRepository = categoriaRepository;
         this.produtoRepository = produtoRepository;
         this.usuarioRepository = usuarioRepository;
@@ -69,9 +69,9 @@ public class DatabaseInitializer implements CommandLineRunner {
         String imagemCarrosselPath;
         int estoque;
 
-        ProductSeed(String nome, String descricao, String preco, int[] categoriaIndices,
-                    String[] imagens, Integer desconto, Boolean destaqueCarrossel,
-                    String imagemCarrosselPath, int estoque) {
+        ProductSeed(String nome, String descricao, String preco, int categoriaIndex,
+                String[] imagens, Integer desconto, Boolean destaqueCarrossel,
+                String imagemCarrosselPath, int estoque) {
             this.nome = nome;
             this.descricao = descricao;
             this.preco = new BigDecimal(preco);
@@ -88,22 +88,21 @@ public class DatabaseInitializer implements CommandLineRunner {
     public void run(String... args) throws Exception {
 
         // ── 1. Categorias ──────────────────────────────────────────────────────────
-        // 0=Masculino 1=Feminino 2=Camisa 3=Camiseta 4=Calça 5=Inverno
         String[] catNames = {
-                "Masculino",  // 0
-                "Feminino",   // 1
-                "Camisa",     // 2
-                "Camiseta",   // 3
-                "Calça",      // 4
-                "Inverno"     // 5
+                "Alfaiataria", // 0
+                "Básicos Premium", // 1
+                "Malhas & Tricot", // 2
+                "Casacos & Blazers", // 3
+                "Calças Clean", // 4
+                "Camisaria Fina" // 5
         };
         String[] catImages = {
-                "/img/blazer_1.png",        // Masculino
-                "/img/bodyareia_1.png",     // Feminino
-                "/img/camisabranca_1.png",  // Camisa
-                "/img/camisetanude_1.png",  // Camiseta
-                "/img/calcabege_1.png",     // Calça
-                "/img/sueter_1.png"         // Inverno
+                "/img/cat_tailoring.png",
+                "/img/cat_basics.png",
+                "/img/cat_knitwear.png",
+                "/img/cat_outerwear.png",
+                "/img/cat_trousers.png",
+                "/img/cat_shirts.png"
         };
 
         Categoria[] cats = new Categoria[catNames.length];
@@ -173,216 +172,215 @@ public class DatabaseInitializer implements CommandLineRunner {
         }
 
         // ── 3. Produtos (20) ───────────────────────────────────────────────────────
-        // Categorias: 0=Masculino 1=Feminino 2=Camisa 3=Camiseta 4=Calça 5=Inverno
         List<Produto> produtosSalvos = new ArrayList<>();
 
         if (produtoRepository.count() == 0) {
             ProductSeed[] seeds = {
-                    // ── Alfaiataria Masculina ────────────────────────────────────────
+                    // ── Alfaiataria (0) ─────────────────────────────────────────────
                     new ProductSeed(
                             "Blazer Slim Lã Fria Grafite",
                             "Blazer estruturado com corte slim, lapela chanfrada e abotoamento simples. " +
                                     "Confeccionado em lã fria premium italiana, perfeito para composições formais elegantes.",
-                            "1290.00", new int[]{0, 5}, new String[] {
-                            "/img/blazer_1.png",
-                            "/img/blazer_2.png",
-                            "/img/blazer_3.png"
-                    }, 10, true, "/img/blazer_1.png", 18),
+                            "1290.00", 0, new String[] {
+                                    "/img/blazer_1.png",
+                                    "/img/blazer_2.png",
+                                    "/img/blazer_3.png"
+                            }, 10, true, "/img/blazer_1.png", 18),
 
                     new ProductSeed(
                             "Colete Alfaiataria Minimalista Preto",
                             "Colete clássico com ajuste traseiro em fivela e abotoamento frontal embutido. " +
                                     "Ideal para sobreposições elegantes ou uso como peça única versátil.",
-                            "359.00", new int[]{0, 1, 5}, new String[] {
-                            "/img/coletepreto_1.png",
-                            "/img/coletepreto_2.png",
-                            "/img/coletepreto_3.png"
-                    }, 0, false, null, 30),
+                            "359.00", 0, new String[] {
+                                    "/img/coletepreto_1.png",
+                                    "/img/coletepreto_2.png",
+                                    "/img/coletepreto_3.png"
+                            }, 0, false, null, 30),
 
                     new ProductSeed(
                             "Paletó Clássico Crepe Preto",
                             "Paletó em crepe encorpado de caimento pesado, lapelas de cetim e modelagem " +
                                     "levemente oversized, unindo modernidade e rigor clássico.",
-                            "1490.00", new int[]{0, 5}, new String[] {
-                            "/img/paletopreto_1.png",
-                            "/img/paletopreto_2.png",
-                            "/img/paletopreto_3.png"
-                    }, 15, false, null, 12),
+                            "1490.00", 0, new String[] {
+                                    "/img/paletopreto_1.png",
+                                    "/img/paletopreto_2.png",
+                                    "/img/paletopreto_3.png"
+                            }, 15, false, null, 12),
 
                     new ProductSeed(
                             "Calça Cigarrete Lã Fria Off-White",
                             "Calça cigarrete estruturada em alfaiataria fina, com zíperes invisíveis nas barras " +
                                     "e toque macio ao corpo. Um básico atemporal da alfaiataria.",
-                            "620.00", new int[]{1, 4}, new String[] {
-                            "/img/calcacigarrete_1.png",
-                            "/img/calcacigarrete_2.png",
-                            "/img/calcacigarrete_3.png"
-                    }, 0, false, null, 25),
+                            "620.00", 0, new String[] {
+                                    "/img/calcacigarrete_1.png",
+                                    "/img/calcacigarrete_2.png",
+                                    "/img/calcacigarrete_3.png"
+                            }, 0, false, null, 25),
 
-                    // ── Camisetas ────────────────────────────────────────────────────
+                    // ── Básicos Premium (1) ──────────────────────────────────────────
                     new ProductSeed(
                             "Camiseta Algodão Egípcio Nude",
                             "Camiseta clássica confeccionada em algodão egípcio de fibra longa. " +
                                     "Toque extremamente suave, caimento fluido e gola sutilmente estruturada.",
-                            "189.00", new int[]{1, 3}, new String[] {
-                            "/img/camisetanude_1.png",
-                            "/img/camisetanude_2.png",
-                            "/img/camisetanude_3.png"
-                    }, 0, false, null, 60),
+                            "189.00", 1, new String[] {
+                                    "/img/camisetanude_1.png",
+                                    "/img/camisetanude_2.png",
+                                    "/img/camisetanude_3.png"
+                            }, 0, false, null, 60),
 
                     new ProductSeed(
                             "T-Shirt Pima Premium Preta",
                             "Camiseta premium em algodão pima peruano, conhecida por sua durabilidade, " +
                                     "brilho suave e maciez inigualável. Um essencial do guarda-roupa minimalista.",
-                            "199.00", new int[]{0, 1, 3}, new String[] {
-                            "/img/camisetapreta_1.png",
-                            "/img/camisetapreta_2.png",
-                            "/img/camisetapreta_3.png"
-                    }, 0, true, "/img/camisetapreta_1.png", 45),
+                            "199.00", 1, new String[] {
+                                    "/img/camisetapreta_1.png",
+                                    "/img/camisetapreta_2.png",
+                                    "/img/camisetapreta_3.png"
+                            }, 0, true, "/img/camisetapreta_1.png", 45),
 
                     new ProductSeed(
                             "Body Canelado Minimalista Areia",
                             "Body canelado em malha premium com elastano, decote quadrado e fecho inferior " +
                                     "confortável. Desenha a silhueta de forma clean e elegante.",
-                            "229.00", new int[]{1, 3}, new String[] {
-                            "/img/bodyareia_1.png",
-                            "/img/bodyareia_2.png",
-                            "/img/bodyareia_3.png"
-                    }, 20, false, null, 35),
+                            "229.00", 1, new String[] {
+                                    "/img/bodyareia_1.png",
+                                    "/img/bodyareia_2.png",
+                                    "/img/bodyareia_3.png"
+                            }, 20, false, null, 35),
 
-                    // ── Inverno ──────────────────────────────────────────────────────
+                    // ── Malhas & Tricot (2) ──────────────────────────────────────────
                     new ProductSeed(
                             "Suéter Cashmere Gola Alta Camel",
                             "Suéter luxuoso em puro cashmere mongol. Gola alta aconchegante, " +
                                     "punhos canelados e caimento clássico e atemporal. O máximo em conforto.",
-                            "1890.00", new int[]{0, 1, 5}, new String[] {
-                            "/img/sueter_1.png",
-                            "/img/sueter_2.png",
-                            "/img/sueter_3.png"
-                    }, 25, true, "/img/sueter_1.png", 8),
+                            "1890.00", 2, new String[] {
+                                    "/img/sueter_1.png",
+                                    "/img/sueter_2.png",
+                                    "/img/sueter_3.png"
+                            }, 25, true, "/img/sueter_1.png", 8),
 
                     new ProductSeed(
                             "Cardigan Tricot Oversized Gelo",
                             "Cardigan amplo em tricot texturizado com botões de chifre natural. " +
                                     "Perfeito para sobreposições modernas e aconchegantes nos dias mais frios.",
-                            "589.00", new int[]{1, 5}, new String[] {
-                            "/img/cardigangelo_1.png",
-                            "/img/cardigangelo_2.png",
-                            "/img/cardigangelo_3.png"
-                    }, 0, false, null, 20),
+                            "589.00", 2, new String[] {
+                                    "/img/cardigangelo_1.png",
+                                    "/img/cardigangelo_2.png",
+                                    "/img/cardigangelo_3.png"
+                            }, 0, false, null, 20),
 
                     new ProductSeed(
                             "Blusa Tricot Gola Canoa Preta",
                             "Blusa de tricot fino com decote canoa e mangas 7/8. " +
                                     "Visual clean e sofisticado para noites frescas e composições de inverno.",
-                            "349.00", new int[]{1, 5}, new String[] {
-                            "/img/golacanoa_1.png",
-                            "/img/golacanoa_2.png",
-                            "/img/golacanoa_3.png"
-                    }, 10, false, null, 28),
+                            "349.00", 2, new String[] {
+                                    "/img/golacanoa_1.png",
+                                    "/img/golacanoa_2.png",
+                                    "/img/golacanoa_3.png"
+                            }, 10, false, null, 28),
 
-                    // ── Casacos (Inverno + gênero) ───────────────────────────────────
+                    // ── Casacos & Blazers (3) ────────────────────────────────────────
                     new ProductSeed(
                             "Sobretudo Lã e Alpaca Camel",
                             "Sobretudo longo trespassado confeccionado em mescla nobre de lã virgem e alpaca. " +
                                     "Bolsos embutidos e faixa opcional para amarração. Um investimento atemporal.",
-                            "2490.00", new int[]{0, 1, 5}, new String[] {
-                            "/img/sobretudocamel_1.png",
-                            "/img/sobretudocamel_2.png",
-                            "/img/sobretudocamel_3.png"
-                    }, 30, true, "/img/sobretudocamel_1.png", 6),
+                            "2490.00", 3, new String[] {
+                                    "/img/sobretudocamel_1.png",
+                                    "/img/sobretudocamel_2.png",
+                                    "/img/sobretudocamel_3.png"
+                            }, 30, true, "/img/sobretudocamel_1.png", 6),
 
                     new ProductSeed(
                             "Trench Coat Impermeável Classic",
                             "O clássico casaco de chuva em sarja impermeável com abotoamento duplo, " +
                                     "lapelas largas e cinto ajustável. Referência de estilo britânico.",
-                            "1290.00", new int[]{0, 1, 5}, new String[] {
-                            "/img/trenchcoat_1.png",
-                            "/img/trenchcoat_2.png",
-                            "/img/trenchcoat_3.png"
-                    }, 0, false, null, 10),
+                            "1290.00", 3, new String[] {
+                                    "/img/trenchcoat_1.png",
+                                    "/img/trenchcoat_2.png",
+                                    "/img/trenchcoat_3.png"
+                            }, 0, false, null, 10),
 
                     new ProductSeed(
                             "Blazer Oversized Linho Preto",
                             "Blazer com modelagem ampla e moderna, confeccionado em linho belga estruturado " +
                                     "com forro parcial respirável. Versátil para looks formais e casuais.",
-                            "789.00", new int[]{0, 1}, new String[] {
-                            "/img/blazeroversized_1.png",
-                            "/img/blazeroversized_2.png",
-                            "/img/blazeroversized_3.png"
-                    }, 15, false, null, 22),
+                            "789.00", 3, new String[] {
+                                    "/img/blazeroversized_1.png",
+                                    "/img/blazeroversized_2.png",
+                                    "/img/blazeroversized_3.png"
+                            }, 15, false, null, 22),
 
-                    // ── Calças ───────────────────────────────────────────────────────
+                    // ── Calças Clean (4) ─────────────────────────────────────────────
                     new ProductSeed(
                             "Calça Reta Gabardine Bege",
                             "Calça clássica de gabardine de algodão com corte reto impecável, " +
                                     "ideal para compor com camisas, blazers e sapatos de couro.",
-                            "399.00", new int[]{0, 4}, new String[] {
-                            "/img/calcabege_1.png",
-                            "/img/calcabege_2.png",
-                            "/img/calcabege_3.png"
-                    }, 0, false, null, 40),
+                            "399.00", 4, new String[] {
+                                    "/img/calcabege_1.png",
+                                    "/img/calcabege_2.png",
+                                    "/img/calcabege_3.png"
+                            }, 0, false, null, 40),
 
                     new ProductSeed(
                             "Pantalona Fluida Crepe Preta",
                             "Pantalona de cintura alta com caimento super fluido, cós largo estruturado " +
                                     "e bolsos faca nas laterais. O equilíbrio perfeito entre conforto e elegância.",
-                            "459.00", new int[]{1, 4}, new String[] {
-                            "/img/pantalonepreta_1.png",
-                            "/img/pantalonepreta_2.png",
-                            "/img/pantalonepreta_3.png"
-                    }, 15, false, null, 32),
+                            "459.00", 4, new String[] {
+                                    "/img/pantalonepreta_1.png",
+                                    "/img/pantalonepreta_2.png",
+                                    "/img/pantalonepreta_3.png"
+                            }, 15, false, null, 32),
 
                     new ProductSeed(
                             "Calça Wide Leg Linho Off-White",
                             "Calça de linho com modelagem wide leg, pregas frontais e caimento leve. " +
                                     "Perfeita para os dias de verão com composições leves e sofisticadas.",
-                            "520.00", new int[]{1, 4}, new String[] {
-                            "/img/wideleg_1.png",
-                            "/img/wideleg_2.png",
-                            "/img/wideleg_3.png"
-                    }, 0, false, null, 28),
+                            "520.00", 4, new String[] {
+                                    "/img/wideleg_1.png",
+                                    "/img/wideleg_2.png",
+                                    "/img/wideleg_3.png"
+                            }, 0, false, null, 28),
 
-                    // ── Camisas ──────────────────────────────────────────────────────
+                    // ── Camisaria Fina (5) ───────────────────────────────────────────
                     new ProductSeed(
                             "Camisa Seda Pura Branca",
                             "Camisa clássica de botões em seda pura premium. Caimento fluido, " +
                                     "punhos largos e botões de madrepérola legítima. O ápice da camisaria.",
-                            "1190.00", new int[]{1, 2}, new String[] {
-                            "/img/camisabranca_1.png",
-                            "/img/camisabranca_2.png",
-                            "/img/camisabranca_3.png"
-                    }, 20, true, "/img/camisabranca_1.png", 15),
+                            "1190.00", 5, new String[] {
+                                    "/img/camisabranca_1.png",
+                                    "/img/camisabranca_2.png",
+                                    "/img/camisabranca_3.png"
+                            }, 20, true, "/img/camisabranca_1.png", 15),
 
                     new ProductSeed(
                             "Camisa Linho Premium Azul Claríssimo",
                             "Camisa casual chique em linho belga amaciado. Colarinho levemente desestruturado " +
                                     "e toque arejado. Perfeita para looks de verão com estilo.",
-                            "389.00", new int[]{0, 2}, new String[] {
-                            "/img/camisaazul_1.png",
-                            "/img/camisaazul_2.png",
-                            "/img/camisaazul_3.png"
-                    }, 0, false, null, 38),
+                            "389.00", 5, new String[] {
+                                    "/img/camisaazul_1.png",
+                                    "/img/camisaazul_2.png",
+                                    "/img/camisaazul_3.png"
+                            }, 0, false, null, 38),
 
                     new ProductSeed(
                             "Camisa Algodão Egípcio Preta",
                             "Camisa formal em tricoline de algodão egípcio fio 120. " +
                                     "Caimento estruturado e acabamento impecável para ocasiões especiais.",
-                            "489.00", new int[]{0, 2}, new String[] {
-                            "/img/camisapreta_1.png",
-                            "/img/camisapreta_2.png",
-                            "/img/camisapreta_3.png"
-                    }, 0, false, null, 20),
+                            "489.00", 5, new String[] {
+                                    "/img/camisapreta_1.png",
+                                    "/img/camisapreta_2.png",
+                                    "/img/camisapreta_3.png"
+                            }, 0, false, null, 20),
 
                     new ProductSeed(
                             "Chemise Midi Linho Cru",
                             "Vestido camisa com comprimento midi, abotoamento frontal completo e cinto " +
                                     "de mesmo tecido para ajuste. Transita entre o casual e o formal com elegância.",
-                            "590.00", new int[]{1, 2}, new String[] {
-                            "/img/midlinho_1.png",
-                            "/img/midlinho_2.png",
-                            "/img/midlinho_3.png"
-                    }, 10, false, null, 18)
+                            "590.00", 5, new String[] {
+                                    "/img/midlinho_1.png",
+                                    "/img/midlinho_2.png",
+                                    "/img/midlinho_3.png"
+                            }, 10, false, null, 18)
             };
 
             for (ProductSeed seed : seeds) {

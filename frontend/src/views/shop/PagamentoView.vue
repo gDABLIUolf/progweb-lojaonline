@@ -21,6 +21,12 @@
         <RouterLink to="/login" class="btn-premium px-5 py-3 text-decoration-none">Entrar na Minha Conta</RouterLink>
       </div>
 
+      <!-- Carregando dados do pedido -->
+      <div v-else-if="carregando" class="text-center py-5 card p-5 shadow-sm border-0">
+        <div class="spinner-border text-dark mx-auto" role="status"></div>
+        <p class="mt-3 text-muted">A carregar os dados do pagamento...</p>
+      </div>
+
       <!-- Caso o carrinho ou itens de checkout estejam vazios e não tenha finalizado -->
       <div v-else-if="itens.length === 0 && !sucesso" class="text-center py-5 fade-in-up card p-5 shadow-sm border-0">
         <i class="ph ph-shopping-cart" style="font-size: 4rem; color: var(--text-secondary)"></i>
@@ -40,19 +46,32 @@
             </div>
             <h2 class="fw-bold mb-2">Pedido Realizado!</h2>
             <p class="text-muted mb-4 fs-5">
-              Sua compra de <strong class="text-dark">R$ {{ totalPedido.toFixed(2) }}</strong> foi processada com sucesso.
+              Sua compra de <strong class="text-dark">R$ {{ obterValorTotalExibido().toFixed(2) }}</strong> foi processada com sucesso.
             </p>
 
             <div class="info-pagamento-sucesso p-4 rounded-4 mb-4 text-start">
               <h6 class="fw-bold border-bottom pb-2 mb-3">Resumo do Pagamento (Simulado)</h6>
               <div class="d-flex justify-content-between mb-2 small">
                 <span class="text-muted">Método Escolhido:</span>
-                <span class="fw-semibold text-capitalize">{{ metodo }}</span>
+                <span class="fw-semibold text-capitalize text-dark">
+                  {{ metodo === 'cartao' ? (form.cartaoTipo === 'credito' ? 'Cartão de Crédito' : 'Cartão de Débito') : (metodo === 'pix' ? 'Pix' : 'Boleto Bancário') }}
+                </span>
+              </div>
+              <div class="d-flex justify-content-between mb-2 small align-items-center" v-if="metodo === 'cartao' && form.cartaoTipo === 'credito'">
+                <span class="text-muted">Opção Escolhida:</span>
+                <div class="d-flex align-items-center gap-2">
+                  <span class="fw-semibold text-dark">
+                    {{ form.cartaoParcelas }}x de R$ {{ obterValorParcelaSelecionada().toFixed(2) }}
+                  </span>
+                  <span :class="['badge-juros-status', form.cartaoParcelas <= 3 ? 'badge-sem-juros' : 'badge-com-juros']">
+                    {{ form.cartaoParcelas <= 3 ? 'Sem Juros' : 'Com Juros' }}
+                  </span>
+                </div>
               </div>
               <div class="d-flex justify-content-between mb-2 small">
                 <span class="text-muted">Status do Pagamento:</span>
-                <span class="badge" :class="(metodo === 'cartao' || metodo === 'pix') ? 'bg-success' : 'bg-warning text-dark'">
-                  {{ metodo === 'cartao' ? 'Aprovado' : (metodo === 'pix' ? 'Concluído' : 'Aguardando Pagamento') }}
+                <span class="badge bg-success">
+                  {{ (metodo === 'cartao') ? 'Aprovado' : 'Concluído' }}
                 </span>
               </div>
               
@@ -198,6 +217,84 @@
               <!-- Form Checks -->
               <form @submit.prevent="confirmarPagamento">
                 <div class="row g-3">
+                  <!-- Escolha de Crédito/Débito -->
+                  <div class="col-md-12 mb-2 text-start">
+                    <label class="form-label small fw-bold text-dark d-block">Tipo de Cartão</label>
+                    <div class="d-flex gap-4 mt-2">
+                      <div class="form-check">
+                        <input
+                          class="form-check-input"
+                          type="radio"
+                          name="cartaoTipo"
+                          id="tipoCredito"
+                          value="credito"
+                          v-model="form.cartaoTipo"
+                        />
+                        <label class="form-check-label small text-dark fw-semibold" for="tipoCredito">
+                          Crédito
+                        </label>
+                      </div>
+                      <div class="form-check">
+                        <input
+                          class="form-check-input"
+                          type="radio"
+                          name="cartaoTipo"
+                          id="tipoDebito"
+                          value="debito"
+                          v-model="form.cartaoTipo"
+                        />
+                        <label class="form-check-label small text-dark fw-semibold" for="tipoDebito">
+                          Débito
+                        </label>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Dropdown de Parcelas para Crédito (Customizado & Estilizado) -->
+                  <div class="col-md-12 text-start mb-2 custom-dropdown-container" v-if="form.cartaoTipo === 'credito'">
+                    <label class="form-label small fw-bold text-dark">Opções de Parcelamento</label>
+                    <div class="custom-select-wrapper">
+                      <!-- Gatilho do select customizado -->
+                      <div 
+                        class="custom-select-trigger" 
+                        :class="{ 'custom-select-trigger--open': dropdownAberto }"
+                        @click="toggleDropdown"
+                      >
+                        <i class="ph ph-percent select-trigger-icon"></i>
+                        <span class="select-trigger-text text-dark fw-semibold">
+                          {{ obterLabelParcelaSelecionadaSimples() }}
+                        </span>
+                        <i class="ph ph-caret-down select-trigger-caret"></i>
+                      </div>
+
+                      <!-- Menu suspenso de opções customizadas -->
+                      <transition name="slide-up">
+                        <div class="custom-options-menu" v-if="dropdownAberto">
+                          <div 
+                            v-for="op in opcoesParcelas" 
+                            :key="op.quantidade" 
+                            class="custom-option-item"
+                            :class="{ 'custom-option-item--selected': form.cartaoParcelas === op.quantidade }"
+                            @click="selecionarParcela(op.quantidade)"
+                          >
+                            <div class="option-left">
+                              <span class="option-qty fw-bold text-dark">{{ op.quantidade }}x</span>
+                              <span class="option-val text-dark">de R$ {{ op.valorParcela.toFixed(2) }}</span>
+                            </div>
+                            <div class="option-right d-flex align-items-center gap-2">
+                              <span v-if="op.quantidade > 3" class="option-total text-muted small">
+                                (Total: R$ {{ op.total.toFixed(2) }})
+                              </span>
+                              <span :class="['badge-juros-status', op.quantidade <= 3 ? 'badge-sem-juros' : 'badge-com-juros']">
+                                {{ op.quantidade <= 3 ? 'Sem Juros' : 'Com Juros' }}
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+                      </transition>
+                    </div>
+                  </div>
+
                   <div class="col-md-12">
                     <label class="form-label small fw-bold">Número do Cartão</label>
                     <div class="input-icon-wrapper">
@@ -294,7 +391,7 @@
               <div class="alert alert-light border rounded-3 d-flex align-items-start gap-3 mb-4">
                 <i class="ph ph-info text-dark fs-4 mt-1"></i>
                 <div class="small">
-                  <strong>Geração de Boleto:</strong> Insira os seus dados de conferência abaixo para gerar o boleto. O boleto bancário simulado será enviado por e-mail e exibido após confirmação.
+                  <strong>Geração de Boleto:</strong> Insira os seus dados de conferência abaixo para gerar o boleto. O boleto bancário simulado será exibido após a confirmação.
                 </div>
               </div>
 
@@ -329,21 +426,6 @@
                         @input="aplicarMascaraBoletoCPF"
                       />
                       <div class="invalid-feedback" v-if="erros.boletoCpf">{{ erros.boletoCpf }}</div>
-                    </div>
-                  </div>
-                  <div class="col-md-12">
-                    <label class="form-label small fw-bold">E-mail para Envio</label>
-                    <div class="input-icon-wrapper">
-                      <i class="ph ph-envelope"></i>
-                      <input
-                        type="email"
-                        class="form-control form-control-custom"
-                        :class="{ 'is-invalid': erros.boletoEmail }"
-                        placeholder="seu-email@provedor.com"
-                        v-model="form.boletoEmail"
-                        @input="limparErro('boletoEmail')"
-                      />
-                      <div class="invalid-feedback" v-if="erros.boletoEmail">{{ erros.boletoEmail }}</div>
                     </div>
                   </div>
                 </div>
@@ -404,7 +486,7 @@
 
             <div class="d-flex justify-content-between align-items-center mb-4">
               <span class="fw-bold fs-5 text-dark">Total</span>
-              <span class="fw-bold fs-4 text-dark">R$ {{ totalPedido.toFixed(2) }}</span>
+              <span class="fw-bold fs-4 text-dark">R$ {{ obterValorTotalExibido().toFixed(2) }}</span>
             </div>
 
             <RouterLink
@@ -422,11 +504,13 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from "vue";
-import { useRouter } from "vue-router";
+import { ref, onMounted, onUnmounted, computed } from "vue";
+import { useRouter, useRoute } from "vue-router";
 import api from "../../services/api";
+import { showToast } from "../../services/toast";
 
 const router = useRouter();
+const route = useRoute();
 
 const estaLogado = ref(false);
 const usuarioId = ref(null);
@@ -436,6 +520,8 @@ const totalPedido = ref(0);
 const metodo = ref("pix"); // pix, cartao, boleto
 const finalizando = ref(false);
 const sucesso = ref(false);
+const carregando = ref(true);
+const pedidoId = ref(null);
 
 // Estados de geração simulada
 const pixGerado = ref(false);
@@ -452,10 +538,80 @@ const form = ref({
   cartaoValidade: "",
   cartaoCvv: "",
   cartaoCpf: "",
+  cartaoTipo: "credito",
+  cartaoParcelas: 1,
   boletoNome: "",
-  boletoCpf: "",
-  boletoEmail: ""
+  boletoCpf: ""
 });
+
+const opcoesParcelas = computed(() => {
+  const list = [];
+  for (let i = 1; i <= 12; i++) {
+    if (i <= 3) {
+      const valor = totalPedido.value / i;
+      list.push({
+        quantidade: i,
+        valorParcela: valor,
+        total: totalPedido.value,
+        label: `${i}x de R$ ${valor.toFixed(2)} sem juros`,
+      });
+    } else {
+      // 1.99% ao mês compostos
+      const taxa = 0.0199;
+      const totalComJuros = totalPedido.value * Math.pow(1 + taxa, i);
+      const valor = totalComJuros / i;
+      list.push({
+        quantidade: i,
+        valorParcela: valor,
+        total: totalComJuros,
+        label: `${i}x de R$ ${valor.toFixed(2)} com juros (Total: R$ ${totalComJuros.toFixed(2)})`,
+      });
+    }
+  }
+  return list;
+});
+
+const obterValorTotalExibido = () => {
+  if (metodo.value === "cartao" && form.value.cartaoTipo === "credito") {
+    const op = opcoesParcelas.value.find(o => o.quantidade === form.value.cartaoParcelas);
+    if (op) return op.total;
+  }
+  return totalPedido.value;
+};
+
+const obterLabelParcelaSelecionada = () => {
+  const op = opcoesParcelas.value.find(o => o.quantidade === form.value.cartaoParcelas);
+  return op ? op.label : "";
+};
+
+const obterValorParcelaSelecionada = () => {
+  const op = opcoesParcelas.value.find(o => o.quantidade === form.value.cartaoParcelas);
+  return op ? op.valorParcela : 0;
+};
+
+// Dropdown de parcelas customizado
+const dropdownAberto = ref(false);
+const toggleDropdown = () => {
+  dropdownAberto.value = !dropdownAberto.value;
+};
+const selecionarParcela = (quantidade) => {
+  form.value.cartaoParcelas = quantidade;
+  dropdownAberto.value = false;
+};
+const obterLabelParcelaSelecionadaSimples = () => {
+  const op = opcoesParcelas.value.find(o => o.quantidade === form.value.cartaoParcelas);
+  if (op) {
+    const jurosLabel = op.quantidade <= 3 ? "sem juros" : "com juros";
+    return `${op.quantidade}x de R$ ${op.valorParcela.toFixed(2)} ${jurosLabel}`;
+  }
+  return "Selecione as parcelas";
+};
+
+const fecharDropdownClickOutside = (e) => {
+  if (!e.target.closest('.custom-dropdown-container')) {
+    dropdownAberto.value = false;
+  }
+};
 
 // Erros de validação
 const erros = ref({});
@@ -472,25 +628,55 @@ const obterUsuarioId = () => {
   }
 };
 
-onMounted(() => {
+onMounted(async () => {
   const token = localStorage.getItem("token_vestebem");
   if (token) {
     estaLogado.value = true;
     usuarioId.value = obterUsuarioId();
     
-    // Carrega itens salvos no localStorage
-    const saved = localStorage.getItem("vestebem_checkout_itens");
-    if (saved) {
+    const queryPedidoId = route.query.pedidoId;
+    if (queryPedidoId) {
+      pedidoId.value = queryPedidoId;
+      carregando.value = true;
       try {
-        itens.value = JSON.parse(saved);
-        totalPedido.value = itens.value.reduce((acc, i) => acc + i.precoTotal, 0);
-      } catch {
-        itens.value = [];
+        const resposta = await api.get(`/pedidos/${pedidoId.value}`);
+        const pedido = resposta.data;
+        
+        if (pedido.status === "CONCLUIDO") {
+          showToast("Este pedido já foi pago!", "warning");
+          router.push("/perfil");
+          return;
+        }
+
+        itens.value = pedido.itens.map(item => ({
+          itemId: item.id,
+          produtoId: item.produtoId,
+          produtoNome: item.produtoNome,
+          quantidade: item.quantidade,
+          precoUnitario: item.precoUnitario,
+          precoTotal: item.totalItem
+        }));
+        totalPedido.value = pedido.totalPedido;
+      } catch (error) {
+        console.error("Erro ao carregar pedido:", error);
+        showToast("Não foi possível carregar o pedido.", "error");
+        router.push("/carrinho");
+      } finally {
+        carregando.value = false;
       }
+    } else {
+      showToast("Nenhum pedido selecionado para pagamento.", "warning");
+      router.push("/carrinho");
     }
   } else {
     estaLogado.value = false;
   }
+
+  window.addEventListener('click', fecharDropdownClickOutside);
+});
+
+onUnmounted(() => {
+  window.removeEventListener('click', fecharDropdownClickOutside);
 });
 
 // Seleção de métodos
@@ -609,7 +795,7 @@ const confirmarPagamento = () => {
   else if (metodo.value === "cartao") {
     const cardDigits = form.value.cartaoNumero.replace(/\D/g, "");
     if (cardDigits.length !== 16) {
-      erros.value.cartaoNumero = "O cartão de crédito deve possuir 16 dígitos.";
+      erros.value.cartaoNumero = "O cartão deve possuir 16 dígitos.";
     }
 
     const erroNome = validarNome(form.value.cartaoNome);
@@ -649,11 +835,9 @@ const confirmarPagamento = () => {
   else if (metodo.value === "boleto") {
     const erroNome = validarNome(form.value.boletoNome);
     const erroCpf = validarCPFValido(form.value.boletoCpf);
-    const erroEmail = validarEmail(form.value.boletoEmail);
 
     if (erroNome) erros.value.boletoNome = erroNome;
     if (erroCpf) erros.value.boletoCpf = erroCpf;
-    if (erroEmail) erros.value.boletoEmail = erroEmail;
 
     if (Object.keys(erros.value).length === 0) {
       const blBlock1 = Math.floor(Math.random() * 90000) + 10000;
@@ -668,34 +852,32 @@ const confirmarPagamento = () => {
 
 // ─── Concluir Compra (API Integrada) ───────────────────────────────────────────
 const concluirPedido = async () => {
-  if (itens.value.length === 0 || !usuarioId.value) return;
+  if (!pedidoId.value) return;
 
   finalizando.value = true;
   try {
-    // 1. Monta payload para realizar checkout oficial no banco de dados
-    const itensPayload = itens.value.map((item) => ({
-      produtoId: item.produtoId,
-      quantidade: item.quantidade,
-    }));
+    let labelMetodo = "";
+    if (metodo.value === "pix") {
+      labelMetodo = "Pix";
+    } else if (metodo.value === "boleto") {
+      labelMetodo = "Boleto Bancário";
+    } else if (metodo.value === "cartao") {
+      labelMetodo = form.value.cartaoTipo === "credito" ? `Cartão de Crédito (${form.value.cartaoParcelas}x)` : "Cartão de Débito";
+    }
 
-    // Cria o pedido no backend
-    await api.post("/pedidos/checkout", {
-      usuarioId: usuarioId.value,
-      itens: itensPayload,
+    // Atualiza o status do pedido para CONCLUIDO no backend (onde o estoque será reduzido)
+    await api.put(`/pedidos/${pedidoId.value}/status`, {
+      status: "CONCLUIDO",
+      metodoPagamento: labelMetodo,
+      valorTotalPago: obterValorTotalExibido()
     });
 
-    // 2. Remove do carrinho do banco de dados todos os itens pedidos
-    await Promise.all(
-      itens.value.map((item) =>
-        api.delete(`/carrinhos/${usuarioId.value}/remover-tudo/${item.produtoId}`)
-      )
-    );
-
-    // 3. Remove a seleção do localStorage e ativa tela de sucesso
     localStorage.removeItem("vestebem_checkout_itens");
     sucesso.value = true;
   } catch (error) {
-    alert(error.response?.data || "Ocorreu um erro ao registrar seu pedido. Tente novamente.");
+    const rawData = error.response?.data;
+    const msg = typeof rawData === "string" ? rawData : (rawData?.message || "Não há estoque suficiente do produto.");
+    showToast(msg, "error");
   } finally {
     finalizando.value = false;
   }
@@ -704,9 +886,9 @@ const concluirPedido = async () => {
 // Helper para copiar textos
 const copiarTexto = (texto) => {
   navigator.clipboard.writeText(texto).then(() => {
-    alert("Código copiado para a área de transferência!");
+    showToast("Código copiado para a área de transferência!", "success");
   }).catch(() => {
-    alert("Falha ao copiar. Selecione e copie manualmente.");
+    showToast("Falha ao copiar. Selecione e copie manualmente.", "warning");
   });
 };
 </script>
@@ -729,8 +911,8 @@ const copiarTexto = (texto) => {
 
 /* ── Métodos de pagamento ── */
 .btn-metodo {
-  background: white;
-  border: 2px solid #e5e5ea;
+  background: var(--bg-color, white);
+  border: 2px solid var(--border-color, #e5e5ea);
   border-radius: var(--radius-sm);
   display: flex;
   flex-direction: column;
@@ -745,18 +927,26 @@ const copiarTexto = (texto) => {
 
 .btn-metodo:hover {
   border-color: var(--primary-color);
-  background: #fbfbfd;
+  background: var(--surface-color, #fbfbfd);
 }
 
 .btn-metodo--selected {
   border-color: var(--primary-color);
   background: var(--primary-color);
-  color: white;
+  color: var(--bg-color, white);
 }
 
 .btn-metodo--selected:hover {
   background: var(--primary-color);
-  color: white;
+  color: var(--bg-color, white);
+}
+
+/* Filhos do btn-metodo herdam a cor do pai */
+.btn-metodo span,
+.btn-metodo i,
+.btn-metodo--selected span,
+.btn-metodo--selected i {
+  color: inherit !important;
 }
 
 /* ── Custom Inputs ── */
@@ -781,14 +971,15 @@ const copiarTexto = (texto) => {
   border-radius: 999px;
   font-family: "Inter", sans-serif;
   font-size: 0.95rem;
-  background-color: #fbfbfd;
+  background-color: var(--surface-light, #fbfbfd);
+  color: var(--text-primary);
   transition: var(--transition);
   width: 100%;
 }
 
 .form-control-custom:focus {
   border-color: var(--primary-color);
-  background-color: white;
+  background-color: var(--bg-color, white);
   outline: none;
   box-shadow: 0 0 0 4px rgba(0, 0, 0, 0.05);
 }
@@ -914,5 +1105,148 @@ const copiarTexto = (texto) => {
 
 .fade-in-up {
   animation: fadeIn 0.6s cubic-bezier(0.25, 1, 0.5, 1) forwards;
+}
+
+.badge-juros-status {
+  font-size: 0.7rem;
+  padding: 2px 8px;
+  border-radius: 99px;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+.badge-sem-juros {
+  background-color: #e6f7ed;
+  color: #1a7f37;
+  border: 1px solid #ccefe0;
+}
+.badge-com-juros {
+  background-color: #fff8eb;
+  color: #b07000;
+  border: 1px solid #ffe8cc;
+}
+
+/* Estilos do custom select dropdown */
+.custom-select-wrapper {
+  position: relative;
+  width: 100%;
+}
+
+.custom-select-trigger {
+  padding: 0.9rem 1.25rem 0.9rem 3.2rem;
+  border: 1px solid var(--border-color);
+  border-radius: 999px;
+  font-family: "Inter", sans-serif;
+  font-size: 0.95rem;
+  background-color: #fbfbfd;
+  transition: var(--transition);
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  cursor: pointer;
+  user-select: none;
+  position: relative;
+}
+
+.custom-select-trigger:hover {
+  border-color: var(--primary-color);
+  background-color: #f5f5f7;
+}
+
+.custom-select-trigger--open {
+  border-color: var(--primary-color);
+  background-color: white;
+  box-shadow: 0 0 0 4px rgba(0, 0, 0, 0.05);
+}
+
+.select-trigger-icon {
+  position: absolute;
+  left: 1.25rem;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--text-secondary);
+  font-size: 1.2rem;
+  pointer-events: none;
+}
+
+.select-trigger-text {
+  flex-grow: 1;
+  text-align: left;
+}
+
+.select-trigger-caret {
+  color: var(--text-secondary);
+  font-size: 1rem;
+  transition: transform 0.2s ease;
+}
+
+.custom-select-trigger--open .select-trigger-caret {
+  transform: rotate(180deg);
+}
+
+/* Menu suspenso de opções customizadas */
+.custom-options-menu {
+  position: absolute;
+  top: 105%;
+  left: 0;
+  right: 0;
+  background: white;
+  border: 1px solid var(--border-color);
+  border-radius: 16px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+  z-index: 1000;
+  max-height: 280px;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  padding: 8px;
+  margin-top: 4px;
+}
+
+.custom-option-item {
+  padding: 10px 14px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+}
+
+.custom-option-item:hover {
+  background-color: #f5f5f7;
+}
+
+.custom-option-item--selected {
+  background-color: #f1f5f9;
+}
+
+.option-left {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.option-qty {
+  font-size: 0.95rem;
+}
+
+.option-val {
+  font-size: 0.9rem;
+}
+
+.option-total {
+  font-size: 0.75rem;
+}
+
+/* Animação slide-up */
+.slide-up-enter-active,
+.slide-up-leave-active {
+  transition: all 0.2s ease;
+}
+
+.slide-up-enter-from,
+.slide-up-leave-to {
+  opacity: 0;
+  transform: translateY(8px);
 }
 </style>

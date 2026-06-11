@@ -34,7 +34,7 @@ body {
   border-radius: var(--radius-pill);
   transition: var(--transition);
   background: var(--primary-color);
-  color: #ffffff;
+  color: var(--bg-color);
   border: none;
 }
 
@@ -42,7 +42,7 @@ body {
   background: #333333;
   transform: translateY(-2px);
   box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
-  color: white;
+  color: var(--bg-color);
 }
 
 /* Inputs Customizados */
@@ -59,4 +59,323 @@ body {
 .form-control-premium:focus {
   border-color: var(--primary-color);
   outline: none;
+}
+
+/* --- MODO ESCURO (DARK MODE) --- */
+[data-theme="dark"] {
+  --primary-color: #f5f5f7;
+  --bg-color: #1a1a1a;
+  --surface-color: #242426;
+  --surface-light: #121212;
+  --text-primary: #f5f5f7;
+  --text-secondary: #a1a1a6;
+  --border-color: #38383a;
+
+  background-color: var(--surface-light);
+  color: var(--text-primary);
+}
+
+[data-theme="dark"] body {
+  background-color: var(--surface-light);
+  color: var(--text-primary);
+}
+
+/* Sobrescrever fundos e textos de classes Bootstrap e layouts da loja */
+[data-theme="dark"] .bg-white,
+[data-theme="dark"] .bg-light,
+[data-theme="dark"] .card,
+[data-theme="dark"] .perfil-card,
+[data-theme="dark"] .order-card,
+[data-theme="dark"] .login-card,
+[data-theme="dark"] .modal-content,
+[data-theme="dark"] .modal-content-custom,
+[data-theme="dark"] .custom-options-menu,
+[data-theme="dark"] .nav-dropdown-content,
+[data-theme="dark"] .carrinho-sidebar,
+[data-theme="dark"] .checkout-wrapper nav,
+[data-theme="dark"] .info-pagamento-sucesso {
+  background-color: var(--bg-color) !important;
+  color: var(--text-primary) !important;
+  border-color: var(--border-color) !important;
+}
+
+[data-theme="dark"] .nav-dropdown-link:hover,
+[data-theme="dark"] .custom-option-item:hover {
+  background-color: rgba(255, 255, 255, 0.06) !important;
+}
+
+[data-theme="dark"] .custom-option-item--selected {
+  background-color: rgba(255, 255, 255, 0.12) !important;
+}
+
+[data-theme="dark"] .bg-dark {
+  background-color: var(--primary-color) !important;
+  color: var(--bg-color) !important;
+}
+
+/* Cápsula do Menu Central da Navbar */
+[data-theme="dark"] .nav-menu-capsule {
+  background: rgba(30, 30, 32, 0.75) !important;
+  border-color: var(--border-color) !important;
+}
+
+[data-theme="dark"] .nav-menu-item:hover {
+  color: var(--text-primary) !important;
+  background: rgba(255, 255, 255, 0.08) !important;
+}
+
+[data-theme="dark"] .nav-menu-item.active {
+  background: var(--primary-color) !important;
+  color: var(--bg-color) !important;
+}
+
+/* Inputs, Textareas e Custom Selects */
+[data-theme="dark"] input:not(.form-control-newsletter),
+[data-theme="dark"] textarea,
+[data-theme="dark"] select,
+[data-theme="dark"] .form-premium,
+[data-theme="dark"] .form-control-premium,
+[data-theme="dark"] .custom-select-trigger {
+  background-color: var(--surface-color) !important;
+  color: var(--text-primary) !important;
+  border-color: var(--border-color) !important;
+}
+
+[data-theme="dark"] input:disabled,
+[data-theme="dark"] textarea:disabled,
+[data-theme="dark"] .form-control-premium:disabled,
+[data-theme="dark"] .bg-light[disabled] {
+  background-color: var(--surface-light) !important;
+  opacity: 0.65;
+}
+
+[data-theme="dark"] .form-control-premium:focus,
+[data-theme="dark"] .custom-select-trigger--open {
+  border-color: var(--text-primary) !important;
+  box-shadow: 0 0 0 4px rgba(255, 255, 255, 0.08) !important;
+}
+
+/* Headers, Parágrafos, Labels, Links e Badges */
+[data-theme="dark"] h1,
+[data-theme="dark"] h2,
+[data-theme="dark"] h3,
+[data-theme="dark"] h4,
+[data-theme="dark"] h5,
+[data-theme="dark"] h6,
+[data-theme="dark"] p,
+[data-theme="dark"] label,
+[data-theme="dark"] strong,
+[data-theme="dark"] small,
+[data-theme="dark"] .text-dark,
+[data-theme="dark"] .text-secondary,
+[data-theme="dark"] .text-muted,
+[data-theme="dark"] .nav-icon-link {
+  color: var(--text-primary) !important;
+}
+
+/* Span: override genérico para textos normais */
+[data-theme="dark"] span {
+  color: var(--text-primary);
+}
+
+/* Exceções: spans dentro de botões com fundo claro devem manter texto escuro */
+[data-theme="dark"] .btn-premium span,
+[data-theme="dark"] .btn-premium i,
+[data-theme="dark"] .btn-metodo span,
+[data-theme="dark"] .btn-metodo i,
+[data-theme="dark"] .btn-metodo--selected span,
+[data-theme="dark"] .btn-metodo--selected i {
+  color: inherit !important;
+}
+
+/* Toast: sempre fundo claro com texto escuro */
+[data-theme="dark"] .toast-message {
+  color: #0f172a !important;
+}
+[data-theme="dark"] .toast-close {
+  color: #475569 !important;
+}
+
+[data-theme="dark"] .text-muted,
+[data-theme="dark"] .text-secondary {
+  opacity: 0.65;
+}
+
+[data-theme="dark"] a:not(.btn-premium):not(.nav-dropdown-link):not(.nav-menu-item.active) {
+  color: var(--text-primary) !important;
+}
+
+/* Item ativo da navbar: fundo claro → texto escuro */
+[data-theme="dark"] .nav-menu-item.active {
+  color: #1a1a1a !important;
+}
+
+[data-theme="dark"] a:not(.btn-premium):hover {
+  opacity: 0.8;
+}
+
+/* Botões */
+[data-theme="dark"] .btn-dark {
+  background-color: var(--primary-color) !important;
+  color: var(--bg-color) !important;
+  border: none !important;
+}
+
+[data-theme="dark"] .btn-dark:hover {
+  opacity: 0.9;
+}
+
+[data-theme="dark"] .btn-outline-dark {
+  border-color: var(--border-color) !important;
+  color: var(--text-primary) !important;
+}
+
+[data-theme="dark"] .btn-outline-dark:hover {
+  background-color: var(--surface-color) !important;
+  color: var(--text-primary) !important;
+}
+
+/* Premium Button - Contraste no Dark Mode */
+[data-theme="dark"] .btn-premium {
+  background-color: #e0e0e2 !important;
+  color: #111111 !important;
+}
+
+[data-theme="dark"] .btn-premium:hover {
+  background-color: #f0f0f2 !important;
+  color: #111111 !important;
+}
+
+/* Forçar texto escuro em todos os filhos do btn-premium */
+[data-theme="dark"] .btn-premium span,
+[data-theme="dark"] .btn-premium i,
+[data-theme="dark"] .btn-premium strong,
+[data-theme="dark"] .btn-premium small {
+  color: #111111 !important;
+}
+
+/* Botão Flutuante do Carrinho */
+[data-theme="dark"] .btn-carrinho-flutuante {
+  background-color: var(--primary-color) !important;
+  color: var(--bg-color) !important;
+}
+
+[data-theme="dark"] .btn-carrinho-flutuante i,
+[data-theme="dark"] .btn-carrinho-flutuante svg,
+[data-theme="dark"] .btn-carrinho-flutuante span {
+  color: var(--bg-color) !important;
+}
+
+/* Placeholders */
+[data-theme="dark"] ::placeholder {
+  color: var(--text-secondary) !important;
+  opacity: 0.7 !important;
+}
+
+[data-theme="dark"] input::placeholder,
+[data-theme="dark"] textarea::placeholder {
+  color: var(--text-secondary) !important;
+  opacity: 0.7 !important;
+}
+
+/* Tabelas */
+[data-theme="dark"] table,
+[data-theme="dark"] thead,
+[data-theme="dark"] tbody,
+[data-theme="dark"] tfoot,
+[data-theme="dark"] tr,
+[data-theme="dark"] th,
+[data-theme="dark"] td,
+[data-theme="dark"] .table,
+[data-theme="dark"] .table-striped > tbody > tr,
+[data-theme="dark"] .table-striped > tbody > tr:nth-of-type(odd),
+[data-theme="dark"] .table-striped > tbody > tr:nth-of-type(even) {
+  background-color: var(--bg-color) !important;
+  color: var(--text-primary) !important;
+  border-color: var(--border-color) !important;
+}
+
+[data-theme="dark"] .table thead th,
+[data-theme="dark"] thead tr,
+[data-theme="dark"] thead td,
+[data-theme="dark"] thead th {
+  background-color: var(--surface-color) !important;
+  color: var(--text-secondary) !important;
+  border-color: var(--border-color) !important;
+}
+
+/* Alert Boxes */
+[data-theme="dark"] .alert-danger {
+  background-color: rgba(220, 38, 38, 0.2) !important;
+  color: #fca5a5 !important;
+  border-color: rgba(220, 38, 38, 0.3) !important;
+}
+
+[data-theme="dark"] .alert-success {
+  background-color: rgba(22, 163, 74, 0.2) !important;
+  color: #86efac !important;
+  border-color: rgba(22, 163, 74, 0.3) !important;
+}
+
+/* Headers e Footers */
+[data-theme="dark"] .navbar,
+[data-theme="dark"] footer,
+[data-theme="dark"] .footer-wrapper {
+  background-color: var(--surface-light) !important;
+  border-color: var(--border-color) !important;
+}
+
+[data-theme="dark"] .navbar {
+  border-bottom: 1px solid var(--border-color) !important;
+}
+
+/* Ajustes finos adicionais para contraste */
+[data-theme="dark"] .text-secondary {
+  color: var(--text-secondary) !important;
+}
+
+[data-theme="dark"] .border-bottom,
+[data-theme="dark"] .border-top,
+[data-theme="dark"] .border {
+  border-color: var(--border-color) !important;
+}
+
+[data-theme="dark"] .nav-tabs .nav-link {
+  background: var(--surface-color) !important;
+  color: var(--text-secondary) !important;
+}
+
+[data-theme="dark"] .nav-tabs .nav-link.active {
+  background: var(--primary-color) !important;
+  color: var(--bg-color) !important;
+}
+
+[data-theme="dark"] .order-items-box {
+  border-color: var(--border-color) !important;
+}
+
+/* ── Navbar: links text-dark ficam escuros no dark mode ── */
+[data-theme="dark"] .text-dark {
+  color: var(--text-primary) !important;
+}
+
+[data-theme="dark"] .nav-icon-link,
+[data-theme="dark"] .nav-icon-link i,
+[data-theme="dark"] .nav-icon-link span,
+[data-theme="dark"] .btn-theme-toggle {
+  color: var(--text-primary) !important;
+}
+
+/* Btn-premium desabilitado no dark */
+[data-theme="dark"] .btn-premium:disabled,
+[data-theme="dark"] .btn-premium[disabled] {
+  background-color: var(--surface-color) !important;
+  color: var(--text-secondary) !important;
+  opacity: 0.6 !important;
+}
+
+/* Seção produtos bg-light no dark */
+[data-theme="dark"] section.bg-light,
+[data-theme="dark"] .produtos.bg-light {
+  background-color: var(--surface-light) !important;
 }

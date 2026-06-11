@@ -48,11 +48,11 @@
               >Lembrar-me</label
             >
           </div>
-          <a
-            href="#"
+          <RouterLink
+            to="/esqueci-senha"
             class="text-dark text-decoration-none"
             style="font-size: 0.9rem; font-weight: 500"
-            >Esqueceu a senha?</a
+            >Esqueceu a senha?</RouterLink
           >
         </div>
 

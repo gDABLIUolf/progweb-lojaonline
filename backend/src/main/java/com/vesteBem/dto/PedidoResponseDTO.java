@@ -10,7 +10,8 @@ public record PedidoResponseDTO(
         LocalDateTime dataCriacao,
         String status,
         List<ItemPedidoResponseDTO> itens,
-        BigDecimal totalPedido
+        BigDecimal totalPedido,
+        String metodoPagamento
 ) {
     public PedidoResponseDTO(Pedido pedido, List<ItemPedidoResponseDTO> itens) {
         this(
@@ -18,9 +19,11 @@ public record PedidoResponseDTO(
                 pedido.getDataCriacao(),
                 pedido.getStatus(),
                 itens,
+                pedido.getValorTotalPago() != null ? pedido.getValorTotalPago() :
                 itens.stream()
                         .map(ItemPedidoResponseDTO::totalItem)
-                        .reduce(BigDecimal.ZERO, BigDecimal::add)
+                        .reduce(BigDecimal.ZERO, BigDecimal::add),
+                pedido.getMetodoPagamento()
         );
     }
 }

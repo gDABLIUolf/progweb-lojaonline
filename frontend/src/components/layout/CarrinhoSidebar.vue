@@ -159,6 +159,7 @@
 import { ref, computed, watch } from "vue";
 import api from "../../services/api";
 import { useRouter } from "vue-router";
+import { showToast } from "../../services/toast";
 
 const router = useRouter();
 
@@ -221,12 +222,36 @@ const toggleTodos = () => {
 };
 
 // ── Checkout parcial ──────────────────────────────────────────────────────────
-const finalizarSelecionados = () => {
+const finalizarSelecionados = async () => {
   if (!props.usuarioId || nenhumSelecionado.value) return;
   
-  localStorage.setItem("vestebem_checkout_itens", JSON.stringify(itensParaCheckout.value));
-  emit("close");
-  router.push("/pagamento");
+  finalizando.value = true;
+  try {
+    const itensPayload = itensParaCheckout.value.map((item) => ({
+      produtoId: item.produtoId,
+      quantidade: item.quantidade,
+    }));
+
+    const resposta = await api.post("/pedidos/checkout", {
+      usuarioId: props.usuarioId,
+      itens: itensPayload,
+    });
+
+    const pedidoCriado = resposta.data;
+
+    localStorage.removeItem("vestebem_checkout_itens");
+    
+    emit("carrinho-atualizado");
+    emit("close");
+    
+    router.push({ path: "/pagamento", query: { pedidoId: pedidoCriado.id } });
+  } catch (error) {
+    const rawData = error.response?.data;
+    const msg = typeof rawData === "string" ? rawData : (rawData?.message || "Não há estoque suficiente do produto.");
+    showToast(msg, "error");
+  } finally {
+    finalizando.value = false;
+  }
 };
 </script>
 
@@ -237,7 +262,7 @@ const finalizarSelecionados = () => {
   right: -420px;
   width: 400px;
   height: 100vh;
-  background: white;
+  background: var(--bg-color, white);
   box-shadow: -10px 0 40px rgba(0, 0, 0, 0.1);
   z-index: 9999;
   padding: 2rem;
@@ -267,8 +292,8 @@ const finalizarSelecionados = () => {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  background: #f8fafc;
-  border: 1px solid #e2e8f0;
+  background: var(--surface-color, #f8fafc);
+  border: 1px solid var(--border-color, #e2e8f0);
   border-radius: 10px;
   padding: 0.45rem 0.75rem;
 }
@@ -285,9 +310,9 @@ const finalizarSelecionados = () => {
   gap: 4px;
   padding: 0.3rem 0.7rem;
   border-radius: 8px;
-  border: 2px solid #1a1a1a;
-  background: #f5f5f7;
-  color: #1a1a1a;
+  border: 2px solid var(--primary-color, #1a1a1a);
+  background: var(--surface-color, #f5f5f7);
+  color: var(--primary-color, #1a1a1a);
   font-size: 0.75rem;
   font-weight: 600;
   cursor: pointer;
@@ -299,17 +324,16 @@ const finalizarSelecionados = () => {
   cursor: not-allowed;
 }
 .btn-sel:not(:disabled):hover {
-  background: #e8e8ed;
+  opacity: 0.8;
 }
 /* Estado "Desmarcar tudo": fundo preto, texto branco */
 .btn-sel--ativo {
-  background: #1a1a1a;
-  color: #ffffff;
-  border-color: #1a1a1a;
+  background: var(--primary-color, #1a1a1a);
+  color: var(--bg-color, #ffffff);
+  border-color: var(--primary-color, #1a1a1a);
 }
 .btn-sel--ativo:not(:disabled):hover {
-  background: #333;
-  border-color: #333;
+  opacity: 0.85;
 }
 
 /* ── Checkbox ── */
@@ -321,12 +345,12 @@ const finalizarSelecionados = () => {
   width: 18px;
   height: 18px;
   border-radius: 5px;
-  border: 2px solid #d1d5db;
+  border: 2px solid var(--border-color, #d1d5db);
   display: flex;
   align-items: center;
   justify-content: center;
   font-size: 0.65rem;
-  color: white;
+  color: var(--bg-color, white);
   transition: all 0.15s;
 }
 .custom-checkbox--checked {
@@ -341,7 +365,7 @@ const finalizarSelecionados = () => {
 }
 
 .sidebar-item {
-  border-bottom: 1px solid #f1f5f9;
+  border-bottom: 1px solid var(--border-color, #f1f5f9);
   border-radius: 8px;
   transition: background 0.15s;
   padding-left: 4px;
@@ -363,7 +387,7 @@ const finalizarSelecionados = () => {
 
 /* ── Footer ── */
 .sidebar-footer {
-  border-top: 1px solid #f1f5f9;
+  border-top: 1px solid var(--border-color, #f1f5f9);
 }
 
 .aviso-selecao {
@@ -379,14 +403,14 @@ const finalizarSelecionados = () => {
   display: block;
   padding: 0.5rem;
   border-radius: 10px;
-  border: 1px solid #e2e8f0;
+  border: 1px solid var(--border-color, #e2e8f0);
   font-size: 0.82rem;
   color: var(--text-secondary);
   transition: all 0.2s;
   background: transparent;
 }
 .btn-ver-carrinho:hover {
-  background: #f8fafc;
+  background: var(--surface-color, #f8fafc);
   color: var(--text-primary);
 }
 
@@ -406,9 +430,10 @@ const finalizarSelecionados = () => {
 .btn-qty-sm {
   width: 22px;
   height: 22px;
-  border: 1px solid #e2e8f0;
+  border: 1px solid var(--border-color, #e2e8f0);
   border-radius: 50%;
-  background: white;
+  background: var(--surface-color, white);
+  color: var(--text-primary);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -418,7 +443,7 @@ const finalizarSelecionados = () => {
 }
 .btn-qty-sm:hover {
   background: var(--primary-color);
-  color: white;
+  color: var(--bg-color);
   border-color: var(--primary-color);
 }
 </style>

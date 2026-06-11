@@ -348,15 +348,16 @@ onUnmounted(() => {
   width: 100%;
   padding: 1rem 1.2rem;
   border-radius: var(--radius-md);
-  border: 1px solid #e2e8f0;
-  background: #f8fafc;
+  border: 1px solid var(--border-color, #e2e8f0);
+  background: var(--surface-color, #f8fafc);
+  color: var(--text-primary);
   transition: 0.3s;
 }
 
 .form-control-premium:focus {
   outline: none;
   border-color: var(--primary-color);
-  background: white;
+  background: var(--bg-color, white);
   box-shadow: 0 0 0 4px rgba(15, 23, 42, 0.05);
 }
 
@@ -366,8 +367,8 @@ onUnmounted(() => {
   gap: 1rem;
   padding: 1rem;
   border-radius: var(--radius-md);
-  border: 1px solid #e2e8f0;
-  background: #f8fafc;
+  border: 1px solid var(--border-color, #e2e8f0);
+  background: var(--surface-color, #f8fafc);
 }
 
 .fade-in-up {

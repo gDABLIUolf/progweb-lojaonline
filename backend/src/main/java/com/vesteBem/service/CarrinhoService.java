@@ -46,8 +46,17 @@ public class CarrinhoService {
                 .filter(item -> item.getProduto().getId().equals(produto.getId()))
                 .findFirst();
 
+        int novaQuantidade = dto.quantidade();
         if (itemExistente.isPresent()) {
-            itemExistente.get().setQuantidade(itemExistente.get().getQuantidade() + dto.quantidade());
+            novaQuantidade += itemExistente.get().getQuantidade();
+        }
+
+        if (produto.getQuantidadeEstoque() < novaQuantidade) {
+            throw new IllegalArgumentException("Não há estoque suficiente do produto: " + produto.getNome());
+        }
+
+        if (itemExistente.isPresent()) {
+            itemExistente.get().setQuantidade(novaQuantidade);
         } else {
             ItemCarrinho novoItem = new ItemCarrinho(carrinho, produto, dto.quantidade());
             carrinho.getItens().add(novoItem);

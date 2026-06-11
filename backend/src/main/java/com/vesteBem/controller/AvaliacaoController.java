@@ -38,6 +38,14 @@ public class AvaliacaoController {
         }
     }
 
+    @GetMapping("/usuario/{usuarioId}")
+    @Operation(summary = "Listar Avaliações do Usuário", description = "Retorna todas as avaliações feitas por um usuário específico.")
+    public ResponseEntity<List<AvaliacaoResponseDTO>> listarAvaliacoesDoUsuario(@PathVariable Long usuarioId) {
+        List<AvaliacaoResponseDTO> lista = avaliacaoService.listarAvaliacoesPorUsuario(usuarioId)
+                .stream().map(AvaliacaoResponseDTO::new).toList();
+        return ResponseEntity.ok(lista);
+    }
+
     @GetMapping("/produto/{produtoId}")
     @Operation(summary = "Listar Avaliações", description = "Retorna todas as avaliações de um produto específico.")
     public ResponseEntity<List<AvaliacaoResponseDTO>> listarAvaliacoesDoProduto(@PathVariable Long produtoId) {

@@ -28,8 +28,9 @@ services:
     restart: always
     ports:
       - "8080:8080"
+    env_file:
+      - .env
     environment:
-      # O host da URL aponta para o nome do serviço do banco ('postgres') na rede interna
       SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/lojaonline
       SPRING_DATASOURCE_USERNAME: lojaonline
       SPRING_DATASOURCE_PASSWORD: lojaonline

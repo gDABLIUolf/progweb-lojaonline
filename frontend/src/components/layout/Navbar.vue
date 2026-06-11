@@ -129,6 +129,16 @@
             {{ quantidadeCarrinho }}
           </span>
         </RouterLink>
+
+        <!-- Botão de Alternância do Modo Escuro -->
+        <button
+          @click="toggleDarkMode"
+          class="btn-theme-toggle nav-icon-link text-dark border-0 bg-transparent fs-4 p-0 d-flex align-items-center"
+          :title="isDarkMode ? 'Modo Claro' : 'Modo Escuro'"
+          style="outline: none;"
+        >
+          <i :class="isDarkMode ? 'ph ph-sun text-warning animate-spin' : 'ph ph-moon'"></i>
+        </button>
       </div>
     </div>
   </nav>
@@ -167,6 +177,19 @@ const router = useRouter();
 const route = useRoute();
 const categorias = ref([]);
 const activeSection = ref("inicio");
+
+const isDarkMode = ref(false);
+
+const toggleDarkMode = () => {
+  isDarkMode.value = !isDarkMode.value;
+  if (isDarkMode.value) {
+    document.documentElement.setAttribute("data-theme", "dark");
+    localStorage.setItem("theme_vestebem", "dark");
+  } else {
+    document.documentElement.removeAttribute("data-theme");
+    localStorage.setItem("theme_vestebem", "light");
+  }
+};
 
 const carregarCategorias = async () => {
   try {
@@ -224,6 +247,12 @@ const isItemActive = (item) => {
 };
 
 onMounted(() => {
+  isDarkMode.value = document.documentElement.getAttribute("data-theme") === "dark" || localStorage.getItem("theme_vestebem") === "dark";
+  if (isDarkMode.value) {
+    document.documentElement.setAttribute("data-theme", "dark");
+  } else {
+    document.documentElement.removeAttribute("data-theme");
+  }
   carregarCategorias();
   window.addEventListener("scroll", handleScroll);
   setTimeout(handleScroll, 200); // Executa um delay para dar tempo do DOM montar
@@ -295,6 +324,11 @@ const irParaContato = () => {
   transition: all 0.3s ease;
 }
 
+:global([data-theme="dark"]) .navbar {
+  background: rgba(18, 18, 18, 0.88) !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06) !important;
+}
+
 .logo {
   letter-spacing: -0.02em;
   transition: all 0.3s ease;
@@ -317,8 +351,13 @@ const irParaContato = () => {
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.02);
 }
 
+:global([data-theme="dark"]) .nav-menu-capsule {
+  background: rgba(30, 30, 32, 0.82) !important;
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+}
+
 .nav-menu-item {
-  color: var(--text-secondary, #86868b);
+  color: var(--text-primary, #1d1d1f);
   font-size: 0.9rem;
   font-weight: 500;
   padding: 6px 16px;
@@ -333,13 +372,23 @@ const irParaContato = () => {
 }
 
 .nav-menu-item:hover {
-  color: var(--text-primary, #1d1d1f);
-  background: rgba(0, 0, 0, 0.04);
+  color: #000000;
+  background: rgba(0, 0, 0, 0.06);
 }
 
 .nav-menu-item.active {
   background: var(--primary-color, #1a1a1a);
-  color: #ffffff !important;
+  color: var(--bg-color, #ffffff) !important;
+}
+
+/* Dark mode: itens inativos ficam claros no fundo escuro */
+:global([data-theme="dark"]) .nav-menu-item {
+  color: var(--text-primary, #f5f5f7);
+}
+
+:global([data-theme="dark"]) .nav-menu-item:hover {
+  color: #ffffff;
+  background: rgba(255, 255, 255, 0.1);
 }
 
 /* Dropdown de Categorias */
@@ -416,7 +465,8 @@ const irParaContato = () => {
 /* Ícones de Ação */
 .nav-icons a,
 .nav-icons .router-link-active,
-.nav-icons .router-link-exact-active {
+.nav-icons .router-link-exact-active,
+.btn-theme-toggle {
   cursor: pointer;
   display: inline-block;
   transition: all 0.3s cubic-bezier(0.25, 1, 0.5, 1);
@@ -424,9 +474,19 @@ const irParaContato = () => {
 
 .nav-icons a:hover,
 .nav-icons .router-link-active:hover,
-.nav-icons .router-link-exact-active:hover {
+.nav-icons .router-link-exact-active:hover,
+.btn-theme-toggle:hover {
   color: var(--primary-color) !important;
   transform: translateY(-4px);
+}
+
+.animate-spin {
+  animation: themeSpin 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes themeSpin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
 }
 
 .nav-icon-link {
@@ -462,8 +522,8 @@ const irParaContato = () => {
   top: -5px;
   right: -8px;
 
-  background: var(--primary-color);
-  color: white;
+  background: #e53e3e;
+  color: #ffffff;
 
   width: 18px;
   height: 18px;

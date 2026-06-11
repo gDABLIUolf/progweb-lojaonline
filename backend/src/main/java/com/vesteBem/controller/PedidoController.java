@@ -36,6 +36,17 @@ public class PedidoController {
         }
     }
 
+    @GetMapping("/{id}")
+    @Operation(summary = "Obter detalhes de um pedido", description = "Retorna os detalhes de um pedido específico por ID.")
+    public ResponseEntity<?> obterPedidoPorId(@PathVariable Long id) {
+        try {
+            PedidoResponseDTO pedido = pedidoService.buscarPedidoPorId(id);
+            return ResponseEntity.ok(pedido);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+        }
+    }
+
     @GetMapping("/usuario/{usuarioId}")
     @Operation(summary = "Histórico de pedidos do usuário", description = "Retorna todas as compras realizadas por um cliente específico.")
     public ResponseEntity<List<PedidoResponseDTO>> listarHistorico(@PathVariable Long usuarioId) {
@@ -49,7 +60,7 @@ public class PedidoController {
             @PathVariable Long id,
             @RequestBody @Valid PedidoStatusUpdateRequestDTO dto) {
         try {
-            Pedido pedidoAtualizado = pedidoService.atualizarStatus(id, dto.status());
+            Pedido pedidoAtualizado = pedidoService.atualizarStatus(id, dto.status(), dto.metodoPagamento(), dto.valorTotalPago());
             return ResponseEntity.ok(pedidoAtualizado);
         } catch (IllegalArgumentException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());

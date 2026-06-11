@@ -205,6 +205,7 @@
 import { ref, computed, onMounted } from "vue";
 import { useRouter } from "vue-router";
 import api from "../../services/api";
+import { showToast } from "../../services/toast";
 
 const router = useRouter();
 
@@ -299,7 +300,9 @@ const adicionarItem = async (produtoId) => {
       }
     }
   } catch (error) {
-    alert(error.response?.data || "Erro ao adicionar item.");
+    const rawData = error.response?.data;
+    const msg = typeof rawData === "string" ? rawData : (rawData?.message || "Erro ao adicionar item.");
+    showToast(msg, "error");
   } finally {
     atualizando.value = false;
   }
@@ -318,17 +321,41 @@ const removerItem = async (produtoId) => {
     );
     itens.value = resposta.data.itens;
   } catch (error) {
-    alert(error.response?.data || "Erro ao remover item.");
+    const rawData = error.response?.data;
+    const msg = typeof rawData === "string" ? rawData : (rawData?.message || "Erro ao remover item.");
+    showToast(msg, "error");
   } finally {
     atualizando.value = false;
   }
 };
 
-const finalizarCompra = () => {
-  if (itensSelecionados.value.length === 0) return;
+const finalizarCompra = async () => {
+  if (itensSelecionados.value.length === 0 || !usuarioId.value) return;
 
-  localStorage.setItem("vestebem_checkout_itens", JSON.stringify(itensParaCheckout.value));
-  router.push("/pagamento");
+  finalizando.value = true;
+  try {
+    const itensPayload = itensParaCheckout.value.map((item) => ({
+      produtoId: item.produtoId,
+      quantidade: item.quantidade,
+    }));
+
+    const resposta = await api.post("/pedidos/checkout", {
+      usuarioId: usuarioId.value,
+      itens: itensPayload,
+    });
+
+    const pedidoCriado = resposta.data;
+
+    localStorage.removeItem("vestebem_checkout_itens");
+
+    router.push({ path: "/pagamento", query: { pedidoId: pedidoCriado.id } });
+  } catch (error) {
+    const rawData = error.response?.data;
+    const msg = typeof rawData === "string" ? rawData : (rawData?.message || "Não há estoque suficiente do produto.");
+    showToast(msg, "error");
+  } finally {
+    finalizando.value = false;
+  }
 };
 
 onMounted(() => {

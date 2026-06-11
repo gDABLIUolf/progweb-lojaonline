@@ -113,7 +113,7 @@ const handleImageError = () => {
 .produto-img-container {
   height: 280px;
   overflow: hidden;
-  background: #f8f9fa;
+  background: var(--surface-color, #f8f9fa);
 }
 
 .produto-img {
@@ -130,7 +130,7 @@ const handleImageError = () => {
 .produto-titulo {
   font-size: 1.15rem;
   font-weight: 600;
-  color: #222;
+  color: var(--text-primary, #222);
 }
 
 /* Trunca a descrição para não quebrar o layout se for muito grande */
@@ -148,7 +148,7 @@ const handleImageError = () => {
 }
 
 .btn-comprar:hover {
-  background: #333;
+  opacity: 0.9;
   transform: scale(1.05);
 }
 

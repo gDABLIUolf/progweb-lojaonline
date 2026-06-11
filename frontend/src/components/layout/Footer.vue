@@ -40,19 +40,42 @@
         <!-- Newsletter / Promotions Section -->
         <div class="footer-newsletter" id="newsletter-secao">
           <h4>Promoções & Novidades</h4>
-          <p>Assine nossa newsletter e receba 10% de desconto na sua primeira compra, além de ofertas exclusivas.</p>
+          <p>
+            Assine nossa newsletter e receba ofertas exclusivas.
+          </p>
+
           <form @submit.prevent="inscreverNewsletter" class="newsletter-form">
-            <input 
-              type="email" 
-              placeholder="Seu melhor e-mail" 
-              required 
+            <input
+              type="email"
+              placeholder="Seu melhor e-mail"
+              required
               v-model="emailNewsletter"
               class="form-control-newsletter"
+              :disabled="carregandoNewsletter"
             />
-            <button type="submit" class="btn-newsletter" title="Inscrever-se">
-              <i class="ph ph-paper-plane-right"></i>
+            <button
+              type="submit"
+              class="btn-newsletter"
+              title="Inscrever-se"
+              :disabled="carregandoNewsletter"
+            >
+              <i
+                v-if="carregandoNewsletter"
+                class="ph ph-spinner-gap spin-anim"
+              ></i>
+              <i v-else class="ph ph-paper-plane-right"></i>
             </button>
           </form>
+
+          <div
+            v-if="mensagemFeedback"
+            :class="[
+              'mt-2 small fw-bold',
+              erroNewsletter ? 'text-danger' : 'text-success',
+            ]"
+          >
+            {{ mensagemFeedback }}
+          </div>
         </div>
       </div>
 
@@ -64,8 +87,9 @@
 </template>
 
 <script setup>
+// No seu <script setup>, adicione/atualize isso:
 import { ref, onMounted } from "vue";
-import api from "../../services/api.js";
+import api from "../../services/api.js"; // Confirme se esse caminho está certo
 
 const emailNewsletter = ref("");
 const contato = ref({
@@ -74,8 +98,13 @@ const contato = ref({
   endereco: "Av. Paulista, 1000 - São Paulo, SP",
   horario: "Seg - Sex: 9h às 18h",
   linkFacebook: "https://facebook.com",
-  linkInstagram: "https://instagram.com"
+  linkInstagram: "https://instagram.com",
 });
+
+// Novas variáveis de estado para a Newsletter
+const carregandoNewsletter = ref(false);
+const mensagemFeedback = ref("");
+const erroNewsletter = ref(false);
 
 const carregarContato = async () => {
   try {
@@ -88,10 +117,31 @@ const carregarContato = async () => {
   }
 };
 
-const inscreverNewsletter = () => {
-  if (emailNewsletter.value) {
-    alert(`Obrigado por se inscrever! Enviamos um cupom de 10% de desconto para ${emailNewsletter.value}`);
-    emailNewsletter.value = "";
+const inscreverNewsletter = async () => {
+  if (!emailNewsletter.value) return;
+
+  carregandoNewsletter.value = true;
+  mensagemFeedback.value = "";
+  erroNewsletter.value = false;
+
+  try {
+    const resposta = await api.post("/newsletter", {
+      email: emailNewsletter.value,
+    });
+
+    mensagemFeedback.value = resposta.data.mensagem;
+
+    if (resposta.data.mensagem.includes("sucesso")) {
+      emailNewsletter.value = ""; // Limpa se deu certo
+    } else {
+      erroNewsletter.value = true; // Marca como erro se o e-mail já existir
+    }
+  } catch (error) {
+    console.error("Erro na inscrição da newsletter:", error);
+    erroNewsletter.value = true;
+    mensagemFeedback.value = "Ocorreu um erro. Tente novamente mais tarde.";
+  } finally {
+    carregandoNewsletter.value = false;
   }
 };
 
@@ -203,7 +253,7 @@ onMounted(() => {
 }
 
 .form-control-newsletter::placeholder {
-  color: #555555;
+  color: rgba(255, 255, 255, 0.4);
 }
 
 .btn-newsletter {
@@ -239,6 +289,28 @@ onMounted(() => {
 
 .highlight-pulse {
   animation: pulseHighlight 1s ease-in-out 2;
+}
+
+.spin-anim {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Cores das mensagens de feedback que ficam visíveis no fundo escuro do footer */
+.text-success {
+  color: #a3e635 !important; /* Um verde claro que destaca bem no fundo preto */
+}
+
+.text-danger {
+  color: #f87171 !important; /* Um vermelho claro que não 'grita' no fundo escuro */
 }
 
 @keyframes pulseHighlight {

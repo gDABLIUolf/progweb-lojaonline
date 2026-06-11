@@ -478,6 +478,7 @@ import ProdutoModal from "../../components/modal/ProductModal.vue";
 import UsuarioModal from "../../components/modal/UsuarioModal.vue";
 import AvaliacaoModal from "../../components/modal/AvaliacaoModal.vue";
 import api from "../../services/api.js";
+import { showToast } from "../../services/toast";
 import { formatarData } from "../../utils/date.js";
 
 const router = useRouter();
@@ -632,7 +633,10 @@ const carregarIdentidade = () => {
     return false;
   }
 
-  if (dadosToken.sub) {
+  const cachedName = localStorage.getItem("nome_usuario_vestebem");
+  if (cachedName) {
+    nomeUsuario.value = cachedName;
+  } else if (dadosToken.sub) {
     nomeUsuario.value = dadosToken.sub.split("@")[0];
   }
   return true;
@@ -643,7 +647,9 @@ const carregarUsuario = async () => {
     try {
       const resposta = await api.get(`/usuarios/${usuarioId.value}`);
       const nomeCompleto = resposta.data.nome || "";
-      nomeUsuario.value = nomeCompleto.split(" ")[0]; // apenas o primeiro nome
+      const primeiroNome = nomeCompleto.split(" ")[0];
+      nomeUsuario.value = primeiroNome;
+      localStorage.setItem("nome_usuario_vestebem", primeiroNome);
     } catch {
       // Fallback
     }
@@ -832,6 +838,7 @@ const onAvaliacaoSalvo = async () => {
 
 const fazerLogout = () => {
   localStorage.removeItem("token_vestebem");
+  localStorage.removeItem("nome_usuario_vestebem");
   estaLogado.value = false;
   isAdmin.value = false;
   nomeUsuario.value = "";
@@ -849,7 +856,9 @@ const removerItemSidebar = async (produtoId) => {
     itensCarrinho.value = resposta.data.itens || [];
     subtotalCarrinho.value = resposta.data.subtotal || 0;
   } catch (error) {
-    alert(error.response?.data || "Erro ao remover item.");
+    const rawData = error.response?.data;
+    const msg = typeof rawData === "string" ? rawData : (rawData?.message || "Erro ao remover item.");
+    showToast(msg, "error");
   }
 };
 
@@ -862,7 +871,9 @@ const adicionarItemSidebar = async (produtoId) => {
     itensCarrinho.value = resposta.data.itens || [];
     subtotalCarrinho.value = resposta.data.subtotal || 0;
   } catch (error) {
-    alert(error.response?.data || "Erro ao adicionar item.");
+    const rawData = error.response?.data;
+    const msg = typeof rawData === "string" ? rawData : (rawData?.message || "Erro ao adicionar item.");
+    showToast(msg, "error");
   }
 };
 
@@ -924,21 +935,21 @@ onMounted(async () => {
 }
 
 .perfil-card {
-  background: white;
+  background: var(--bg-color, white);
   border-radius: var(--radius-lg, 16px);
-  border: 1px solid rgba(0, 0, 0, 0.05) !important;
+  border: 1px solid var(--border-color, rgba(0, 0, 0, 0.05)) !important;
 }
 
 .nav-tabs .nav-link {
-  color: #64748b;
+  color: var(--text-secondary, #64748b);
   font-weight: 500;
   transition: all 0.2s ease;
-  background: #f1f5f9;
+  background: var(--surface-color, #f1f5f9);
 }
 
 .nav-tabs .nav-link.active {
-  color: white;
-  background: #111 !important;
+  color: var(--bg-color, white);
+  background: var(--primary-color, #111) !important;
   font-weight: 600;
 }
 
@@ -947,8 +958,8 @@ onMounted(async () => {
 }
 
 .custom-table th {
-  border-bottom: 2px solid #f1f5f9;
-  color: #475569;
+  border-bottom: 2px solid var(--border-color, #f1f5f9);
+  color: var(--text-secondary, #475569);
   font-weight: 600;
   font-size: 0.85rem;
   text-transform: uppercase;
@@ -958,8 +969,8 @@ onMounted(async () => {
 
 .custom-table td {
   padding: 1rem;
-  border-bottom: 1px solid #f1f5f9;
-  color: #334155;
+  border-bottom: 1px solid var(--border-color, #f1f5f9);
+  color: var(--text-primary, #334155);
 }
 
 .prod-thumb {
@@ -1014,18 +1025,18 @@ onMounted(async () => {
 }
 
 .table-scroll-container {
-  max-height: calc(35.5 * 66px); /* Altura correspondente a aproximadamente 35.5 itens com paddings e bordas */
+  max-height: calc(35.5 * 66px);
   overflow-y: auto;
   border-radius: 8px;
-  border: 1px solid #f1f5f9;
+  border: 1px solid var(--border-color, #f1f5f9);
 }
 
 .table-scroll-container thead th {
   position: sticky;
   top: 0;
-  background-color: white;
+  background-color: var(--surface-color, white);
   z-index: 2;
-  box-shadow: inset 0 -2px 0 #f1f5f9;
+  box-shadow: inset 0 -2px 0 var(--border-color, #f1f5f9);
 }
 
 .btn-admin-action {
@@ -1033,7 +1044,7 @@ onMounted(async () => {
   padding: 0.85rem 1.5rem;
   border-radius: var(--radius-md, 8px);
   background-color: var(--primary-color, #111);
-  color: white;
+  color: var(--bg-color, white);
   font-weight: 500;
   transition: all 0.3s ease;
   cursor: pointer;
@@ -1042,8 +1053,8 @@ onMounted(async () => {
 
 .btn-admin-action:hover {
   transform: translateY(-2px);
-  background-color: #333333;
+  opacity: 0.9;
   box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
-  color: white;
+  color: var(--bg-color, white);
 }
 </style>

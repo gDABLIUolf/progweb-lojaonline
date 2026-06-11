@@ -9,4 +9,5 @@ import java.util.List;
 @Repository
 public interface ItemPedidoRepository extends JpaRepository<ItemPedido, Long> {
     List<ItemPedido> findByPedidoId(Long pedidoId);
+    boolean existsByPedidoUsuarioIdAndProdutoIdAndPedidoStatusIn(Long usuarioId, Long produtoId, List<String> statuses);
 }

@@ -86,6 +86,7 @@ import ProdutoList from "../../components/produto/ProdutoList.vue";
 import CarrinhoSidebar from "../../components/layout/CarrinhoSidebar.vue";
 import Footer from "../../components/layout/Footer.vue";
 import api from "../../services/api.js";
+import { showToast } from "../../services/toast";
 
 const router = useRouter();
 const route = useRoute();
@@ -120,7 +121,7 @@ const decodificarJWT = (token) => {
   }
 };
 
-const carregarUsuario = () => {
+const carregarUsuario = async () => {
   const token = localStorage.getItem("token_vestebem");
   if (!token) return;
 
@@ -131,12 +132,28 @@ const carregarUsuario = () => {
 
   usuarioId.value = dadosToken.usuarioId || dadosToken.id || null;
 
-  if (dadosToken.sub) {
+  const cachedName = localStorage.getItem("nome_usuario_vestebem");
+  if (cachedName) {
+    nomeUsuario.value = cachedName;
+  } else if (dadosToken.sub) {
     nomeUsuario.value = dadosToken.sub.split("@")[0];
   }
 
   const permissao = dadosToken.role || "";
   isAdmin.value = permissao.toUpperCase() === "ADMIN";
+
+  // Busca o nome real no backend para atualizar o cache
+  if (usuarioId.value) {
+    try {
+      const resposta = await api.get(`/usuarios/${usuarioId.value}`);
+      const nomeCompleto = resposta.data.nome || "";
+      const primeiroNome = nomeCompleto.split(" ")[0];
+      nomeUsuario.value = primeiroNome;
+      localStorage.setItem("nome_usuario_vestebem", primeiroNome);
+    } catch {
+      // Mantém fallback caso a busca falhe
+    }
+  }
 };
 
 const carregarCarrinho = async () => {
@@ -153,6 +170,7 @@ const carregarCarrinho = async () => {
 
 const fazerLogout = () => {
   localStorage.removeItem("token_vestebem");
+  localStorage.removeItem("nome_usuario_vestebem");
   estaLogado.value = false;
   isAdmin.value = false;
   nomeUsuario.value = "";
@@ -177,7 +195,9 @@ const adicionarAoCarrinho = async (produtoId) => {
     subtotalCarrinho.value = resposta.data.subtotal || 0;
     sidebarAberta.value = true;
   } catch (error) {
-    alert(error.response?.data || "Erro ao adicionar ao carrinho.");
+    const rawData = error.response?.data;
+    const msg = typeof rawData === "string" ? rawData : (rawData?.message || "Erro ao adicionar ao carrinho.");
+    showToast(msg, "error");
   }
 };
 
@@ -189,7 +209,9 @@ const removerItemSidebar = async (produtoId) => {
     itensCarrinho.value = resposta.data.itens || [];
     subtotalCarrinho.value = resposta.data.subtotal || 0;
   } catch (error) {
-    alert(error.response?.data || "Erro ao remover item.");
+    const rawData = error.response?.data;
+    const msg = typeof rawData === "string" ? rawData : (rawData?.message || "Erro ao remover item.");
+    showToast(msg, "error");
   }
 };
 
@@ -202,7 +224,9 @@ const adicionarItemSidebar = async (produtoId) => {
     itensCarrinho.value = resposta.data.itens || [];
     subtotalCarrinho.value = resposta.data.subtotal || 0;
   } catch (error) {
-    alert(error.response?.data || "Erro ao adicionar item.");
+    const rawData = error.response?.data;
+    const msg = typeof rawData === "string" ? rawData : (rawData?.message || "Erro ao adicionar item.");
+    showToast(msg, "error");
   }
 };
 
@@ -301,7 +325,7 @@ watch(
 );
 
 onMounted(async () => {
-  carregarUsuario();
+  await carregarUsuario();
   if (usuarioId.value) {
     await carregarCarrinho();
   }

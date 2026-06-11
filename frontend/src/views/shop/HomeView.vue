@@ -28,7 +28,6 @@
 
     <DescontoCarrossel />
 
-    <!-- Botão flutuante para abrir o carrinho -->
     <button
       class="btn-carrinho-flutuante"
       @click="sidebarAberta = true"
@@ -40,7 +39,6 @@
       </span>
     </button>
 
-    <!-- Sidebar do Carrinho -->
     <CarrinhoSidebar
       :is-open="sidebarAberta"
       :itens="itensCarrinho"
@@ -52,7 +50,6 @@
       @carrinho-atualizado="carregarCarrinho"
     />
 
-    <!-- Modal de login necessário -->
     <div
       v-if="modalLoginAberto"
       class="modal-overlay"
@@ -82,7 +79,6 @@
       </div>
     </div>
 
-    <!-- Rodapé Premium -->
     <Footer />
   </div>
 </template>
@@ -153,7 +149,6 @@ const carregarUsuario = async () => {
   const permissao = dadosToken.role || "";
   isAdmin.value = permissao.toUpperCase() === "ADMIN";
 
-  // Buscar o nome real do banco de dados com suporte a cache
   if (usuarioId.value) {
     const cachedName = localStorage.getItem("nome_usuario_vestebem");
     if (cachedName) {
@@ -169,7 +164,7 @@ const carregarUsuario = async () => {
       nomeUsuario.value = primeiroNome;
       localStorage.setItem("nome_usuario_vestebem", primeiroNome);
     } catch {
-      // Mantém fallback caso a busca falhe
+
     }
   }
 };
@@ -283,7 +278,6 @@ const carregarProdutos = async () => {
     const response = await api.get(url);
     produtos.value = response.data;
 
-    // Restaura a posição de scroll salva se estiver retornando de um produto
     setTimeout(() => {
       const isReturning = sessionStorage.getItem("is_returning");
       if (isReturning === "true") {
@@ -305,14 +299,20 @@ const aplicarFiltros = ({ nome, categoriasIds }) => {
   carregarProdutos();
 };
 
+const NAVBAR_OFFSET = 80;
+
+const scrollParaElemento = (el) => {
+  if (!el) return;
+  const top = el.getBoundingClientRect().top + window.scrollY - NAVBAR_OFFSET;
+  window.scrollTo({ top, behavior: "smooth" });
+};
+
 const filtrarPorCarrosselCategoria = (categoriaId) => {
   filtroCategoriasAtual.value = [categoriaId];
   carregarProdutos();
 
   const produtosSecao = document.querySelector(".produtos");
-  if (produtosSecao) {
-    produtosSecao.scrollIntoView({ behavior: "smooth" });
-  }
+  if (produtosSecao) scrollParaElemento(produtosSecao);
 };
 
 const verificarHashEScroll = () => {
@@ -320,18 +320,14 @@ const verificarHashEScroll = () => {
   if (hash === "#promocoes" || hash === "#contato" || hash === "#categorias-secao") {
     if (hash === "#categorias-secao") {
       const el = document.getElementById("categorias-secao");
-      if (el) {
-        el.scrollIntoView({ behavior: "smooth" });
-      }
+      if (el) scrollParaElemento(el);
     } else if (hash === "#promocoes") {
       const el = document.getElementById("promocoes-secao");
-      if (el) {
-        el.scrollIntoView({ behavior: "smooth" });
-      }
+      if (el) scrollParaElemento(el);
     } else {
       const el = document.getElementById("footer");
       if (el) {
-        el.scrollIntoView({ behavior: "smooth" });
+        scrollParaElemento(el);
         const targetEl = document.getElementById("contato-secao");
         if (targetEl) {
           targetEl.classList.add("highlight-pulse");

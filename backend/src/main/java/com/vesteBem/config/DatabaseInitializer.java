@@ -62,7 +62,7 @@ public class DatabaseInitializer implements CommandLineRunner {
         String nome;
         String descricao;
         BigDecimal preco;
-        int categoriaIndex;
+        int[] categoriaIndices;
         String[] imagens;
         Integer desconto;
         Boolean destaqueCarrossel;
@@ -70,12 +70,14 @@ public class DatabaseInitializer implements CommandLineRunner {
         int estoque;
 
         ProductSeed(String nome, String descricao, String preco, int categoriaIndex,
-                String[] imagens, Integer desconto, Boolean destaqueCarrossel,
-                String imagemCarrosselPath, int estoque) {
+                    String[] imagens, Integer desconto, Boolean destaqueCarrossel,
+                    String imagemCarrosselPath, int estoque) {
             this.nome = nome;
             this.descricao = descricao;
             this.preco = new BigDecimal(preco);
-            this.categoriaIndex = categoriaIndex;
+
+            this.categoriaIndices = new int[]{categoriaIndex};
+
             this.imagens = imagens;
             this.desconto = desconto;
             this.destaqueCarrossel = destaqueCarrossel;
@@ -391,7 +393,9 @@ public class DatabaseInitializer implements CommandLineRunner {
                     p.setImagemCarrossel(lerImagem(seed.imagemCarrosselPath));
                     p.setTipoImagemCarrossel("image/png");
                 }
-                p.setCategorias(List.of(cats[seed.categoriaIndex]));
+                List<Categoria> prodCats = new ArrayList<>();
+                for (int ci : seed.categoriaIndices) { prodCats.add(cats[ci]); }
+                p.setCategorias(prodCats);
 
                 for (String imgPath : seed.imagens) {
                     ProdutoImagem pImg = new ProdutoImagem();

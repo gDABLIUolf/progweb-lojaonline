@@ -55,7 +55,7 @@ public class ProdutoController {
         return produtoRepository.findById(id)
                 .filter(p -> p.getImagens() != null && !p.getImagens().isEmpty())
                 .map(p -> {
-                    // Pega a primeira da lista (a capa)
+
                     var imagem = p.getImagens().get(0);
                     return ResponseEntity.ok()
                             .header(HttpHeaders.CONTENT_TYPE, imagem.getTipo())

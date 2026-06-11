@@ -13,6 +13,6 @@ public record PedidoRequestDTO(
 
         @Schema(description = "Lista de itens no carrinho")
         @NotEmpty(message = "O pedido deve conter pelo menos um item")
-        @Valid // Faz o Spring validar as anotações dentro da lista de itens
+        @Valid
         List<ItemPedidoRequestDTO> itens
 ) {}

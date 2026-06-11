@@ -1,320 +1,177 @@
-# 👕 VesteBem API
+# 👕 VesteBem — E-Commerce de Moda de Luxo
 
-Backend da loja virtual **VesteBem**, desenvolvido com Java + Spring Boot.
+Plataforma completa de e-commerce de moda de luxo, composta por um backend robusto em **Java + Spring Boot** e um frontend interativo e moderno em **Vue 3 + Vite**.
 
-A aplicação tem como objetivo fornecer uma API REST para gerenciamento de produtos, categorias, usuários, carrinho de compras e pedidos de uma plataforma e-commerce.
-
----
-
-# 🚀 Tecnologias Utilizadas
-
-## Backend
-
-- Java 21
-- Spring Boot 4
-- Spring Web
-- Spring Data JPA
-- Spring Security
-- Spring Validation
-
-## Banco de Dados
-
-- PostgreSQL 16
-
-## DevOps
-
-- Docker
-- Docker Compose
-
-## Ferramentas
-
-- Maven
-- Postman
-- Git/GitHub
+A aplicação fornece um sistema completo e fluído para gerenciamento de catálogo, carrinho de compras, fluxo de pedidos com controle de estoque, avaliações detalhadas de produtos e perfis de usuários.
 
 ---
 
-# 📁 Estrutura do Projeto
+## 🚀 Tecnologias Utilizadas
 
+### Backend
+- **Java 21**
+- **Spring Boot 3**
+- **Spring Data JPA** (Persistência)
+- **Spring Security** (Autenticação baseada em JWT)
+- **Spring Validation** (Validação de entrada de dados)
+- **PostgreSQL 16** (Banco de dados relacional)
+- **Swagger / OpenAPI** (Documentação de endpoints)
+
+### Frontend
+- **Vue 3** (Composition API)
+- **Vite** (Build tool rápido)
+- **Vanilla CSS** + **TailwindCSS** (Estilização responsiva e moderna)
+- **Composables** customizados para gerenciamento de estado e APIs
+- Estrutura modular de componentes reutilizáveis
+
+---
+
+## 📁 Estrutura do Projeto
+
+O projeto é dividido em duas partes principais:
+
+### ☕ Backend (`/backend`)
 ```txt
-src/main/java/com/VesteBem
+backend/src/main/java/com/vesteBem
+├── config              # Configurações globais e inicializador de banco de dados
+├── controller          # Controllers REST (Exposição de endpoints)
+├── dto                 # Objetos de Transferência de Dados (Requests/Responses)
+├── model               # Entidades JPA (Banco de Dados)
+├── repository          # Interfaces Spring Data JPA
+├── security            # Configurações de filtro e autenticação JWT
+├── service             # Regras de negócio do sistema
+└── specs               # Especificações para filtragem dinâmica de produtos
+```
 
-├── controller
-├── service
-├── repository
-├── entity
-├── dto
-├── security
-└── config
+### ⚡ Frontend (`/frontend`)
+```txt
+frontend/src
+├── assets              # Arquivos estáticos (fontes, imagens globais)
+├── components          # Componentes modulares reutilizáveis
+│   ├── carrinho        # Itens do carrinho e resumo
+│   ├── layout          # Navbar, Footer e Sidebar
+│   ├── modal           # Modais de autenticação e mensagens
+│   ├── perfil          # Formulários de dados e listagem de pedidos
+│   └── produto         # Galeria de imagens e avaliações de produtos
+├── composables         # Lógica compartilhada (useAuth, useCarrinho)
+├── router              # Configuração do Vue Router
+└── views               # Páginas principais da loja virtual
 ```
 
 ---
 
-# 📌 Funcionalidades
+## 🛠️ Arquitetura e Boas Práticas
 
-## ✅ Usuários
+Recentemente, a base de código passou por uma série de refatorações focadas em legibilidade e manutenabilidade:
 
-- Cadastro de usuários
-- Login/autenticação
-- Controle de acesso
-
-## ✅ Produtos
-
-- Cadastro de produtos
-- Atualização de produtos
-- Listagem de produtos
-- Remoção de produtos
-
-## ✅ Categorias
-
-- Cadastro de categorias
-- Associação de produtos por categoria
-
-## ✅ Carrinho
-
-- Adicionar produtos
-- Remover produtos
-- Alterar quantidade
-
-## ✅ Pedidos
-
-- Finalizar compra
-- Histórico de pedidos
-- Controle de status
-
-## ✅ Avaliações
-
-- Avaliação de produtos
-- Comentários e notas
+- **Clean Code (Sem Comentários Redundantes)**: Código limpo e autodocumentado em ambos os lados (frontend e backend). Comentários de checklist acadêmicos, marcadores de getters/setters e códigos comentados/mortos foram completamente eliminados.
+- **Separação de Responsabilidades**: Toda a lógica pesada de views no frontend foi extraída para **Composables** (`useAuth` e `useCarrinho`) e componentes menores, reduzindo o tamanho de páginas centrais em até **90%**.
+- **Segurança e Validação**: Regras rígidas de validação de DTO no Spring e autenticação JWT stateless no frontend.
 
 ---
 
-# 🧠 Modelo do Sistema
+## 🌐 Endpoints da API (Prefixados com `/api`)
 
-O sistema é composto pelas seguintes entidades principais:
+Abaixo estão listadas as rotas do backend expostas pela aplicação:
 
-- Usuário
-- Produto
-- Categoria
-- Carrinho
-- ItemCarrinho
-- Pedido
-- Avaliação
+### Autenticação & Usuários
+- `POST /api/auth/login` — Autenticação de usuário e obtenção do token JWT
+- `POST /api/usuarios` — Cadastro de novo cliente
+- `POST /api/auth/esqueci-senha` — Solicitação de link de redefinição de senha
+- `POST /api/auth/redefinir-senha` — Confirmação de nova senha
+
+### Produtos & Categorias
+- `GET /api/produtos` — Vitrine de produtos (com filtros de busca, categoria, desconto e carrossel)
+- `GET /api/produtos/{id}` — Detalhes de um produto específico
+- `GET /api/categorias` — Listagem de categorias da loja
+- `POST /api/produtos` — Criação de produto (Administrador)
+- `PUT /api/produtos/{id}` — Edição de produto (Administrador)
+- `DELETE /api/produtos/{id}` — Exclusão de produto (Administrador)
+
+### Carrinho & Pedidos
+- `GET /api/carrinho` — Obter itens do carrinho do usuário autenticado
+- `POST /api/carrinho` — Adicionar/atualizar itens do carrinho
+- `POST /api/pedidos` — Processamento de checkout e criação de pedido
+- `GET /api/pedidos` — Histórico de pedidos do usuário
+- `PUT /api/pedidos/{id}/status` — Atualização de status de entrega (e.g. CONCLUIDO) com controle de estoque automático
+
+### Avaliações
+- `GET /api/avaliacoes/produto/{id}` — Obter lista de comentários e notas do produto
+- `POST /api/avaliacoes` — Enviar uma nota (0.5 a 5.0 estrelas) e comentário sobre um produto adquirido
 
 ---
 
-# ⚙️ Como Executar o Projeto
+## 🐳 Banco de Dados com Docker
 
-## Pré-requisitos
-
-- Java 21+
-- Docker Desktop
-- Maven
-- Git
-
----
-
-# 🐳 Banco de Dados com Docker
-
-## Subindo PostgreSQL
+Para subir a instância do PostgreSQL configurada para a aplicação:
 
 ```bash
+cd backend
 docker compose up -d
 ```
 
----
-
-## docker-compose.yml
-
-```yaml
-services:
-  postgres:
-    image: postgres:16-alpine
-    container_name: postgres_db
-    restart: always
-
-    environment:
-      POSTGRES_DB: vesteBem
-      POSTGRES_USER: vesteBem
-      POSTGRES_PASSWORD: vesteBem
-
-    ports:
-      - "5432:5432"
-
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
-
-volumes:
-  postgres_data:
+### Configurações de Acesso (`backend/.env`)
+```properties
+SPRING_DATASOURCE_URL=jdbc:postgresql://localhost:5432/lojaonline
+SPRING_DATASOURCE_USERNAME=lojaonline
+SPRING_DATASOURCE_PASSWORD=lojaonline
 ```
 
 ---
 
-# 🔧 Configuração da Aplicação
+## ▶️ Como Executar a Aplicação
 
-## application.yml
+### 1. Backend (Spring Boot)
+Dentro da pasta `/backend`, execute:
 
-```yaml
-spring:
-  datasource:
-    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5432/vesteBem}
-    username: ${SPRING_DATASOURCE_USERNAME:vesteBem}
-    password: ${SPRING_DATASOURCE_PASSWORD:vesteBem}
-    driver-class-name: org.postgresql.Driver
-
-  jpa:
-    show-sql: true
-
-    hibernate:
-      ddl-auto: update
-
-    properties:
-      hibernate:
-        dialect: org.hibernate.dialect.PostgreSQLDialect
-        format_sql: true
-
-  devtools:
-    restart:
-      additional-paths: src/main/java
-      exclude: static/**,templates/**,**/*.txt
-```
-
----
-
-# ▶️ Executando a Aplicação
-
-## Executar com Maven Wrapper
-
-### Linux/macOS
-
+**Windows (cmd/powershell):**
 ```bash
+.\mvnw.cmd spring-boot:run
+```
+
+**Linux/macOS:**
+```bash
+chmod +x mvnw
 ./mvnw spring-boot:run
 ```
 
-### Windows
+O backend inicializará na porta `8080`. Um inicializador de banco de dados (`DatabaseInitializer`) povoará automaticamente a base de dados com 10 categorias de luxo, 50 produtos premium, usuários de teste e avaliações simuladas.
+
+---
+
+### 2. Frontend (Vue 3 + Vite)
+Dentro da pasta `/frontend`, execute:
 
 ```bash
-mvnw.cmd spring-boot:run
+npm install
+npm run dev
 ```
+
+O frontend abrirá localmente em: `http://localhost:5173`.
 
 ---
 
-# 🌐 Endpoints da API
+## 🛠️ Status do Projeto (Roadmap)
 
-## Produtos
-
-```http
-GET    /api/v1/produtos
-GET    /api/v1/produtos/{id}
-POST   /api/v1/produtos
-PUT    /api/v1/produtos/{id}
-DELETE /api/v1/produtos/{id}
-```
-
----
-
-## Categorias
-
-```http
-GET    /api/v1/categorias
-GET    /api/v1/categorias/{id}
-POST   /api/v1/categorias
-PUT    /api/v1/categorias/{id}
-DELETE /api/v1/categorias/{id}
-```
-
----
-
-## Autenticação
-
-```http
-POST /api/v1/auth/register
-POST /api/v1/auth/login
-```
-
----
-
-# 📦 Exemplo de Requisição
-
-## Criar Produto
-
-### Request
-
-```json
-{
-  "nome": "Camiseta Oversized",
-  "descricao": "Camiseta oversized preta",
-  "preco": 89.9
-}
-```
-
----
-
-## Response
-
-```json
-{
-  "id": 1,
-  "nome": "Camiseta Oversized",
-  "descricao": "Camiseta oversized preta",
-  "preco": 89.9
-}
-```
-
----
-
-# 🔐 Segurança
-
-A API utilizará autenticação baseada em JWT para proteção das rotas privadas.
-
-Exemplo de header:
-
-```http
-Authorization: Bearer TOKEN
-```
-
----
-
-# 🛠️ Roadmap do Projeto
-
-## Backend
-
+### Backend
 - [x] Estrutura inicial do projeto
-- [ ] CRUD de categorias
-- [ ] CRUD de produtos
-- [ ] Sistema de autenticação JWT
-- [ ] Carrinho de compras
-- [ ] Sistema de pedidos
-- [ ] Avaliações de produtos
+- [x] CRUD de categorias e carregamento de imagens de capa
+- [x] CRUD de produtos e galeria de fotos
+- [x] Sistema de autenticação JWT e controle de permissões
+- [x] Carrinho de compras integrado ao banco
+- [x] Fluxo de pedidos com controle transacional de estoque
+- [x] Sistema de avaliações de produtos (cálculo de média de estrelas)
 
-## Frontend
-
-- [ ] Página inicial
-- [ ] Catálogo de produtos
-- [ ] Login e cadastro
-- [ ] Carrinho de compras
-
----
-
-# 📚 Objetivo do Projeto
-
-Projeto desenvolvido para fins acadêmicos com foco em aprendizado de:
-
-- APIs REST
-- Spring Boot
-- JPA/Hibernate
-- PostgreSQL
-- Arquitetura backend
-- Segurança com JWT
+### Frontend
+- [x] Página inicial com vitrine e destaque carrossel
+- [x] Filtros dinâmicos no catálogo de produtos (por categoria e nome)
+- [x] Telas de Login, Cadastro e Recuperação de Senha
+- [x] Gerenciamento dinâmico de Carrinho de Compras (Sidebar e Página de Checkout)
+- [x] Perfil do Usuário com Edição de Dados, Histórico de Pedidos e Formulário de Avaliação
 
 ---
 
-# 👨‍💻 Autores
-
-Gabriel Wolf
-
-Karlos Eduardo
-
-André Augusto
-
----
+## 👨‍💻 Autores
+- Gabriel Wolf
+- Karlos Eduardo
+- André Augusto

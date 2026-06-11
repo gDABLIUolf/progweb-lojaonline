@@ -21,7 +21,7 @@ public class Avaliacao {
     @JoinColumn(name = "usuario_id", nullable = false)
     private Usuario usuario;
 
-    // Trocado de Integer para Double e as anotações para aceitarem decimais
+
     @DecimalMin(value = "0.5", message = "A nota mínima é 0.5")
     @DecimalMax(value = "5.0", message = "A nota máxima é 5.0")
     @Column(nullable = false)
@@ -42,7 +42,7 @@ public class Avaliacao {
         this.comentario = comentario;
     }
 
-    // Getters e Setters
+
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
     public Produto getProduto() { return produto; }

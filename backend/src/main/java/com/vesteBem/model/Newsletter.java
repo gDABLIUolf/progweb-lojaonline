@@ -17,7 +17,7 @@ public class Newsletter {
     @Column(name = "data_inscricao")
     private LocalDateTime dataInscricao = LocalDateTime.now();
 
-    // Getters e Setters
+
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
     public String getEmail() { return email; }

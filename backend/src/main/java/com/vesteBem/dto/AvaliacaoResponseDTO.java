@@ -18,7 +18,7 @@ public record AvaliacaoResponseDTO(
                 avaliacao.getNota(),
                 avaliacao.getComentario(),
                 avaliacao.getDataAvaliacao(),
-                avaliacao.getUsuario().getNome().split(" ")[0], // Use first name if available, fallback email prefix was split
+                avaliacao.getUsuario().getNome().split(" ")[0],
                 avaliacao.getProduto().getId(),
                 avaliacao.getProduto().getNome()
         );

@@ -70,12 +70,14 @@ public class DatabaseInitializer implements CommandLineRunner {
         int estoque;
 
         ProductSeed(String nome, String descricao, String preco, int categoriaIndex,
-                String[] imagens, Integer desconto, Boolean destaqueCarrossel,
-                String imagemCarrosselPath, int estoque) {
+                    String[] imagens, Integer desconto, Boolean destaqueCarrossel,
+                    String imagemCarrosselPath, int estoque) {
             this.nome = nome;
             this.descricao = descricao;
             this.preco = new BigDecimal(preco);
-            this.categoriaIndices = categoriaIndices;
+
+            this.categoriaIndices = new int[]{categoriaIndex};
+
             this.imagens = imagens;
             this.desconto = desconto;
             this.destaqueCarrossel = destaqueCarrossel;

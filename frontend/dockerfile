@@ -1,0 +1,15 @@
+# Estágio 1: Build (Node.js)
+FROM node:22-alpine as build-stage
+WORKDIR /app
+COPY package*.json ./
+RUN npm install
+COPY . .
+# Se você usa Vite, o comando padrão é build
+RUN npm run build 
+
+# Estágio 2: Servidor Web (Nginx)
+FROM nginx:alpine as production-stage
+# O Vite joga o build na pasta /dist. Se for Vue CLI antigo, mude para /dist
+COPY --from=build-stage /app/dist /usr/share/nginx/html
+EXPOSE 80
+CMD ["nginx", "-g", "daemon off;"]
